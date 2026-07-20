@@ -299,6 +299,14 @@ section { padding: clamp(6rem, 14vh, 10rem) var(--pad); position: relative; }
 }
 .stage::before { top: 0; background: linear-gradient(var(--bg), transparent); }
 .stage::after { bottom: 0; background: linear-gradient(transparent, var(--bg)); }
+/* side masks: first and last visible cards fade out at the edges */
+.stage-fade {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  background: linear-gradient(90deg, var(--bg), transparent 16%, transparent 84%, var(--bg));
+}
 
 .plane { position: absolute; inset: 0; }
 
@@ -344,7 +352,7 @@ section { padding: clamp(6rem, 14vh, 10rem) var(--pad); position: relative; }
   min-height: 0;
   padding: 0.4rem 0;
 }
-.g-mid .cover { width: 76%; }
+.g-mid .cover { height: 100%; width: auto; max-width: 92%; }
 .g-mid .cover .ghost { font-size: clamp(2rem, 3.2vw, 3rem); }
 .g-mid .v-label { width: 34%; font-size: 7px; letter-spacing: 0.02em; white-space: nowrap; }
 .g-bot {
