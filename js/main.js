@@ -148,15 +148,29 @@
   function heroIn(instant) {
     if (reduced || instant) return;
     const chars = $$(".hero-name .line").flatMap((l) => split(l, "chars"));
-    gsap.from(chars, { yPercent: 112, duration: 0.9, ease: "power4.out", stagger: 0.028, delay: 0.1 });
-    gsap.from([".hero-kicker", ".hero-tag", ".hero-roles", ".hero-cue"], {
-      y: 24, opacity: 0, duration: 0.8, ease: "power3.out", stagger: 0.09, delay: 0.5,
-    });
+    gsap.timeline({ defaults: { ease: "power4.out" }, delay: 0.1 })
+      /* letters rise out of the mask with a slight tilt that settles */
+      .from(chars, {
+        yPercent: 118, rotate: 7, transformOrigin: "0% 100%",
+        duration: 1.05, stagger: 0.032,
+      })
+      .from(".hero-kicker", { y: 20, opacity: 0, duration: 0.7, ease: "power3.out" }, "-=0.65")
+      .from([".hero-tag", ".hero-roles"], {
+        y: 24, opacity: 0, duration: 0.7, ease: "power3.out", stagger: 0.12,
+      }, "<0.15")
+      .from("#nav > *", {
+        y: -18, opacity: 0, duration: 0.6, ease: "power3.out", stagger: 0.08,
+      }, "<")
+      .from("#player", { yPercent: 100, duration: 0.8, ease: "power3.out" }, "<0.1")
+      .from(".hero-cue", { opacity: 0, duration: 0.6, ease: "none" }, "-=0.35");
   }
 
-  if (reduced || sessionStorage.getItem("rh-seen")) {
+  if (reduced) {
     loader.remove();
     heroIn(true);
+  } else if (sessionStorage.getItem("rh-seen")) {
+    loader.remove(); // repeat visit: skip the counter, keep the entrance
+    heroIn(false);
   } else {
     sessionStorage.setItem("rh-seen", "1");
     const cnt = $(".l-count"), quip = $(".l-quip");
