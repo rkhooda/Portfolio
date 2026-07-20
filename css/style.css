@@ -156,6 +156,7 @@ body::after {
 #soundToggle:hover { color: var(--text); }
 #soundToggle.on { color: var(--accent); }
 .btn-talk {
+  position: relative;
   font-family: var(--font-m);
   font-size: 11px;
   letter-spacing: 0.12em;
@@ -166,6 +167,37 @@ body::after {
   white-space: nowrap;
 }
 .btn-talk:hover { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+
+/* shiny streak orbiting the button border: a conic glint clipped to a
+   thin ring by masking out the button's interior */
+@property --orbit {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+.btn-talk::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  padding: 2px;
+  border-radius: 999px;
+  background: conic-gradient(from var(--orbit),
+    transparent 0deg 290deg,
+    rgba(168, 181, 138, 0.7) 325deg,
+    #f2f5e8 344deg,
+    rgba(168, 181, 138, 0.7) 352deg,
+    transparent 360deg);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  filter: drop-shadow(0 0 5px rgba(168, 181, 138, 0.55));
+  animation: orbit 3.4s linear infinite;
+  pointer-events: none;
+}
+@keyframes orbit {
+  to { --orbit: 360deg; }
+}
 
 /* ---------------- layout primitives ---------------- */
 section { padding: clamp(6rem, 14vh, 10rem) var(--pad); position: relative; }
