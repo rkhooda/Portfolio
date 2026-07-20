@@ -93,10 +93,12 @@ window.Player = (() => {
 
   /* ---------- ambient audio (lazy, gapless WebAudio loop) ---------- */
   let ctx = null, gain = null, analyser = null, freq = null;
+  let el = null; // <audio> fallback when fetch/decode can't run (e.g. file://)
   let on = false, loading = false, raf = 0;
+  const VOL = 0.9;
 
   async function ensureAudio() {
-    if (ctx) return true;
+    if (ctx || el) return true;
     loading = true;
     ui("…");
     try {
@@ -116,10 +118,14 @@ window.Player = (() => {
       src.start(0);
       return true;
     } catch (err) {
-      console.warn("ambient audio unavailable:", err);
+      console.warn("web audio unavailable, using <audio> fallback:", err);
       try { ctx && ctx.close(); } catch (_) {}
       ctx = null;
-      return false;
+      analyser = null;
+      el = new Audio(AUDIO_URL);
+      el.loop = true;
+      el.volume = VOL;
+      return true;
     } finally {
       loading = false;
     }
@@ -130,17 +136,32 @@ window.Player = (() => {
     if (!on) {
       const ok = await ensureAudio();
       if (!ok) { ui("OFF"); return; }
-      await ctx.resume();
-      gain.gain.cancelScheduledValues(ctx.currentTime);
-      gain.gain.setTargetAtTime(0.55, ctx.currentTime, 0.4);
+      if (ctx) {
+        await ctx.resume();
+        gain.gain.cancelScheduledValues(ctx.currentTime);
+        gain.gain.setTargetAtTime(VOL, ctx.currentTime, 0.4);
+      } else {
+        try {
+          await el.play();
+        } catch (err) {
+          console.warn("ambient audio unavailable:", err);
+          el = null;
+          ui("OFF");
+          return;
+        }
+      }
       on = true;
       ui("ON");
       eqLive();
     } else {
-      gain.gain.setTargetAtTime(0.0001, ctx.currentTime, 0.2);
+      if (ctx) {
+        gain.gain.setTargetAtTime(0.0001, ctx.currentTime, 0.2);
+        setTimeout(() => { if (!on && ctx) ctx.suspend(); }, 800);
+      } else if (el) {
+        el.pause();
+      }
       on = false;
       ui("OFF");
-      setTimeout(() => { if (!on && ctx) ctx.suspend(); }, 800);
     }
   }
 
@@ -153,8 +174,11 @@ window.Player = (() => {
     document.body.classList.toggle("sound-on", playing);
   }
 
-  /* equalizer bars react to the actual signal while sound is on */
+  /* equalizer bars react to the actual signal while sound is on;
+     without an analyser (fallback <audio>) CSS dances them instead */
   function eqLive() {
+    eqEl.classList.toggle("fake", !analyser);
+    if (!analyser) return;
     cancelAnimationFrame(raf);
     const step = () => {
       if (!on) {

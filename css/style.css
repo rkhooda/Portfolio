@@ -672,11 +672,16 @@ footer {
   0%, 100% { transform: scaleY(0.18); }
   50% { transform: scaleY(0.95); }
 }
-body:not(.sound-on) #player.scrolling #eq i { animation: eqdance 0.6s ease-in-out infinite; }
-body:not(.sound-on) #player.scrolling #eq i:nth-child(2) { animation-duration: 0.45s; animation-delay: 0.1s; }
-body:not(.sound-on) #player.scrolling #eq i:nth-child(3) { animation-duration: 0.7s; animation-delay: 0.05s; }
-body:not(.sound-on) #player.scrolling #eq i:nth-child(4) { animation-duration: 0.5s; animation-delay: 0.15s; }
-body:not(.sound-on) #player.scrolling #eq i:nth-child(5) { animation-duration: 0.65s; animation-delay: 0.2s; }
+body:not(.sound-on) #player.scrolling #eq i,
+body.sound-on #eq.fake i { animation: eqdance 0.6s ease-in-out infinite; }
+body:not(.sound-on) #player.scrolling #eq i:nth-child(2),
+body.sound-on #eq.fake i:nth-child(2) { animation-duration: 0.45s; animation-delay: 0.1s; }
+body:not(.sound-on) #player.scrolling #eq i:nth-child(3),
+body.sound-on #eq.fake i:nth-child(3) { animation-duration: 0.7s; animation-delay: 0.05s; }
+body:not(.sound-on) #player.scrolling #eq i:nth-child(4),
+body.sound-on #eq.fake i:nth-child(4) { animation-duration: 0.5s; animation-delay: 0.15s; }
+body:not(.sound-on) #player.scrolling #eq i:nth-child(5),
+body.sound-on #eq.fake i:nth-child(5) { animation-duration: 0.65s; animation-delay: 0.2s; }
 #player.scrolling #playBtn .i-play { display: none; }
 #player.scrolling #playBtn .i-pause { display: block; }
 /* slow ease-down when the dance ends (default 0.1s stays for the analyser) */
