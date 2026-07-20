@@ -62,8 +62,9 @@
   const stageH = () => stage.clientHeight || Math.min(innerHeight * 0.78, 720);
 
   function buildGrid() {
-    cellW = Math.round(Math.min(470, Math.max(300, innerWidth * 0.32)));
-    cellH = Math.round(cellW * 0.95);
+    /* three full rows always fit the stage exactly */
+    cellH = Math.floor(stageH() / 3);
+    cellW = Math.round(cellH * 1.15);
     /* pool = the 3x3 project pattern repeated enough to cover the stage;
        cells wrap around the pool span, so content never needs to change */
     const cols = Math.ceil((innerWidth / cellW + 2) / 3) * 3;
