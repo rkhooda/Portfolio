@@ -61,9 +61,20 @@
         <h2>Selected Work</h2>
         <p class="sec-meta">09 TRACKS · MIXED 2023–2026</p>
       </div>
-      <div class="gallery">
-        <div class="col" id="colA"></div>
-        <div class="col" id="colB"></div>
+      <div class="work-body">
+        <div class="stage" id="gstage">
+          <div class="plane" id="gplane"></div>
+          <p class="drag-hint mono" aria-hidden="true">DRAG TO EXPLORE</p>
+        </div>
+        <ol class="bsides work-rows" id="worklist" hidden></ol>
+        <div class="view-toggle" role="group" aria-label="Gallery view">
+          <button id="viewGrid" class="vt-btn" type="button" aria-pressed="true" aria-label="Grid view">
+            <svg viewBox="0 0 13 13" aria-hidden="true"><rect x="0" y="0" width="5" height="5" rx="1"/><rect x="8" y="0" width="5" height="5" rx="1"/><rect x="0" y="8" width="5" height="5" rx="1"/><rect x="8" y="8" width="5" height="5" rx="1"/></svg>
+          </button>
+          <button id="viewList" class="vt-btn" type="button" aria-pressed="false" aria-label="List view">
+            <svg viewBox="0 0 13 13" aria-hidden="true"><rect x="0" y="1.2" width="13" height="1.7" rx="0.8"/><rect x="0" y="5.6" width="13" height="1.7" rx="0.8"/><rect x="0" y="10" width="13" height="1.7" rx="0.8"/></svg>
+          </button>
+        </div>
       </div>
     </section>
 

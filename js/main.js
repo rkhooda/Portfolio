@@ -6,7 +6,6 @@
 (() => {
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const finePointer = matchMedia("(pointer: fine)").matches;
-  const desktop = () => innerWidth >= 768;
   const $ = (s, c) => (c || document).querySelector(s);
   const $$ = (s, c) => [...(c || document).querySelectorAll(s)];
 
@@ -17,64 +16,169 @@
   console.log("%cthe un-minified truth lives at https://github.com/rkhooda", mono + "color:#EAEAE2;");
   console.log('%c"it works on my machine" — me, lying', mono + "color:#7E827A;font-style:italic;");
 
-  /* ---------- render: Side A cards ---------- */
+  /* ---------- shared render helpers ---------- */
   const catNo = (i) => "RH-" + String(i + 1).padStart(2, "0");
 
   function coverHTML(p, i) {
     if (p.img) return `<img class="shot" src="${p.img}" alt="" loading="lazy">`;
     return `<span class="ghost" aria-hidden="true">${p.title.trim()[0]}</span>
       <span class="vinyl" aria-hidden="true"><span class="v-label mono">${catNo(i)}</span></span>
-      <span class="cov-cat mono" aria-hidden="true">${catNo(i)} · ${p.year}</span>
       ${p.wip ? '<span class="cov-wip mono">UNRELEASED</span>' : ""}`;
   }
 
-  function cardHTML(p, i) {
+  const rowHTML = (p, i, src, idx) => {
     const tag = p.url ? `a href="${p.url}" target="_blank" rel="noopener"` : 'button type="button"';
     const end = p.url ? "a" : "button";
-    return `<${tag} class="card${p.wip ? " is-wip" : ""}" data-i="${i}" aria-label="${p.title} — ${p.desc}">
-      <span class="cover" style="--tint:${p.tint}">${coverHTML(p, i)}</span>
-      <span class="c-row"><span class="c-title">${p.title}</span><span class="c-dur mono">${p.dur}</span></span>
-      <span class="c-desc">${p.desc}</span>
-      <span class="c-row sub mono"><span>${p.tags.join(" · ")}</span><span>${p.year}</span></span>
-    </${end}>`;
-  }
-
-  /* two staggered columns on desktop; one column in true order on mobile
-     (stacked columns would shuffle the RH-01, RH-02… catalog sequence) */
-  const colA = $("#colA"), colB = $("#colB");
-  const galleryMQ = matchMedia("(min-width: 768px)");
-  function layoutCards() {
-    const cards = $$(".card").sort((a, b) => a.dataset.i - b.dataset.i);
-    if (cards.length) {
-      cards.forEach((c) => c.remove());
-      window.PROJECTS.forEach((p, i) => {
-        (galleryMQ.matches && i % 2 ? colB : colA).appendChild(cards[i]);
-      });
-    } else {
-      window.PROJECTS.forEach((p, i) => {
-        (galleryMQ.matches && i % 2 ? colB : colA).insertAdjacentHTML("beforeend", cardHTML(p, i));
-      });
-    }
-  }
-  layoutCards();
-  galleryMQ.addEventListener("change", () => {
-    layoutCards();
-    if (window.ScrollTrigger) ScrollTrigger.refresh();
-  });
-
-  /* ---------- render: B-sides tracklist ---------- */
-  $("#bsides").innerHTML = window.BSIDES.map((p, i) => {
-    const tag = p.url ? `a href="${p.url}" target="_blank" rel="noopener"` : 'button type="button"';
-    const end = p.url ? "a" : "button";
-    return `<li><${tag} class="bside" data-i="${i}">
-      <span class="b-idx mono">B${i + 1}</span>
+    return `<li><${tag} class="bside" data-i="${i}" data-src="${src}">
+      <span class="b-idx mono">${idx}</span>
       <span class="b-name">${p.title}${p.wip ? ' <em class="mono">UNRELEASED</em>' : ""}</span>
       <span class="b-desc">${p.desc}</span>
       <span class="b-tags mono">${p.tags.join(" · ")}</span>
       <span class="b-dur mono">${p.dur}</span>
       <span class="b-arrow" aria-hidden="true">↗</span>
     </${end}></li>`;
-  }).join("");
+  };
+
+  $("#bsides").innerHTML = window.BSIDES.map((p, i) => rowHTML(p, i, "b", "B" + (i + 1))).join("");
+  $("#worklist").innerHTML = window.PROJECTS.map((p, i) => rowHTML(p, i, "p", catNo(i))).join("");
+
+  /* ---------- Work: draggable infinite gallery (phantom-style) ---------- */
+  const stage = $("#gstage"), plane = $("#gplane"), workList = $("#worklist");
+  const P = window.PROJECTS;
+
+  const cellHTML = (p, i) => `
+    <div class="gcell">
+      <button type="button" class="gcard" data-i="${i}" aria-label="${p.title} — ${p.desc}">
+        <span class="g-top mono"><span>${catNo(i)}</span><span>${p.title.toUpperCase()}</span></span>
+        <span class="g-mid"><span class="cover" style="--tint:${p.tint}">${coverHTML(p, i)}</span></span>
+        <span class="g-bot mono"><span class="g-chips">${p.tags.map((t) => `<i>${t}</i>`).join("")}</span><span>${p.year}</span></span>
+      </button>
+    </div>`;
+
+  let cells = [], cellW, cellH, spanX, spanY;
+  const cam = { x: 0, y: 0, tx: 0, ty: 0, vx: 0, vy: 0 };
+  let grabbing = false, moved = false, downX = 0, downY = 0;
+
+  const stageH = () => stage.clientHeight || Math.min(innerHeight * 0.78, 720);
+
+  function buildGrid() {
+    cellW = Math.round(Math.min(470, Math.max(300, innerWidth * 0.32)));
+    cellH = Math.round(cellW * 0.95);
+    /* pool = the 3x3 project pattern repeated enough to cover the stage;
+       cells wrap around the pool span, so content never needs to change */
+    const cols = Math.ceil((innerWidth / cellW + 2) / 3) * 3;
+    const rows = Math.ceil((stageH() / cellH + 2) / 3) * 3;
+    spanX = cols * cellW;
+    spanY = rows * cellH;
+    plane.innerHTML = "";
+    cells = [];
+    for (let iy = 0; iy < rows; iy++) {
+      for (let ix = 0; ix < cols; ix++) {
+        const pIdx = (ix % 3) + 3 * (iy % 3);
+        plane.insertAdjacentHTML("beforeend", cellHTML(P[pIdx], pIdx));
+        const el = plane.lastElementChild;
+        el.style.width = cellW + "px";
+        el.style.height = cellH + "px";
+        cells.push({ el, ix, iy });
+      }
+    }
+    place();
+  }
+
+  function place() {
+    for (const c of cells) {
+      const x = (((c.ix * cellW + cam.x) % spanX) + spanX) % spanX - cellW;
+      const y = (((c.iy * cellH + cam.y) % spanY) + spanY) % spanY - cellH;
+      c.el.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+    }
+  }
+
+  (function galleryTick() {
+    requestAnimationFrame(galleryTick);
+    if (stage.hidden || !cells.length) return;
+    if (!grabbing) {
+      cam.tx += cam.vx;
+      cam.ty += cam.vy;
+      cam.vx *= 0.94;
+      cam.vy *= 0.94;
+    }
+    const k = reduced ? 1 : 0.14;
+    const nx = cam.x + (cam.tx - cam.x) * k;
+    const ny = cam.y + (cam.ty - cam.y) * k;
+    if (Math.abs(nx - cam.x) < 0.01 && Math.abs(ny - cam.y) < 0.01) return;
+    cam.x = nx;
+    cam.y = ny;
+    place();
+  })();
+
+  let lastPt = null;
+  stage.addEventListener("pointerdown", (e) => {
+    grabbing = true;
+    moved = false;
+    downX = e.clientX;
+    downY = e.clientY;
+    lastPt = { x: e.clientX, y: e.clientY };
+    cam.vx = cam.vy = 0;
+    try { stage.setPointerCapture(e.pointerId); } catch (_) {}
+    stage.classList.add("grabbing");
+    if (!reduced) gsap.to(plane, { scale: 0.96, duration: 0.45, ease: "power3.out" });
+  });
+  stage.addEventListener("pointermove", (e) => {
+    if (!grabbing) return;
+    const dx = e.clientX - lastPt.x, dy = e.clientY - lastPt.y;
+    lastPt = { x: e.clientX, y: e.clientY };
+    cam.tx += dx;
+    cam.ty += dy;
+    cam.vx = dx;
+    cam.vy = dy;
+    if (Math.hypot(e.clientX - downX, e.clientY - downY) > 8) {
+      moved = true;
+      stage.classList.add("dragged"); // retires the DRAG TO EXPLORE hint
+    }
+  });
+  const endDrag = () => {
+    if (!grabbing) return;
+    grabbing = false;
+    stage.classList.remove("grabbing");
+    if (reduced) cam.vx = cam.vy = 0;
+    else gsap.to(plane, { scale: 1, duration: 0.6, ease: "power3.out" });
+  };
+  stage.addEventListener("pointerup", endDrag);
+  stage.addEventListener("pointercancel", endDrag);
+
+  /* a real click (no drag) plays the track-change transition;
+     the moved flag is consumed here so a stale drag never swallows
+     a later keyboard activation */
+  stage.addEventListener("click", (e) => {
+    const wasDrag = moved;
+    moved = false;
+    const g = e.target.closest(".gcard");
+    if (!g) return;
+    if (wasDrag) { e.preventDefault(); return; }
+    playTransition(P[+g.dataset.i]);
+  }, true);
+
+  /* grid <-> list toggle */
+  const vg = $("#viewGrid"), vl = $("#viewList");
+  function setView(v) {
+    const grid = v === "grid";
+    stage.hidden = !grid;
+    workList.hidden = grid;
+    vg.setAttribute("aria-pressed", grid);
+    vl.setAttribute("aria-pressed", !grid);
+    if (grid) buildGrid();
+    if (window.ScrollTrigger) ScrollTrigger.refresh();
+  }
+  vg.addEventListener("click", () => setView("grid"));
+  vl.addEventListener("click", () => setView("list"));
+  setView(finePointer ? "grid" : "list");
+
+  let lastW = innerWidth;
+  addEventListener("resize", () => {
+    if (innerWidth === lastW) return; // ignore mobile url-bar height churn
+    lastW = innerWidth;
+    if (!stage.hidden) buildGrid();
+  });
 
   /* ---------- gsap / lenis setup ---------- */
   gsap.registerPlugin(ScrollTrigger);
@@ -197,13 +301,12 @@
         scrollTrigger: { trigger: h, start: "top 82%", once: true },
       });
     });
-    gsap.set(".card", { y: 56, opacity: 0 });
-    ScrollTrigger.batch(".card", {
-      start: "top 88%", once: true,
-      onEnter: (b) => gsap.to(b, { y: 0, opacity: 1, duration: 0.9, ease: "power3.out", stagger: 0.1 }),
+    gsap.from("#gstage", {
+      opacity: 0, y: 44, duration: 0.9, ease: "power3.out",
+      scrollTrigger: { trigger: "#work", start: "top 75%", once: true },
     });
-    gsap.set(".bside", { x: -24, opacity: 0 });
-    ScrollTrigger.batch(".bside", {
+    gsap.set("#lab .bside", { x: -24, opacity: 0 });
+    ScrollTrigger.batch("#lab .bside", {
       start: "top 90%", once: true,
       onEnter: (b) => gsap.to(b, { x: 0, opacity: 1, duration: 0.7, ease: "power3.out", stagger: 0.07 }),
     });
@@ -221,18 +324,6 @@
         scrollTrigger: { trigger: talk, start: "top 85%", once: true },
       });
     }
-  }
-
-  /* ---------- gallery parallax (desktop only) ---------- */
-  if (!reduced && desktop()) {
-    gsap.fromTo("#colA", { y: -30 }, {
-      y: 60, ease: "none",
-      scrollTrigger: { trigger: ".gallery", start: "top bottom", end: "bottom top", scrub: 1.2 },
-    });
-    gsap.fromTo("#colB", { y: 40 }, {
-      y: -110, ease: "none",
-      scrollTrigger: { trigger: ".gallery", start: "top bottom", end: "bottom top", scrub: 1.2 },
-    });
   }
 
   /* ---------- "changing tracks" project transition ---------- */
@@ -266,11 +357,10 @@
   }
 
   document.addEventListener("click", (e) => {
-    const el = e.target.closest(".card, .bside");
+    const el = e.target.closest(".bside");
     if (!el) return;
     e.preventDefault();
-    const list = el.classList.contains("card") ? window.PROJECTS : window.BSIDES;
-    playTransition(list[+el.dataset.i]);
+    playTransition((el.dataset.src === "p" ? window.PROJECTS : window.BSIDES)[+el.dataset.i]);
   });
 
   /* ---------- magnetic buttons ---------- */
