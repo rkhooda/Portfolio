@@ -13,7 +13,8 @@ window.Player = (() => {
   const trackEl = $("#pTrack");
   const playBtn = $("#playBtn");
   const navToggle = $("#soundToggle");
-  const eqBars = [...document.querySelectorAll("#eq i")];
+  const eqEl = $("#eq");
+  const eqBars = [...eqEl.querySelectorAll("i")];
 
   const TOTAL = window.SITE.albumLength;
   const AUDIO_URL = "assets/audio/night-sage.wav";
@@ -24,8 +25,11 @@ window.Player = (() => {
   totalEl.textContent = fmt(TOTAL);
 
   /* ---------- scroll → progress bar + timestamp ---------- */
+  const playerEl = document.getElementById("player");
   let dragging = false;
   let lastSec = -1;
+  let lastP = null;
+  let scrollTimer = 0;
 
   function onScroll(p) {
     p = Math.min(1, Math.max(0, p || 0));
@@ -36,6 +40,33 @@ window.Player = (() => {
       lastSec = sec;
       timeEl.textContent = fmt(sec);
     }
+    /* scrolling = the album is "playing": pause glyph + dancing bars,
+       settling gently ~220ms after the scroll stops */
+    if (lastP !== null && p !== lastP) {
+      playerEl.classList.add("scrolling");
+      eqEl.classList.remove("settling");
+      clearTimeout(scrollTimer);
+      scrollTimer = setTimeout(stopDance, 220);
+    }
+    lastP = p;
+  }
+
+  /* freeze each bar at its mid-dance pose, then release it under a slow
+     transition so the bars sink to idle instead of snapping */
+  function stopDance() {
+    if (on) { // analyser owns the bars — just drop the scroll state
+      playerEl.classList.remove("scrolling");
+      return;
+    }
+    eqBars.forEach((b) => (b.style.transform = getComputedStyle(b).transform));
+    playerEl.classList.remove("scrolling");
+    eqEl.classList.add("settling");
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => {
+        eqBars.forEach((b) => (b.style.transform = ""));
+        setTimeout(() => eqEl.classList.remove("settling"), 700);
+      })
+    );
   }
 
   /* Dragging the bar seeks the page — the album scrubs the scroll */

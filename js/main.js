@@ -273,6 +273,44 @@
     });
   }
 
+  /* ---------- custom cursor: sage dot + lagging ring ---------- */
+  if (finePointer && !reduced) {
+    const dot = document.createElement("div");
+    dot.id = "cDot";
+    const ring = document.createElement("div");
+    ring.id = "cRing";
+    document.body.append(ring, dot);
+    document.body.classList.add("custom-cursor");
+
+    const rx = gsap.quickTo(ring, "x", { duration: 0.45, ease: "power3" });
+    const ry = gsap.quickTo(ring, "y", { duration: 0.45, ease: "power3" });
+    let seen = false;
+    addEventListener("mousemove", (e) => {
+      if (!seen) {
+        seen = true;
+        gsap.set([dot, ring], { x: e.clientX, y: e.clientY });
+        document.body.classList.add("cursor-seen");
+      }
+      gsap.set(dot, { x: e.clientX, y: e.clientY });
+      rx(e.clientX);
+      ry(e.clientY);
+    }, { passive: true });
+
+    const HOVERABLE = "a, button, input, .card, .bside";
+    document.addEventListener("mouseover", (e) => {
+      if (e.target.closest(HOVERABLE)) document.body.classList.add("cursor-hover");
+    });
+    document.addEventListener("mouseout", (e) => {
+      if (e.target.closest(HOVERABLE)) document.body.classList.remove("cursor-hover");
+    });
+    addEventListener("mousedown", () => document.body.classList.add("cursor-down"));
+    addEventListener("mouseup", () => document.body.classList.remove("cursor-down"));
+    document.documentElement.addEventListener("mouseleave", () =>
+      gsap.to([dot, ring], { opacity: 0, duration: 0.25 }));
+    document.documentElement.addEventListener("mouseenter", () =>
+      gsap.to([dot, ring], { opacity: 1, duration: 0.25 }));
+  }
+
   /* keep triggers honest once fonts settle */
   document.fonts.ready.then(() => ScrollTrigger.refresh());
 })();
