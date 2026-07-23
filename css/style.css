@@ -85,14 +85,14 @@ body::after {
   letter-spacing: 0.22em;
   color: var(--muted);
 }
-.l-count {
+.l-hello {
   font-family: var(--font-d);
   font-weight: 600;
   font-size: clamp(4rem, 11vw, 7.5rem);
   letter-spacing: -0.02em;
-  color: var(--text);
+  color: #e5484d;
+  text-align: center;
 }
-.l-count::after { content: "%"; font-size: 0.35em; color: var(--accent); margin-left: 0.1em; }
 .l-quip {
   position: absolute;
   bottom: 2.2rem;

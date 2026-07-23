@@ -278,20 +278,20 @@
     heroIn(false);
   } else {
     sessionStorage.setItem("rh-seen", "1");
-    const cnt = $(".l-count"), quip = $(".l-quip");
+    const hello = $(".l-hello"), quip = $(".l-quip");
     let qi = 0;
     quip.textContent = window.QUIPS[0];
     const rot = setInterval(() => (quip.textContent = window.QUIPS[++qi % window.QUIPS.length]), 700);
-    const obj = { n: 0 };
-    gsap.to(obj, {
-      n: 100, duration: 1.7, ease: "power2.inOut",
-      onUpdate: () => (cnt.textContent = String(Math.round(obj.n)).padStart(2, "0")),
-      onComplete: () => {
-        clearInterval(rot);
-        gsap.to(loader, { yPercent: -100, duration: 0.7, ease: "power3.inOut", onComplete: () => loader.remove() });
-        heroIn(false);
-      },
-    });
+    /* fast-flash "hello" across languages, then slide the loader up */
+    let hi = 0;
+    const flash = setInterval(() => (hello.textContent = window.HELLOS[++hi % window.HELLOS.length]), 90);
+    setTimeout(() => {
+      clearInterval(flash);
+      clearInterval(rot);
+      hello.textContent = window.HELLOS[0];
+      gsap.to(loader, { yPercent: -100, duration: 0.7, ease: "power3.inOut", onComplete: () => loader.remove() });
+      heroIn(false);
+    }, 1900);
   }
 
   /* ---------- scroll reveals ---------- */
