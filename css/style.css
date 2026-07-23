@@ -90,7 +90,7 @@ body::after {
   font-weight: 600;
   font-size: clamp(4rem, 11vw, 7.5rem);
   letter-spacing: -0.02em;
-  color: #e5484d;
+  color: var(--accent);
   text-align: center;
 }
 .l-quip {

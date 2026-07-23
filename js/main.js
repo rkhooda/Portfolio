@@ -284,14 +284,14 @@
     const rot = setInterval(() => (quip.textContent = window.QUIPS[++qi % window.QUIPS.length]), 700);
     /* fast-flash "hello" across languages, then slide the loader up */
     let hi = 0;
-    const flash = setInterval(() => (hello.textContent = window.HELLOS[++hi % window.HELLOS.length]), 90);
+    const flash = setInterval(() => (hello.textContent = window.HELLOS[++hi % window.HELLOS.length]), 140);
     setTimeout(() => {
       clearInterval(flash);
       clearInterval(rot);
       hello.textContent = window.HELLOS[0];
       gsap.to(loader, { yPercent: -100, duration: 0.7, ease: "power3.inOut", onComplete: () => loader.remove() });
       heroIn(false);
-    }, 1900);
+    }, 3200);
   }
 
   /* ---------- scroll reveals ---------- */
