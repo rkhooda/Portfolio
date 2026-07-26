@@ -251,6 +251,10 @@
   const loader = $("#loader");
 
   function heroIn(instant) {
+    /* the desk diorama keys its entrance off this; the flag covers the
+       case where the module loads after the event already fired */
+    window.__rhHeroIn = true;
+    document.dispatchEvent(new CustomEvent("rh:hero-in"));
     if (reduced || instant) return;
     const chars = $$(".hero-name .line").flatMap((l) => split(l, "chars"));
     gsap.timeline({ defaults: { ease: "power4.out" }, delay: 0.1 })

@@ -273,6 +273,19 @@ section { padding: clamp(6rem, 14vh, 10rem) var(--pad); position: relative; }
 .hero-cue span { color: var(--accent); animation: bob 1.8s ease-in-out infinite; }
 @keyframes bob { 50% { transform: translateY(4px); } }
 
+/* the 3d desk diorama lives in the hero's empty right half; text stacks above it */
+.hero-scene {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(50vw, 940px);
+  z-index: 0;
+}
+.hero-scene canvas { display: block; width: 100%; height: 100%; opacity: 0; }
+.hero-kicker, .hero-name, .hero-tag, .hero-roles { position: relative; z-index: 1; }
+.hero-cue { z-index: 1; }
+
 /* ---------------- work gallery: draggable infinite grid ---------------- */
 .work-body { position: relative; }
 
@@ -945,6 +958,10 @@ body.cursor-down #cRing { width: 24px; height: 24px; margin: -12px 0 0 -12px; }
 .err p { margin: 1.6rem 0 2.6rem; color: var(--muted); font-size: 1.05rem; }
 
 /* ---------------- responsive ---------------- */
+@media (max-width: 1023px) {
+  .hero-scene { display: none; } /* small screens keep the clean hero */
+}
+
 @media (max-width: 900px) {
   .b-desc { display: none; }
   .bside { grid-template-columns: 2.4rem 1.6fr 1fr 3.2rem 1.2rem; }

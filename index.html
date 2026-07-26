@@ -15,6 +15,7 @@
   <link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
+  <script type="importmap">{ "imports": { "three": "./js/vendor/three.module.min.js" } }</script>
 </head>
 <body>
   <a class="skip" href="#work">skip to the work</a>
@@ -52,6 +53,7 @@
       <p class="hero-tag">Full-stack developer chasing good ideas and good music.</p>
       <p class="hero-roles mono">CODE & BUILD STUFF — LEARNING EVERYTHING — SHIPPING ALWAYS</p>
       <div class="hero-cue mono" aria-hidden="true">SCROLL TO PLAY <span>▾</span></div>
+      <div class="hero-scene" aria-hidden="true"><canvas id="deskScene"></canvas></div>
     </section>
 
     <!-- TRACK 02 — selected work -->
@@ -206,5 +208,6 @@
   <script src="js/data.js"></script>
   <script src="js/player.js"></script>
   <script src="js/main.js"></script>
+  <script type="module" src="js/desk-scene.js"></script>
 </body>
 </html>
