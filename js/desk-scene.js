@@ -65,6 +65,7 @@ function init() {
     elevation: 27 * DEG,
     halfWidth: 3.2,
     dist: 15,
+    entr: 1, // entrance dolly multiplier
     mx: 0, my: 0, // eased pointer offset
     tx: 0, ty: 0, // raw pointer target
   };
@@ -89,9 +90,10 @@ function init() {
   }
 
   function placeCamera() {
-    camera.position.copy(view.target).addScaledVector(camDir, view.dist);
-    camera.position.addScaledVector(camRight, view.mx * view.dist * 0.055);
-    camera.position.y += view.my * view.dist * 0.034;
+    const D = view.dist * view.entr;
+    camera.position.copy(view.target).addScaledVector(camDir, D);
+    camera.position.addScaledVector(camRight, view.mx * D * 0.055);
+    camera.position.y += view.my * D * 0.034;
     camera.lookAt(view.target);
   }
 
@@ -200,8 +202,7 @@ function init() {
   const floorG = new THREE.Group();
   root.add(floorG);
   {
-    const slab = box(6.4, 0.16, 4.6, M.slab, 0.35, -0.08, -0.15, { parent: floorG, cast: false, recv: true });
-    slab.receiveShadow = true;
+    box(6.4, 0.16, 4.6, M.slab, 0.35, -0.08, -0.15, { parent: floorG, cast: false, recv: true });
     const rug = cyl(1.85, 1.85, 0.02, 26, M.rug, 0.2, 0.011, 0.4, { parent: floorG, cast: false, recv: true });
     rug.scale.z = 0.72;
     const rugIn = cyl(1.45, 1.45, 0.021, 26, M.rugIn, 0.2, 0.012, 0.4, { parent: floorG, cast: false, recv: true });
@@ -213,8 +214,7 @@ function init() {
   root.add(deskG);
   const DESK_Y = 1.2; // work surface height
   {
-    const top = box(4.4, 0.1, 1.5, M.wood, 0, DESK_Y - 0.05, -0.9, { parent: deskG, recv: true });
-    top.receiveShadow = true;
+    box(4.4, 0.1, 1.5, M.wood, 0, DESK_Y - 0.05, -0.9, { parent: deskG, recv: true });
     box(0.1, 1.15, 1.3, M.woodDark, -2.08, 0.575, -0.9, { parent: deskG });
     /* drawer unit doubles as the right leg */
     box(0.62, 1.1, 1.32, M.woodDark, 1.78, 0.55, -0.9, { parent: deskG });
@@ -710,19 +710,19 @@ function init() {
     lampHalo.material.map = warmGlow;
     lampLight.position.set(-1.92, 2.2, -0.72);
     props.lamp = { light: lampLight, bulb, halo: lampHalo, on: true };
+    props.lampG = lampG;
   }
 
   /* -- coffee mug + steam -- */
   {
     const mugM = mat(0xd6d2c4, { rough: 0.75 });
-    const mug = cyl(0.055, 0.048, 0.115, 14, mugM, 0.5, DESK_Y + 0.058, -0.66);
+    cyl(0.055, 0.048, 0.115, 14, mugM, 0.5, DESK_Y + 0.058, -0.66);
     cyl(0.046, 0.046, 0.008, 12, mat(0x191009, { rough: 0.5 }), 0.5, DESK_Y + 0.112, -0.66, { cast: false });
     const handle = new THREE.Mesh(new THREE.TorusGeometry(0.036, 0.01, 6, 12, Math.PI), mugM);
     handle.position.set(0.556, DESK_Y + 0.062, -0.66);
     handle.rotation.z = -Math.PI / 2 + 0.5;
     handle.castShadow = true;
     root.add(handle);
-    props.mug = mug;
 
     const wisps = [];
     for (let i = 0; i < 3; i++) {
@@ -764,6 +764,9 @@ function init() {
     }
   }
 
+  /* boot factor lets the entrance ramp the accent glows from cold */
+  const glowBoot = { amp: 1 };
+
   /* -- pc tower under the desk, breathing sage -- */
   {
     box(0.32, 0.74, 0.6, M.bodyDeep, -1.5, 0.38, -1.15);
@@ -780,8 +783,8 @@ function init() {
     scene.add(pcGlow);
     systems.push((dt) => {
       const b = 0.75 + Math.sin(clock * 1.7) * 0.25;
-      led.material.opacity = b;
-      pcGlow.intensity = 1.6 * b;
+      led.material.opacity = b * glowBoot.amp;
+      pcGlow.intensity = 1.6 * b * glowBoot.amp;
     });
     led.material.transparent = true;
   }
@@ -798,6 +801,7 @@ function init() {
     const ledWash = new THREE.PointLight(CONFIG.sage, 4, 3.4, 1.9);
     ledWash.position.set(0, 1.55, -1.58);
     scene.add(ledWash);
+    props.ledWash = ledWash;
   }
 
   /* -- vinyl corner: side table + turntable, 33 and a third -- */
@@ -819,13 +823,14 @@ function init() {
     const vinylG = new THREE.Group();
     vinylG.position.set(0, 0.9, 0);
     tableG.add(vinylG);
-    const disc = cyl(0.172, 0.172, 0.008, 32, mat(0x0d0d0d, { rough: 0.35 }), 0, 0, 0, { parent: vinylG, cast: false });
+    cyl(0.172, 0.172, 0.008, 32, mat(0x0d0d0d, { rough: 0.35 }), 0, 0, 0, { parent: vinylG, cast: false });
     cyl(0.055, 0.055, 0.012, 16, mat(0x97a47b, { rough: 0.8 }), 0, 0.002, 0, { parent: vinylG, cast: false });
     box(0.05, 0.011, 0.012, mat(0xd9d9cc), 0.1, 0.004, 0, { parent: vinylG, cast: false }); // tick so the spin reads
     /* tonearm */
     cyl(0.028, 0.028, 0.05, 8, M.metal, 0.23, 0.895, 0.17, { parent: tableG });
     limb(0.23, 0.91, 0.17, 0.08, 0.895, 0.02, 0.016, M.metal, tableG);
     props.vinyl = { g: vinylG, speed: 3.49, boost: 0 };
+    props.tableG = tableG;
     systems.push((dt) => {
       vinylG.rotation.y -= dt * (props.vinyl.speed + props.vinyl.boost);
       props.vinyl.boost = Math.max(0, props.vinyl.boost - dt * 6);
@@ -943,7 +948,6 @@ function init() {
       blinkT: 0,
       pose: { rx: 0, headRx: 0, legTuck: 0, y: 0 },
       goal: { rx: 0, headRx: 0, legTuck: 0, y: 0 },
-      sitSwish: 0,
     };
     props.cat = cat;
     props.catG = catG;
@@ -1125,6 +1129,89 @@ function init() {
     });
   }
 
+  /* ---------- easter eggs: the room answers clicks ---------- */
+  const lampBase = new THREE.Color(0xffe2b4);
+  function applyLamp(v) {
+    props.lampV = v;
+    lampLight.intensity = 26 * v;
+    if (props.lamp) {
+      props.lamp.bulb.material.color.copy(lampBase).multiplyScalar(0.12 + 0.88 * v);
+      props.lamp.halo.material.opacity = 0.35 * v;
+    }
+  }
+
+  /* a shared flicker: old bulbs and crt screens wake up the same way */
+  function flickOn(apply) {
+    const p = { v: 0 };
+    return gsap.to(p, {
+      keyframes: [
+        { v: 0.85, duration: 0.06 }, { v: 0.15, duration: 0.05 },
+        { v: 1, duration: 0.07 }, { v: 0.35, duration: 0.06 }, { v: 1, duration: 0.1 },
+      ],
+      onUpdate: () => apply(p.v),
+    });
+  }
+
+  if (CONFIG.easterEggs && !reduced) {
+    const ray = new THREE.Raycaster();
+    const ndc = new THREE.Vector2(9, 9);
+    let overCanvas = false;
+    let hovered = null;
+    const eggs = [
+      { obj: props.lampG, id: "lamp" },
+      { obj: props.catG, id: "cat" },
+      { obj: props.tableG, id: "vinyl" },
+    ].filter((e) => e.obj);
+
+    const toNdc = (e) => {
+      const r = cvs.getBoundingClientRect();
+      ndc.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+    };
+
+    const pick = () => {
+      ray.setFromCamera(ndc, camera);
+      const hit = ray.intersectObjects(eggs.map((e) => e.obj), true)[0];
+      if (!hit) return null;
+      for (let o = hit.object; o; o = o.parent) {
+        const e = eggs.find((e) => e.obj === o);
+        if (e) return e.id;
+      }
+      return null;
+    };
+
+    cvs.addEventListener("pointermove", (e) => { toNdc(e); overCanvas = true; }, { passive: true });
+    cvs.addEventListener("pointerleave", () => { overCanvas = false; });
+
+    if (finePointer) {
+      systems.push(() => {
+        const id = overCanvas ? pick() : null;
+        if (id !== hovered) {
+          hovered = id;
+          document.body.classList.toggle("cursor-hover", !!id);
+          cvs.style.cursor = id ? "pointer" : "";
+        }
+      });
+    }
+
+    cvs.addEventListener("click", (e) => {
+      toNdc(e);
+      const id = pick();
+      if (id === "lamp") {
+        props.lamp.on = !props.lamp.on;
+        if (props.lamp.on) flickOn(applyLamp);
+        else {
+          const p = { v: props.lampV ?? 1 };
+          gsap.to(p, { v: 0, duration: 0.16, onUpdate: () => applyLamp(p.v) });
+        }
+      } else if (id === "cat") {
+        props.catHop();
+      } else if (id === "vinyl") {
+        props.vinyl.boost = 9;
+        props.noteAt(2.45, 1.4, -0.8);
+      }
+    });
+  }
+
   /* ---------- pointer: parallax target + idle drift ---------- */
   let clock = 0;
   let lastPointer = -10;
@@ -1171,19 +1258,51 @@ function init() {
   frame();
   placeCamera();
 
-  /* ---------- reveal: wait for the hero entrance ---------- */
+  /* ---------- reveal: the room rises, then the rig boots ---------- */
   function reveal() {
     started = true;
     if (reduced) {
-      /* one honest frame, no motion */
+      /* one honest frame, no motion — cat posed on the rug */
+      if (props.cat) {
+        props.cat.x = 1.35;
+        props.cat.z = 1.05;
+        props.cat.heading = 0.6;
+        props.cat.state = "sit";
+        props.cat.pose.rx = -0.52;
+      }
       cvs.style.opacity = 1;
       for (const s of screens) s.paint();
       update(0);
       renderer.render(scene, camera);
       return;
     }
-    gsap.to(cvs, { opacity: 1, duration: 0.9, ease: "power2.out" });
+
+    /* start cold: lamp off, screens dark, accent glows down */
+    applyLamp(0);
+    glowBoot.amp = 0;
+    screenGlow.intensity = 0;
+    sageWash.intensity = 0;
+    if (props.ledWash) props.ledWash.intensity = 0;
+    for (const m of screenMats) m.color.setScalar(0);
+    root.position.y = -0.5;
+    view.entr = 1.14;
+
     gsap.ticker.add(tick);
+
+    const tl = gsap.timeline();
+    tl.to(cvs, { opacity: 1, duration: 0.7, ease: "power2.out" }, 0);
+    tl.to(root.position, { y: 0, duration: 1.15, ease: "power3.out" }, 0.05);
+    tl.to(view, { entr: 1, duration: 1.8, ease: "power3.out" }, 0);
+    /* the lamp wakes first — someone's clearly home */
+    tl.add(flickOn(applyLamp), 0.45);
+    /* then the monitors, left to right */
+    screenMats.forEach((m, i) => tl.add(flickOn((v) => m.color.setScalar(v)), 0.85 + i * 0.28));
+    tl.to(screenGlow, { intensity: 10, duration: 0.5 }, 1.15);
+    tl.to(sageWash, { intensity: 5, duration: 0.6 }, 1.45);
+    if (props.ledWash) tl.to(props.ledWash, { intensity: 4, duration: 0.7 }, 1.55);
+    tl.to(glowBoot, { amp: 1, duration: 0.6 }, 1.6);
+    /* and the first note drifts up */
+    tl.call(() => props.noteAt && props.noteAt(), null, 2.35);
   }
 
   if (window.__rhHeroIn) reveal();
