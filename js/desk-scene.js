@@ -120,8 +120,8 @@ function init() {
   scene.add(sageWash);
 
   /* faint room bounce behind the chair so backs aren't pure void */
-  const backFill = new THREE.PointLight(0x3d4238, 2.4, 7, 2);
-  backFill.position.set(2.0, 1.6, 2.4);
+  const backFill = new THREE.PointLight(0x434840, 3.4, 8, 2);
+  backFill.position.set(2.1, 1.8, 2.6);
   scene.add(backFill);
 
   /* ---------- tiny toolkit ---------- */
@@ -663,6 +663,196 @@ function init() {
         n.s.material.rotation = Math.sin(n.life * 1.6 + n.phase) * 0.22;
         n.s.material.opacity = (k < 0.18 ? k / 0.18 : k > 0.6 ? (1 - k) / 0.4 : 1) * 0.85;
       }
+    });
+  }
+
+  /* ---------- studio props ---------- */
+  const props = {}; // shared refs for the easter eggs later
+
+  /* -- desk lamp: the physical body of the one warm light -- */
+  {
+    const shade = mat(0x23261f, { rough: 0.6, extra: { side: THREE.DoubleSide } });
+    const joint = new THREE.SphereGeometry(0.035, 8, 6);
+    const lampG = new THREE.Group();
+    root.add(lampG);
+    cyl(0.13, 0.15, 0.035, 12, M.metal, -1.98, DESK_Y + 0.018, -0.68, { parent: lampG });
+    limb(-1.98, DESK_Y + 0.03, -0.68, -2.08, 1.82, -0.76, 0.045, M.metal, lampG);
+    limb(-2.08, 1.82, -0.76, -1.92, 2.18, -0.72, 0.04, M.metal, lampG);
+    for (const p of [[-2.08, 1.82, -0.76], [-1.92, 2.18, -0.72]]) {
+      const j = new THREE.Mesh(joint, M.metal);
+      j.position.set(...p);
+      j.castShadow = true;
+      lampG.add(j);
+    }
+    /* shade cone aimed along the spotlight */
+    const headPos = new THREE.Vector3(-1.9, 2.16, -0.7);
+    const aim = lampLight.target.position.clone().sub(headPos).normalize();
+    const cone = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.12, 0.17, 12, 1, true), shade);
+    cone.position.copy(headPos);
+    cone.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), aim.clone().negate());
+    cone.castShadow = true;
+    lampG.add(cone);
+    const bulb = new THREE.Mesh(
+      new THREE.CircleGeometry(0.09, 12),
+      new THREE.MeshBasicMaterial({ color: 0xffe2b4, toneMapped: false, fog: false })
+    );
+    bulb.position.copy(headPos).addScaledVector(aim, 0.09);
+    bulb.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), aim);
+    lampG.add(bulb);
+    const warmGlow = glowTexture("rgba(255,216,164,0.9)", "rgba(255,216,164,0)");
+    const lampHalo = glowSprite(0.55, 0.55, 0.35, headPos.x + aim.x * 0.12, headPos.y + aim.y * 0.12, headPos.z + aim.z * 0.12, lampG);
+    lampHalo.material.map = warmGlow;
+    lampLight.position.set(-1.92, 2.2, -0.72);
+    props.lamp = { light: lampLight, bulb, halo: lampHalo, on: true };
+  }
+
+  /* -- coffee mug + steam -- */
+  {
+    const mugM = mat(0xd6d2c4, { rough: 0.75 });
+    const mug = cyl(0.055, 0.048, 0.115, 14, mugM, 0.5, DESK_Y + 0.058, -0.66);
+    cyl(0.046, 0.046, 0.008, 12, mat(0x191009, { rough: 0.5 }), 0.5, DESK_Y + 0.112, -0.66, { cast: false });
+    const handle = new THREE.Mesh(new THREE.TorusGeometry(0.036, 0.01, 6, 12, Math.PI), mugM);
+    handle.position.set(0.556, DESK_Y + 0.062, -0.66);
+    handle.rotation.z = -Math.PI / 2 + 0.5;
+    handle.castShadow = true;
+    root.add(handle);
+    props.mug = mug;
+
+    const wisps = [];
+    for (let i = 0; i < 3; i++) {
+      const w = glowSprite(0.055, 0.15, 0, 0.5, DESK_Y + 0.16, -0.66);
+      wisps.push({ s: w, phase: (i / 3) * 2.4 });
+    }
+    systems.push((dt) => {
+      for (const w of wisps) {
+        w.phase += dt;
+        const k = (w.phase % 2.4) / 2.4;
+        w.s.position.set(
+          0.5 + Math.sin(k * 7 + w.phase * 0.4) * 0.028,
+          DESK_Y + 0.15 + k * 0.34,
+          -0.66
+        );
+        w.s.material.opacity = Math.sin(k * Math.PI) * 0.3;
+        w.s.scale.set(0.05 + k * 0.05, 0.13 + k * 0.08, 1);
+      }
+    });
+  }
+
+  /* -- little sage plant, back-left corner -- */
+  {
+    const plantG = new THREE.Group();
+    plantG.position.set(-2.02, DESK_Y, -1.38);
+    root.add(plantG);
+    cyl(0.078, 0.06, 0.13, 10, mat(0x47332a, { rough: 0.95 }), 0, 0.065, 0, { parent: plantG });
+    cyl(0.07, 0.07, 0.012, 10, mat(0x18130e), 0, 0.128, 0, { parent: plantG, cast: false });
+    const greens = [mat(0x6d7d57), mat(0x86976a), mat(0xa8b58a)];
+    for (let i = 0; i < 7; i++) {
+      const a = (i / 7) * Math.PI * 2 + 0.4;
+      const lean = i < 5 ? 0.62 : 0.16; // outer rosette + two upright
+      const h = i < 5 ? rand(0.14, 0.19) : rand(0.24, 0.28);
+      const leaf = new THREE.Mesh(new THREE.ConeGeometry(0.035, h, 5), greens[i % 3]);
+      leaf.position.set(Math.sin(a) * 0.035, 0.13 + h * 0.42, Math.cos(a) * 0.035);
+      leaf.rotation.set(Math.cos(a) * lean, 0, -Math.sin(a) * lean);
+      leaf.castShadow = true;
+      plantG.add(leaf);
+    }
+  }
+
+  /* -- pc tower under the desk, breathing sage -- */
+  {
+    box(0.32, 0.74, 0.6, M.bodyDeep, -1.5, 0.38, -1.15);
+    box(0.3, 0.02, 0.58, M.body, -1.5, 0.76, -1.15, { cast: false });
+    const led = new THREE.Mesh(
+      new THREE.BoxGeometry(0.014, 0.5, 0.014),
+      new THREE.MeshBasicMaterial({ color: CONFIG.sage, toneMapped: false, fog: false })
+    );
+    led.position.set(-1.415, 0.42, -0.848);
+    root.add(led);
+    glowSprite(0.34, 0.6, 0.22, -1.42, 0.42, -0.82);
+    const pcGlow = new THREE.PointLight(CONFIG.sage, 1.6, 2.2, 2);
+    pcGlow.position.set(-1.42, 0.45, -0.75);
+    scene.add(pcGlow);
+    systems.push((dt) => {
+      const b = 0.75 + Math.sin(clock * 1.7) * 0.25;
+      led.material.opacity = b;
+      pcGlow.intensity = 1.6 * b;
+    });
+    led.material.transparent = true;
+  }
+
+  /* -- led strip washing the back of the rig -- */
+  if (CONFIG.led) {
+    const strip = new THREE.Mesh(
+      new THREE.BoxGeometry(3.9, 0.022, 0.022),
+      new THREE.MeshBasicMaterial({ color: 0xb9c79a, toneMapped: false, fog: false })
+    );
+    strip.position.set(0, DESK_Y + 0.012, -1.615);
+    root.add(strip);
+    for (let i = -1; i <= 1; i++) glowSprite(1.7, 0.5, 0.12, i * 1.3, DESK_Y + 0.1, -1.58);
+    const ledWash = new THREE.PointLight(CONFIG.sage, 4, 3.4, 1.9);
+    ledWash.position.set(0, 1.55, -1.58);
+    scene.add(ledWash);
+  }
+
+  /* -- vinyl corner: side table + turntable, 33 and a third -- */
+  if (CONFIG.vinyl) {
+    const tableG = new THREE.Group();
+    tableG.position.set(2.68, 0, -0.95);
+    tableG.rotation.y = 0.12;
+    root.add(tableG);
+    box(0.82, 0.07, 0.66, M.wood, 0, 0.79, 0, { parent: tableG, recv: true });
+    box(0.78, 0.3, 0.6, M.woodDark, 0, 0.6, 0, { parent: tableG });
+    for (const [lx, lz] of [[-0.34, -0.24], [0.34, -0.24], [-0.34, 0.24], [0.34, 0.24]])
+      box(0.05, 0.46, 0.05, M.woodDark, lx, 0.23, lz, { parent: tableG });
+    /* records leaning against the side */
+    for (let i = 0; i < 3; i++)
+      box(0.015, 0.34, 0.34, [M.bodyDeep, M.body, M.rugIn][i], -0.47 - i * 0.022, 0.19, 0.1, { parent: tableG, rz: 0.12 + i * 0.03 });
+
+    box(0.56, 0.045, 0.44, M.body, 0, 0.85, 0, { parent: tableG });
+    cyl(0.185, 0.185, 0.018, 24, mat(0x131513, { rough: 0.5 }), 0, 0.885, 0, { parent: tableG });
+    const vinylG = new THREE.Group();
+    vinylG.position.set(0, 0.9, 0);
+    tableG.add(vinylG);
+    const disc = cyl(0.172, 0.172, 0.008, 32, mat(0x0d0d0d, { rough: 0.35 }), 0, 0, 0, { parent: vinylG, cast: false });
+    cyl(0.055, 0.055, 0.012, 16, mat(0x97a47b, { rough: 0.8 }), 0, 0.002, 0, { parent: vinylG, cast: false });
+    box(0.05, 0.011, 0.012, mat(0xd9d9cc), 0.1, 0.004, 0, { parent: vinylG, cast: false }); // tick so the spin reads
+    /* tonearm */
+    cyl(0.028, 0.028, 0.05, 8, M.metal, 0.23, 0.895, 0.17, { parent: tableG });
+    limb(0.23, 0.91, 0.17, 0.08, 0.895, 0.02, 0.016, M.metal, tableG);
+    props.vinyl = { g: vinylG, speed: 3.49, boost: 0 };
+    systems.push((dt) => {
+      vinylG.rotation.y -= dt * (props.vinyl.speed + props.vinyl.boost);
+      props.vinyl.boost = Math.max(0, props.vinyl.boost - dt * 6);
+    });
+  }
+
+  /* -- dust drifting through the lamp light -- */
+  if (CONFIG.dust && !reduced) {
+    const N = 42;
+    const base = new Float32Array(N * 3);
+    const pos = new Float32Array(N * 3);
+    const ph = new Float32Array(N);
+    for (let i = 0; i < N; i++) {
+      base[i * 3] = rand(-2.3, 1.7);
+      base[i * 3 + 1] = rand(1.15, 2.65);
+      base[i * 3 + 2] = rand(-1.55, 0.5);
+      ph[i] = rand(0, 6.28);
+    }
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+    const dust = new THREE.Points(geo, new THREE.PointsMaterial({
+      size: 0.02, map: softGlow, color: 0xe6dcbe, transparent: true, opacity: 0.45,
+      blending: THREE.AdditiveBlending, depthWrite: false, sizeAttenuation: true, fog: false,
+    }));
+    root.add(dust);
+    systems.push(() => {
+      for (let i = 0; i < N; i++) {
+        const t = clock * 0.55 + ph[i];
+        pos[i * 3] = base[i * 3] + Math.sin(t * 0.5) * 0.07;
+        pos[i * 3 + 1] = base[i * 3 + 1] + Math.sin(t * 0.34 + 1.7) * 0.06;
+        pos[i * 3 + 2] = base[i * 3 + 2] + Math.sin(t * 0.42 + 3.1) * 0.06;
+      }
+      geo.attributes.position.needsUpdate = true;
     });
   }
 
