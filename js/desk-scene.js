@@ -119,6 +119,11 @@ function init() {
   sageWash.position.set(1.35, 1.7, -0.8);
   scene.add(sageWash);
 
+  /* faint room bounce behind the chair so backs aren't pure void */
+  const backFill = new THREE.PointLight(0x3d4238, 2.4, 7, 2);
+  backFill.position.set(2.0, 1.6, 2.4);
+  scene.add(backFill);
+
   /* ---------- tiny toolkit ---------- */
   const rand = (a, b) => a + Math.random() * (b - a);
   const systems = []; // per-frame updaters, all dt-driven so pausing is free
@@ -458,6 +463,207 @@ function init() {
       new THREE.Vector3(0.62, 0.5, -1.6),
       new THREE.Vector3(1.0, 0.02, -1.4),
     ]);
+  }
+
+  /* ---------- the artist: charcoal hoodie, sage headphones ---------- */
+  const artist = { boost: 0, bobPhase: 0 }; // boost eases toward 1 when sound is on
+
+  /* limbs are boxes stretched between two points — reused for arms */
+  function limb(ax, ay, az, bx, by, bz, w, m, parent) {
+    const from = new THREE.Vector3(ax, ay, az);
+    const d = new THREE.Vector3(bx, by, bz).sub(from);
+    const len = d.length();
+    const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, len, w * 0.92), m);
+    mesh.position.copy(from).addScaledVector(d, 0.5);
+    mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.normalize());
+    mesh.castShadow = true;
+    parent.add(mesh);
+    return mesh;
+  }
+
+  {
+    const P = {
+      hoodie: mat(0x353a3c, { rough: 0.96 }), // charcoal
+      hood: mat(0x2b2f31),
+      pants: mat(0x1b1d1f),
+      hair: mat(0x161310),
+      skin: mat(0x8d7a66),
+      phone: mat(0x1d201d, { rough: 0.55 }),
+      pad: mat(CONFIG.sage, { rough: 0.7 }),
+      chair: mat(0x151716),
+    };
+
+    /* chair, low enough that the back stays readable over it */
+    const chairG = new THREE.Group();
+    chairG.position.set(-0.1, 0, 0.46);
+    root.add(chairG);
+    for (let i = 0; i < 5; i++) {
+      const a = (i / 5) * Math.PI * 2;
+      const leg = box(0.3, 0.035, 0.06, P.chair, Math.sin(a) * 0.16, 0.035, Math.cos(a) * 0.16, { parent: chairG });
+      leg.rotation.y = a;
+    }
+    cyl(0.028, 0.028, 0.5, 8, M.metal, 0, 0.3, 0, { parent: chairG });
+    box(0.5, 0.07, 0.48, P.chair, 0, 0.585, 0.02, { parent: chairG });
+    box(0.44, 0.52, 0.06, P.chair, 0, 0.9, 0.27, { parent: chairG, rx: -0.08 });
+
+    const person = new THREE.Group();
+    person.position.set(-0.1, 0, 0.32);
+    root.add(person);
+
+    /* legs disappearing under the desk */
+    box(0.15, 0.13, 0.44, P.pants, -0.115, 0.66, -0.1, { parent: person });
+    box(0.15, 0.13, 0.44, P.pants, 0.115, 0.66, -0.1, { parent: person });
+    box(0.13, 0.4, 0.14, P.pants, -0.115, 0.42, -0.32, { parent: person, rx: 0.12 });
+    box(0.13, 0.4, 0.14, P.pants, 0.115, 0.42, -0.32, { parent: person, rx: 0.12 });
+    box(0.13, 0.06, 0.24, P.hood, -0.115, 0.03, -0.42, { parent: person });
+    box(0.13, 0.06, 0.24, P.hood, 0.115, 0.03, -0.42, { parent: person });
+
+    /* everything above the hips sways together */
+    const torsoG = new THREE.Group();
+    person.add(torsoG);
+    box(0.56, 0.62, 0.34, P.hoodie, 0, 0.95, 0.08, { parent: torsoG });
+    box(0.63, 0.2, 0.37, P.hoodie, 0, 1.29, 0.08, { parent: torsoG });
+    box(0.4, 0.18, 0.14, P.hood, 0, 1.37, 0.24, { parent: torsoG }); // hood bunched at the neck
+    box(0.34, 0.34, 0.05, P.hood, 0, 1.12, 0.26, { parent: torsoG }); // hood hanging down the back
+
+    /* head: bobs to the music, glances between monitors */
+    const headG = new THREE.Group();
+    headG.position.set(0, 1.52, 0.06);
+    torsoG.add(headG);
+    box(0.11, 0.14, 0.12, P.skin, 0, -0.04, 0, { parent: headG });
+    box(0.27, 0.29, 0.27, P.skin, 0, 0.13, 0, { parent: headG });
+    box(0.29, 0.15, 0.29, P.hair, 0, 0.27, 0.012, { parent: headG });
+    box(0.29, 0.27, 0.1, P.hair, 0, 0.11, 0.115, { parent: headG });
+    const band = new THREE.Mesh(new THREE.TorusGeometry(0.19, 0.028, 6, 14, Math.PI), P.phone);
+    band.position.set(0, 0.15, 0);
+    band.castShadow = true;
+    headG.add(band);
+    cyl(0.075, 0.075, 0.06, 10, P.phone, -0.168, 0.09, 0, { parent: headG, rz: Math.PI / 2 });
+    cyl(0.075, 0.075, 0.06, 10, P.phone, 0.168, 0.09, 0, { parent: headG, rz: Math.PI / 2 });
+    cyl(0.058, 0.058, 0.02, 10, P.pad, -0.205, 0.09, 0, { parent: headG, rz: Math.PI / 2 });
+    cyl(0.058, 0.058, 0.02, 10, P.pad, 0.205, 0.09, 0, { parent: headG, rz: Math.PI / 2 });
+
+    /* arms: elbows tucked, forearms gliding flat onto the keyboard */
+    limb(-0.31, 1.26, 0.08, -0.33, 1.08, -0.06, 0.13, P.hoodie, torsoG);
+    limb(0.31, 1.26, 0.08, 0.33, 1.08, -0.06, 0.13, P.hoodie, torsoG);
+    limb(-0.33, 1.09, -0.08, -0.19, 1.25, -0.6, 0.105, P.hoodie, torsoG);
+    limb(0.33, 1.09, -0.08, 0.19, 1.25, -0.6, 0.105, P.hoodie, torsoG);
+    const handL = box(0.095, 0.05, 0.13, P.skin, -0.19, 1.27, -0.66, { parent: torsoG });
+    const handR = box(0.095, 0.05, 0.13, P.skin, 0.19, 1.27, -0.66, { parent: torsoG });
+
+    /* ---- music notes rising off the headphones ---- */
+    function noteTexture(glyph) {
+      const c = document.createElement("canvas");
+      c.width = c.height = 96;
+      const g = c.getContext("2d");
+      g.font = "600 58px 'JetBrains Mono', ui-monospace, monospace";
+      g.textAlign = "center";
+      g.textBaseline = "middle";
+      g.shadowColor = "rgba(168,181,138,0.95)";
+      g.shadowBlur = 16;
+      g.fillStyle = "#cfdab2";
+      g.fillText(glyph, 48, 52);
+      const tex = new THREE.CanvasTexture(c);
+      tex.colorSpace = THREE.SRGBColorSpace;
+      return tex;
+    }
+    const noteTex = [noteTexture("♪"), noteTexture("♫")];
+    const notes = [];
+    for (let i = 0; i < 8; i++) {
+      const s = new THREE.Sprite(new THREE.SpriteMaterial({
+        map: noteTex[i % 2], transparent: true, opacity: 0,
+        blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false, fog: false,
+      }));
+      s.visible = false;
+      root.add(s);
+      notes.push({ s, life: 0, ttl: 1, x0: 0, y0: 0, z0: 0, sway: 0, phase: 0, speed: 0, size: 0.2, active: false });
+    }
+    let noteTimer = 1.4;
+    const headWorld = new THREE.Vector3();
+
+    function spawnNote() {
+      const n = notes.find((n) => !n.active);
+      if (!n) return;
+      headG.getWorldPosition(headWorld);
+      n.active = true;
+      n.s.visible = true;
+      n.life = 0;
+      n.ttl = rand(1.9, 2.6);
+      n.x0 = headWorld.x + rand(-0.12, 0.12);
+      n.y0 = headWorld.y + 0.28;
+      n.z0 = headWorld.z + rand(-0.06, 0.1);
+      n.sway = rand(0.05, 0.1) * (Math.random() < 0.5 ? -1 : 1);
+      n.phase = rand(0, 6.28);
+      n.speed = rand(0.3, 0.42);
+      n.size = rand(0.18, 0.24) * (1 + artist.boost * 0.3);
+    }
+
+    /* ---- behavior: bob, sway, glance, type ---- */
+    const typing = { on: true, t: rand(1.2, 2.4) };
+    let glance = 0, glanceTarget = 0, glanceT = rand(2.5, 5);
+
+    systems.push((dt) => {
+      const live = document.body.classList.contains("sound-on");
+      artist.boost += ((live ? 1 : 0) - artist.boost) * lerpK(1.4, dt);
+      const B = artist.boost;
+
+      /* head bob — phase accumulator so tempo shifts stay smooth */
+      artist.bobPhase += dt * 6.28 * (1.35 + 0.45 * B);
+      const bob = Math.sin(artist.bobPhase);
+      headG.position.y = 1.52 + bob * (0.008 + 0.016 * B);
+      headG.rotation.x = bob * (0.05 + 0.06 * B);
+      headG.rotation.z = Math.sin(artist.bobPhase * 0.5) * (0.012 + 0.03 * B);
+
+      /* slow body groove */
+      torsoG.rotation.z = Math.sin(clock * 0.55) * 0.018 + Math.sin(artist.bobPhase * 0.5) * 0.012 * B;
+      torsoG.rotation.y = Math.sin(clock * 0.31) * 0.014;
+
+      /* glancing between monitors */
+      glanceT -= dt;
+      if (glanceT <= 0) {
+        glanceTarget = [-0.36, 0, 0, 0.3][(Math.random() * 4) | 0];
+        glanceT = rand(2.5, 6);
+      }
+      glance += (glanceTarget - glance) * lerpK(2.2, dt);
+      headG.rotation.y = glance;
+
+      /* typing bursts with thinking pauses */
+      typing.t -= dt;
+      if (typing.t <= 0) {
+        typing.on = !typing.on;
+        typing.t = typing.on ? rand(1.4, 3) : rand(0.7, 2.2);
+      }
+      const tAmp = typing.on ? 0.013 : 0;
+      handL.position.y = 1.27 + Math.max(0, Math.sin(clock * 13)) * tAmp;
+      handR.position.y = 1.27 + Math.max(0, Math.sin(clock * 13 + 2.2)) * tAmp;
+
+      /* notes */
+      noteTimer -= dt;
+      if (noteTimer <= 0) {
+        spawnNote();
+        noteTimer = rand(1.1, 1.8) / (1 + B * 1.2);
+      }
+      for (const n of notes) {
+        if (!n.active) continue;
+        n.life += dt;
+        const k = n.life / n.ttl;
+        if (k >= 1) {
+          n.active = false;
+          n.s.visible = false;
+          n.s.material.opacity = 0;
+          continue;
+        }
+        n.s.position.set(
+          n.x0 + Math.sin(n.life * 2.1 + n.phase) * n.sway,
+          n.y0 + n.life * n.speed,
+          n.z0
+        );
+        const grow = n.size * (0.85 + k * 0.35);
+        n.s.scale.set(grow, grow, 1);
+        n.s.material.rotation = Math.sin(n.life * 1.6 + n.phase) * 0.22;
+        n.s.material.opacity = (k < 0.18 ? k / 0.18 : k > 0.6 ? (1 - k) / 0.4 : 1) * 0.85;
+      }
+    });
   }
 
   /* ---------- pointer: parallax target + idle drift ---------- */
