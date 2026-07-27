@@ -467,6 +467,7 @@ function init() {
 
   /* ---------- the artist: charcoal hoodie, sage headphones ---------- */
   const artist = { boost: 0, bobPhase: 0 }; // boost eases toward 1 when sound is on
+  const props = {}; // shared refs for the cat + easter eggs
 
   /* limbs are boxes stretched between two points — reused for arms */
   function limb(ax, ay, az, bx, by, bz, w, m, parent) {
@@ -581,22 +582,28 @@ function init() {
     let noteTimer = 1.4;
     const headWorld = new THREE.Vector3();
 
-    function spawnNote() {
+    function spawnNote(px, py, pz) {
       const n = notes.find((n) => !n.active);
       if (!n) return;
-      headG.getWorldPosition(headWorld);
+      if (px === undefined) {
+        headG.getWorldPosition(headWorld);
+        px = headWorld.x + rand(-0.12, 0.12);
+        py = headWorld.y + 0.28;
+        pz = headWorld.z + rand(-0.06, 0.1);
+      }
       n.active = true;
       n.s.visible = true;
       n.life = 0;
       n.ttl = rand(1.9, 2.6);
-      n.x0 = headWorld.x + rand(-0.12, 0.12);
-      n.y0 = headWorld.y + 0.28;
-      n.z0 = headWorld.z + rand(-0.06, 0.1);
+      n.x0 = px;
+      n.y0 = py;
+      n.z0 = pz;
       n.sway = rand(0.05, 0.1) * (Math.random() < 0.5 ? -1 : 1);
       n.phase = rand(0, 6.28);
       n.speed = rand(0.3, 0.42);
       n.size = rand(0.18, 0.24) * (1 + artist.boost * 0.3);
     }
+    props.noteAt = spawnNote;
 
     /* ---- behavior: bob, sway, glance, type ---- */
     const typing = { on: true, t: rand(1.2, 2.4) };
@@ -667,7 +674,6 @@ function init() {
   }
 
   /* ---------- studio props ---------- */
-  const props = {}; // shared refs for the easter eggs later
 
   /* -- desk lamp: the physical body of the one warm light -- */
   {
@@ -853,6 +859,269 @@ function init() {
         pos[i * 3 + 2] = base[i * 3 + 2] + Math.sin(t * 0.42 + 3.1) * 0.06;
       }
       geo.attributes.position.needsUpdate = true;
+    });
+  }
+
+  /* ---------- the cat: black, sage-eyed, owns the place ---------- */
+  {
+    const fur = mat(0x141414, { rough: 0.92 });
+    const furDark = mat(0x0e0e0e, { rough: 0.95 });
+    const eyeM = new THREE.MeshBasicMaterial({ color: 0xb9c795, toneMapped: false, fog: false });
+
+    const catG = new THREE.Group(); // moves + turns; built facing +z
+    root.add(catG);
+    const bodyG = new THREE.Group(); // pitches for sit / jump
+    bodyG.position.y = 0.19;
+    catG.add(bodyG);
+    box(0.16, 0.15, 0.38, fur, 0, 0.01, 0, { parent: bodyG });
+    box(0.14, 0.12, 0.12, fur, 0, 0.05, 0.16, { parent: bodyG }); // chest riser
+
+    const headG = new THREE.Group();
+    headG.position.set(0, 0.14, 0.21);
+    bodyG.add(headG);
+    box(0.15, 0.13, 0.13, fur, 0, 0, 0, { parent: headG });
+    const earGeo = new THREE.ConeGeometry(0.032, 0.055, 4);
+    for (const sx of [-1, 1]) {
+      const ear = new THREE.Mesh(earGeo, furDark);
+      ear.position.set(sx * 0.05, 0.085, -0.01);
+      ear.rotation.z = sx * -0.16;
+      ear.castShadow = true;
+      headG.add(ear);
+    }
+    const eyeGeo = new THREE.BoxGeometry(0.02, 0.014, 0.006);
+    const eyeL = new THREE.Mesh(eyeGeo, eyeM);
+    const eyeR = new THREE.Mesh(eyeGeo, eyeM);
+    eyeL.position.set(-0.036, 0.012, 0.066);
+    eyeR.position.set(0.036, 0.012, 0.066);
+    headG.add(eyeL, eyeR);
+
+    /* legs: diagonal-pair gait */
+    const legs = [];
+    for (const [sx, sz] of [[-1, 1], [1, 1], [-1, -1], [1, -1]]) {
+      const hip = new THREE.Group();
+      hip.position.set(sx * 0.055, -0.045, sz * 0.13);
+      bodyG.add(hip);
+      box(0.045, 0.15, 0.05, fur, 0, -0.07, 0, { parent: hip });
+      legs.push(hip);
+    }
+
+    /* tail: three chained segments for the S-swish */
+    const tail = [];
+    let tailParent = bodyG;
+    for (let i = 0; i < 3; i++) {
+      const seg = new THREE.Group();
+      seg.position.set(0, i ? 0.005 : 0.06, i ? -0.11 : -0.19);
+      tailParent.add(seg);
+      box(0.034 - i * 0.005, 0.034 - i * 0.005, 0.13, i ? fur : furDark, 0, 0, -0.055, { parent: seg });
+      tail.push(seg);
+      tailParent = seg;
+    }
+
+    /* soft blob shadow so the cat is grounded even outside lamp reach */
+    const blobTex = glowTexture("rgba(0,0,0,0.55)", "rgba(0,0,0,0)");
+    const blob = new THREE.Mesh(
+      new THREE.CircleGeometry(0.17, 16),
+      new THREE.MeshBasicMaterial({ map: blobTex, transparent: true, opacity: 0.32, depthWrite: false, fog: false })
+    );
+    blob.rotation.x = -Math.PI / 2;
+    root.add(blob);
+
+    /* ---- behavior ---- */
+    const FLOOR = 0.025, DESK_TOP = DESK_Y;
+    const cat = {
+      state: "enter",
+      t: 0,               // time left in the current state
+      x: 3.4, z: 1.7, y: FLOOR,
+      heading: -2.2,
+      speed: 0,
+      gait: 0,            // eased walk-cycle weight
+      walkPhase: 0,
+      target: { x: 1.2, z: 1.1 },
+      jump: null,         // {ax,az,ay,bx,bz,by,t,dur,h}
+      deskCool: rand(14, 22),
+      blink: rand(2, 5),
+      blinkT: 0,
+      pose: { rx: 0, headRx: 0, legTuck: 0, y: 0 },
+      goal: { rx: 0, headRx: 0, legTuck: 0, y: 0 },
+      sitSwish: 0,
+    };
+    props.cat = cat;
+    props.catG = catG;
+    props.catHop = () => {
+      if (cat.state === "sit" || cat.state === "wander" || cat.state === "pause") {
+        cat.jump = { ax: cat.x, az: cat.z, ay: cat.y, bx: cat.x, bz: cat.z, by: cat.y, t: 0, dur: 0.45, h: 0.28 };
+        cat.state = "hop";
+        props.noteAt(cat.x, cat.y + 0.55, cat.z);
+      }
+    };
+
+    const floorSpot = () => {
+      /* somewhere on the open floor, not inside the chair or desk */
+      for (let i = 0; i < 12; i++) {
+        const x = rand(-2.2, 3.1), z = rand(0.15, 1.75);
+        if (Math.hypot(x + 0.1, z - 0.46) < 0.85) continue; // chair bubble
+        if (x > 2.1 && z < 0.2) continue;                   // table legs
+        return { x, z };
+      }
+      return { x: 1.6, z: 1.2 };
+    };
+
+    const beginJump = (bx, bz, by, dur, h) => {
+      cat.jump = { ax: cat.x, az: cat.z, ay: cat.y, bx, bz, by, t: 0, dur, h };
+      cat.heading = Math.atan2(bx - cat.x, bz - cat.z);
+    };
+
+    const setState = (s, t) => { cat.state = s; cat.t = t; };
+
+    systems.push((dt) => {
+      cat.deskCool -= dt;
+      cat.t -= dt;
+
+      /* -- state logic -- */
+      switch (cat.state) {
+        case "enter":
+          cat.speed = 0.62;
+          if (arrive(dt)) setState("pause", rand(0.6, 1.4));
+          break;
+        case "wander":
+          cat.speed = 0.55;
+          if (arrive(dt)) {
+            const r = Math.random();
+            if (cat.deskCool <= 0 && r < 0.3) {
+              cat.target = { x: 2.35, z: 0.35 }; // launch point by the drawers
+              setState("toLaunch", 0);
+            } else if (r < 0.62) setState("sit", rand(3.5, 7));
+            else setState("pause", rand(0.8, 2));
+          }
+          break;
+        case "pause":
+          cat.speed = 0;
+          if (cat.t <= 0) { cat.target = floorSpot(); setState("wander", 0); }
+          break;
+        case "sit":
+          cat.speed = 0;
+          if (cat.t <= 0) { cat.target = floorSpot(); setState("wander", 0); }
+          break;
+        case "toLaunch":
+          cat.speed = 0.62;
+          if (arrive(dt)) {
+            beginJump(1.42, -0.42, DESK_TOP, 0.62, 0.55);
+            setState("jumpUp", 0);
+          }
+          break;
+        case "jumpUp":
+        case "jumpDown":
+        case "hop":
+          break; // handled by the jump integrator
+        case "deskWalk":
+          cat.speed = 0.42;
+          if (arrive(dt)) setState("loaf", rand(9, 15));
+          break;
+        case "loaf":
+          cat.speed = 0;
+          if (cat.t <= 0) {
+            beginJump(2.15, 0.55, FLOOR, 0.7, 0.35);
+            setState("jumpDown", 0);
+          }
+          break;
+      }
+
+      /* -- locomotion -- */
+      function arrive(dt) {
+        const dx = cat.target.x - cat.x, dz = cat.target.z - cat.z;
+        const d = Math.hypot(dx, dz);
+        if (d < 0.09) return true;
+        const want = Math.atan2(dx, dz);
+        let dA = want - cat.heading;
+        dA = ((dA + Math.PI) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2) - Math.PI;
+        cat.heading += dA * lerpK(6, dt);
+        const step = cat.speed * dt;
+        cat.x += Math.sin(cat.heading) * step;
+        cat.z += Math.cos(cat.heading) * step;
+        return false;
+      }
+
+      if (cat.jump) {
+        const j = cat.jump;
+        j.t += dt;
+        const k = Math.min(1, j.t / j.dur);
+        cat.x = j.ax + (j.bx - j.ax) * k;
+        cat.z = j.az + (j.bz - j.az) * k;
+        cat.y = j.ay + (j.by - j.ay) * k + j.h * 4 * k * (1 - k);
+        bodyG.rotation.x = -(1 - 2 * k) * 0.4;
+        if (k >= 1) {
+          cat.jump = null;
+          cat.y = j.by;
+          if (cat.state === "jumpUp") { cat.target = { x: 1.05, z: -0.78 }; setState("deskWalk", 0); }
+          else if (cat.state === "jumpDown") { cat.deskCool = rand(26, 40); cat.target = floorSpot(); setState("wander", 0); }
+          else setState("pause", rand(0.4, 0.9)); // hop landing
+        }
+      }
+
+      /* -- pose targets per state -- */
+      const sitting = cat.state === "sit";
+      const loafing = cat.state === "loaf";
+      cat.goal.rx = sitting ? -0.52 : loafing ? -0.08 : 0;
+      cat.goal.y = loafing ? -0.055 : sitting ? 0.01 : 0;
+      cat.goal.legTuck = loafing ? 1 : 0;
+      cat.goal.headRx = sitting ? -0.18 : loafing ? -0.05 : 0.06;
+      const P = cat.pose;
+      for (const key of ["rx", "y", "legTuck", "headRx"])
+        P[key] += (cat.goal[key] - P[key]) * lerpK(5, dt);
+
+      /* -- gait + body -- */
+      const moving = cat.speed > 0 && !cat.jump;
+      cat.gait += ((moving ? 1 : 0) - cat.gait) * lerpK(8, dt);
+      cat.walkPhase += dt * (cat.speed * 14 + 0.001);
+      const lp = [0, Math.PI, Math.PI, 0];
+      legs.forEach((leg, i) => {
+        /* rear legs fold under when sitting; front legs counter the pitch */
+        leg.rotation.x = Math.sin(cat.walkPhase + lp[i]) * 0.55 * cat.gait + (i > 1 ? P.rx * 1.7 : -P.rx);
+        leg.scale.y = 1 - P.legTuck * 0.55;
+      });
+
+      catG.position.set(cat.x, cat.y + 0.005, cat.z);
+      catG.rotation.y = cat.heading;
+      if (!cat.jump) {
+        bodyG.rotation.x = P.rx;
+        bodyG.position.y = 0.19 + P.y + Math.abs(Math.sin(cat.walkPhase)) * 0.02 * cat.gait;
+      }
+
+      /* -- head: cursor-watching when settled, else forward -- */
+      if ((sitting || loafing) && finePointer && !reduced) {
+        /* face the camera-ish, then offset by where the cursor is */
+        let dA = (Math.atan2(camera.position.x - cat.x, camera.position.z - cat.z) - cat.heading + view.mx * 0.7);
+        dA = ((dA + Math.PI) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2) - Math.PI;
+        headG.rotation.y += (Math.max(-1, Math.min(1, dA)) - headG.rotation.y) * lerpK(4, dt);
+        headG.rotation.x += (P.headRx + view.my * 0.25 - headG.rotation.x) * lerpK(4, dt);
+      } else {
+        headG.rotation.y += (0 - headG.rotation.y) * lerpK(4, dt);
+        headG.rotation.x += (P.headRx - headG.rotation.x) * lerpK(4, dt);
+      }
+
+      /* -- tail: swish always, lazier when loafing -- */
+      const swish = loafing ? 0.55 : sitting ? 1.15 : 0.8;
+      tail[0].rotation.x = 0.85 + (sitting ? 0.5 : loafing ? 0.7 : 0) - cat.gait * 0.25;
+      tail.forEach((seg, i) => {
+        seg.rotation.y = Math.sin(clock * (1.6 + i * 0.35) * swish + i * 0.9) * (0.28 + i * 0.22);
+      });
+
+      /* -- blink -- */
+      cat.blink -= dt;
+      if (cat.blink <= 0) { cat.blink = rand(2.5, 6); cat.blinkT = 0.12; }
+      cat.blinkT = Math.max(0, cat.blinkT - dt);
+      const lid = cat.blinkT > 0 ? 0.12 : 1;
+      eyeL.scale.y = lid;
+      eyeR.scale.y = lid;
+
+      /* -- blob shadow -- */
+      const overDesk = cat.y > 0.6;
+      const ground = overDesk ? DESK_TOP + 0.006 : FLOOR + 0.006;
+      const lift = Math.max(0, cat.y - ground);
+      blob.position.set(cat.x, ground, cat.z);
+      blob.material.opacity = Math.max(0.08, 0.3 - lift * 0.35);
+      const bs = 1 + lift * 0.4;
+      blob.scale.set(bs, bs, 1);
     });
   }
 
