@@ -62,8 +62,17 @@
   /* the plane is pressed into a dish, not blown into a bubble: the middle
      sits back and the four corners come forward, so cards stretch and grow
      as they travel out to the edges. r2 is capped or the far ring explodes. */
-  const WARP = { depth: 175, tilt: 21, stretch: 0.06, edge: 1.8, maxR2: 2.4 };
+  const WARP = { depth: 210, tilt: 26, stretch: 0.05, rim: 0.8, maxBend: 1.5, maxR2: 2.2 };
   const clamp = (n, m) => (n < -m ? -m : n > m ? m : n);
+  /* mostly cubic, then rescaled so the outermost visible column (rim) is
+     already full strength: the middle three stay near flat and the bend
+     piles up at the edge, where the cards stretch and suck outward */
+  const RIM = WARP.rim * (0.3 + 0.7 * WARP.rim * WARP.rim);
+  const bend = (t) => {
+    const a = t < 0 ? -t : t;
+    const s = Math.min((a * (0.3 + 0.7 * a * a)) / RIM, WARP.maxBend);
+    return t < 0 ? -s : s;
+  };
   let halfW = 0, halfH = 0; // stage centre, refreshed on build — never read per frame
 
   /* hover: the card under the cursor leans toward it and keeps leaning for a
@@ -80,11 +89,11 @@
   const stageH = () => stage.clientHeight || Math.min(innerHeight * 0.78, 720);
 
   function buildGrid() {
-    /* the cell is sized from the artwork out: ~4.6 columns across the
-       viewport, then just enough height for the cover plus its two meta rows,
-       so the captions sit flush with the artwork's edges */
-    cellW = Math.max(260, Math.round(innerWidth / 4));
-    cellH = Math.round(cellW / 1.62) + 58;
+    /* five across and three down fill the stage exactly — the top and bottom
+       rows are the ones the edge fades bite into, leaving the middle clear */
+    const w = stage.clientWidth || innerWidth;
+    cellW = Math.round(w / (w < 1100 ? 4 : 5));
+    cellH = Math.round(stageH() / 3);
     /* pool = the 3x3 project pattern repeated enough to cover the stage;
        cells wrap around the pool span, so content never needs to change */
     const cols = Math.ceil((innerWidth / cellW + 2) / 3) * 3;
@@ -115,8 +124,8 @@
       const y = (((c.iy * cellH + cam.y) % spanY) + spanY) % spanY - cellH;
       if (reduced) { c.el.style.transform = `translate3d(${x}px, ${y}px, 0)`; continue; }
       /* -1…1 across the stage, measured from each card's own centre */
-      const u = clamp((x + cellW / 2 - halfW) / halfW, WARP.edge);
-      const v = clamp((y + cellH / 2 - halfH) / halfH, WARP.edge);
+      const u = bend((x + cellW / 2 - halfW) / halfW);
+      const v = bend((y + cellH / 2 - halfH) / halfH);
       const r2 = Math.min(u * u + v * v, WARP.maxR2);
       c.el.style.transform =
         `translate3d(${x}px, ${y}px, ${(WARP.depth * r2).toFixed(1)}px)` +

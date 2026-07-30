@@ -297,33 +297,34 @@ section { padding: clamp(6rem, 14vh, 10rem) var(--pad); position: relative; }
   touch-action: pan-y; /* vertical swipe still scrolls the page on touch */
   user-select: none;
   -webkit-user-select: none;
-  /* the grid is bent over a dome — see WARP in main.js */
+  /* the grid is pressed into a dish — see WARP in main.js */
   perspective: 1200px;
   perspective-origin: 50% 50%;
 }
 .stage.grabbing { cursor: grabbing; }
-/* fade masks: the gallery melts into the page above and below */
+/* top and bottom rows dip into the page — just enough to hide the hard cut */
 .stage::before,
 .stage::after {
   content: "";
   position: absolute;
   left: 0;
   right: 0;
-  height: 110px;
+  height: 62px;
   z-index: 4;
   pointer-events: none;
 }
-.stage::before { top: 0; background: linear-gradient(var(--bg), transparent); }
-.stage::after { bottom: 0; background: linear-gradient(transparent, var(--bg)); }
-/* edge masks: the bent grid melts into the page on every side */
+.stage::before { top: 0; background: linear-gradient(var(--bg), transparent 88%); }
+.stage::after { bottom: 0; background: linear-gradient(transparent 88%, var(--bg)); }
+/* the outer ring loses a little light, nothing more — the stretched corner
+   cards are the point of the dish, so they stay legible */
 .stage-fade {
   position: absolute;
   inset: 0;
   z-index: 4;
   pointer-events: none;
   background:
-    radial-gradient(125% 115% at 50% 50%, transparent 58%, rgba(10, 11, 10, 0.34) 84%, var(--bg) 100%),
-    linear-gradient(90deg, var(--bg), transparent 10%, transparent 90%, var(--bg));
+    radial-gradient(135% 125% at 50% 50%, transparent 74%, rgba(10, 11, 10, 0.3) 93%, rgba(10, 11, 10, 0.72) 100%),
+    linear-gradient(90deg, var(--bg), transparent 5%, transparent 95%, var(--bg));
 }
 
 .plane {
