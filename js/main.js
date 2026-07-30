@@ -59,18 +59,36 @@
   const cam = { x: 0, y: 0, tx: 0, ty: 0, vx: 0, vy: 0 };
   let grabbing = false, moved = false, downX = 0, downY = 0;
 
+  /* the plane is bent over an invisible dome: cards drift back, shrink and
+     turn away from the viewer the further they sit from the stage centre.
+     depth stays modest so the perspective pull-in never uncovers the edge. */
+  const WARP = { depth: 150, tilt: 17, shrink: 0.05, edge: 1.8 };
+  const clamp = (n, m) => (n < -m ? -m : n > m ? m : n);
+  let halfW = 0, halfH = 0; // stage centre, refreshed on build — never read per frame
+
+  /* hover: the card under the cursor leans toward it and keeps leaning for a
+     beat after the pointer stops — the lift itself is CSS */
+  const hover = { el: null, x: 0, y: 0, px: 0, py: 0 };
+  const HOVER_PULL = 0.09;
+  const canLean = finePointer && !reduced;
+
   const stageH = () => stage.clientHeight || Math.min(innerHeight * 0.78, 720);
 
   function buildGrid() {
-    /* three full rows and four columns fill the stage exactly */
-    cellH = Math.floor(stageH() / 3);
-    cellW = Math.max(Math.round(innerWidth / 4), Math.round(cellH * 1.05));
+    /* the cell is sized from the artwork out: ~4.6 columns across the
+       viewport, then just enough height for the cover plus its two meta rows,
+       so the captions sit flush with the artwork's edges */
+    cellW = Math.max(240, Math.round(innerWidth / 4.6));
+    cellH = Math.round(cellW / 1.62) + 58;
     /* pool = the 3x3 project pattern repeated enough to cover the stage;
        cells wrap around the pool span, so content never needs to change */
     const cols = Math.ceil((innerWidth / cellW + 2) / 3) * 3;
     const rows = Math.ceil((stageH() / cellH + 2) / 3) * 3;
     spanX = cols * cellW;
     spanY = rows * cellH;
+    halfW = (stage.clientWidth || innerWidth) / 2;
+    halfH = stageH() / 2;
+    hover.el = null; // the node it pointed at is about to be replaced
     plane.innerHTML = "";
     cells = [];
     for (let iy = 0; iy < rows; iy++) {
@@ -90,8 +108,23 @@
     for (const c of cells) {
       const x = (((c.ix * cellW + cam.x) % spanX) + spanX) % spanX - cellW;
       const y = (((c.iy * cellH + cam.y) % spanY) + spanY) % spanY - cellH;
-      c.el.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+      if (reduced) { c.el.style.transform = `translate3d(${x}px, ${y}px, 0)`; continue; }
+      /* -1…1 across the stage, measured from each card's own centre */
+      const u = clamp((x + cellW / 2 - halfW) / halfW, WARP.edge);
+      const v = clamp((y + cellH / 2 - halfH) / halfH, WARP.edge);
+      const r2 = u * u + v * v;
+      c.el.style.transform =
+        `translate3d(${x}px, ${y}px, ${(-WARP.depth * r2).toFixed(1)}px)` +
+        ` rotateY(${(u * WARP.tilt).toFixed(2)}deg) rotateX(${(-v * WARP.tilt).toFixed(2)}deg)` +
+        ` scale(${(1 - WARP.shrink * r2).toFixed(3)})`;
     }
+  }
+
+  function setHover(el) {
+    if (el === hover.el) return;
+    if (hover.el) gsap.to(hover.el, { x: 0, y: 0, duration: 0.5, ease: "power3.out" });
+    hover.el = el;
+    hover.x = hover.y = 0;
   }
 
   (function galleryTick() {
@@ -102,6 +135,15 @@
       cam.ty += cam.vy;
       cam.vx *= 0.94;
       cam.vy *= 0.94;
+    }
+    /* the one layout read of the frame, taken before any style is written */
+    if (hover.el) {
+      const r = hover.el.getBoundingClientRect();
+      const tx = (hover.px - (r.left + r.width / 2)) * HOVER_PULL;
+      const ty = (hover.py - (r.top + r.height / 2)) * HOVER_PULL;
+      hover.x += (tx - hover.x) * 0.12;
+      hover.y += (ty - hover.y) * 0.12;
+      gsap.set(hover.el, { x: hover.x, y: hover.y });
     }
     const k = reduced ? 1 : 0.14;
     const nx = cam.x + (cam.tx - cam.x) * k;
@@ -120,12 +162,20 @@
     downY = e.clientY;
     lastPt = { x: e.clientX, y: e.clientY };
     cam.vx = cam.vy = 0;
+    setHover(null); // dragging owns the plane; drop the lean
     try { stage.setPointerCapture(e.pointerId); } catch (_) {}
     stage.classList.add("grabbing");
     if (!reduced) gsap.to(plane, { scale: 0.96, duration: 0.45, ease: "power3.out" });
   });
   stage.addEventListener("pointermove", (e) => {
-    if (!grabbing) return;
+    if (!grabbing) {
+      if (canLean) {
+        setHover(e.target.closest(".gcard"));
+        hover.px = e.clientX;
+        hover.py = e.clientY;
+      }
+      return;
+    }
     const dx = e.clientX - lastPt.x, dy = e.clientY - lastPt.y;
     lastPt = { x: e.clientX, y: e.clientY };
     cam.tx += dx;
@@ -146,6 +196,7 @@
   };
   stage.addEventListener("pointerup", endDrag);
   stage.addEventListener("pointercancel", endDrag);
+  stage.addEventListener("pointerleave", () => setHover(null));
 
   /* a real click (no drag) plays the track-change transition;
      the moved flag is consumed here so a stale drag never swallows
@@ -298,7 +349,7 @@
         return;
       }
       hello.textContent = window.HELLOS[hi];
-    }, 160);
+    }, 185);
   }
 
   /* ---------- scroll reveals ---------- */

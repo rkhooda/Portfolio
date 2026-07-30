@@ -136,12 +136,8 @@ window.BSIDES = [
   },
 ];
 
-/* Loader one-liners — rotate while the counter runs */
-window.HELLOS = [
-  "Hello", "Hola", "Bonjour", "Ciao", "Hallo", "Olá", "Namaste",
-  "こんにちは", "안녕", "你好", "Привет", "Merhaba", "Salam",
-  "Xin chào", "Sawubona", "Aloha", "Shalom", "Hej", "Ahoj", "Yo",
-];
+/* Loader greetings — kept short on purpose; the widely-read ones, then "Yo" */
+window.HELLOS = ["Hello", "Hola", "Bonjour", "Ciao", "Hallo", "Olá", "Namaste", "Yo"];
 
 window.QUIPS = [
   "built with caffeine and questionable decisions",
