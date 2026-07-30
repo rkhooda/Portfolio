@@ -354,7 +354,9 @@ section { padding: clamp(6rem, 14vh, 10rem) var(--pad); position: relative; }
   flex-direction: column;
   width: 100%;
   height: 100%;
-  padding: 0.7rem 0.8rem;
+  /* the side padding is the gap between neighbours — it has to absorb the
+     growth the rim cards pick up without them touching */
+  padding: 0.7rem 1.35rem;
   text-align: left;
   cursor: inherit;
   transition: background 0.35s;

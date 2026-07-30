@@ -61,19 +61,27 @@
 
   /* the plane is pressed into a dish, not blown into a bubble: the middle
      sits back and the four corners come forward, so cards stretch and grow
-     as they travel out to the edges. r2 is capped or the far ring explodes. */
-  const WARP = { depth: 210, tilt: 26, stretch: 0.05, rim: 0.8, maxBend: 1.5, maxR2: 2.2 };
-  const clamp = (n, m) => (n < -m ? -m : n > m ? m : n);
-  /* mostly cubic, then rescaled so the outermost visible column (rim) is
-     already full strength: the middle three stay near flat and the bend
-     piles up at the edge, where the cards stretch and suck outward */
-  const RIM = WARP.rim * (0.3 + 0.7 * WARP.rim * WARP.rim);
-  const bend = (t) => {
+     as they travel out to the edges. r2 is capped or the far ring explodes.
+     rimX/rimY are where full strength lands — the outermost of five columns
+     and the top/bottom of three rows — so both axes bend the same amount. */
+  const WARP = {
+    depth: 210, tilt: 26, tiltRow: 32, stretch: 0.11, maxGrow: 0.26, hold: 0.75,
+    rimX: 0.8, rimY: 2 / 3, maxBend: 1.5, maxR2: 2.4,
+  };
+  const SLIVER = 110; // strip of the fourth row the bottom fade dissolves
+  /* mostly cubic, then rescaled so the rim is already full strength: the
+     middle stays near flat and the bend piles up at the edge, where the
+     cards both turn away and grow */
+  const curve = (a) => a * (0.3 + 0.7 * a * a);
+  const KX = curve(WARP.rimX), KY = curve(WARP.rimY);
+  const bend = (t, K) => {
     const a = t < 0 ? -t : t;
-    const s = Math.min((a * (0.3 + 0.7 * a * a)) / RIM, WARP.maxBend);
+    const s = Math.min(curve(a) / K, WARP.maxBend);
     return t < 0 ? -s : s;
   };
-  let halfW = 0, halfH = 0; // stage centre, refreshed on build — never read per frame
+  /* the perspective origin (must track the CSS) and the dish's own centre,
+     which sits above it because the sliver pushes the three rows up */
+  let originX = 0, originY = 0, warpCy = 0, warpRy = 1;
   let persp = 1200; // read off the stage so JS and CSS can't drift apart
 
   /* the whole plane looks around with the cursor, like the desk diorama's
@@ -90,15 +98,17 @@
        instead of being chopped off mid-card */
     const w = stage.clientWidth || innerWidth;
     cellW = Math.round(w / (w < 1100 ? 4 : 5));
-    cellH = Math.round((stageH() - 110) / 3);
+    cellH = Math.round((stageH() - SLIVER) / 3);
     /* pool = the 3x3 project pattern repeated enough to cover the stage;
        cells wrap around the pool span, so content never needs to change */
     const cols = Math.ceil((innerWidth / cellW + 2) / 3) * 3;
     const rows = Math.ceil((stageH() / cellH + 2) / 3) * 3;
     spanX = cols * cellW;
     spanY = rows * cellH;
-    halfW = (stage.clientWidth || innerWidth) / 2;
-    halfH = stageH() / 2;
+    originX = (stage.clientWidth || innerWidth) / 2;
+    originY = stageH() / 2;
+    warpRy = (cellH * 3) / 2; // the three full rows, not the whole stage
+    warpCy = warpRy;
     persp = parseFloat(getComputedStyle(stage).perspective) || 1200;
     plane.innerHTML = "";
     cells = [];
@@ -120,22 +130,25 @@
       const x = (((c.ix * cellW + cam.x) % spanX) + spanX) % spanX - cellW;
       const y = (((c.iy * cellH + cam.y) % spanY) + spanY) % spanY - cellH;
       if (reduced) { c.el.style.transform = `translate3d(${x}px, ${y}px, 0)`; continue; }
-      /* -1…1 across the stage, measured from each card's own centre */
-      const cx = x + cellW / 2 - halfW, cy = y + cellH / 2 - halfH;
-      const u = bend(cx / halfW);
-      const v = bend(cy / halfH);
+      /* -1…1 out to the rim, measured from each card's own centre */
+      const mx = x + cellW / 2, my = y + cellH / 2;
+      const u = bend((mx - originX) / originX, KX);
+      const v = bend((my - warpCy) / warpRy, KY);
       const r2 = Math.min(u * u + v * v, WARP.maxR2);
       const z = WARP.depth * r2;
-      /* perspective magnifies anything brought forward, which would fan the
-         outer cards apart. Pre-divide both the offset and the scale by that
-         magnification: every card lands back on an evenly spaced grid and
-         only the tilt — plus a hair of stretch — survives the projection. */
+      /* perspective magnifies anything brought forward. Left alone it fans
+         the rim cards apart; fully undone it holds the pitch fixed while the
+         cards still grow, which closes the gap instead. `hold` splits the
+         difference: pitch and card size expand together, so the gap between
+         neighbours stays even from the middle out to the rim. */
       const k = persp / (persp - z);
+      const kh = Math.pow(k, WARP.hold);
+      const grow = 1 + Math.min(WARP.stretch * r2, WARP.maxGrow);
       c.el.style.transform =
-        `translate3d(${(halfW + cx / k - cellW / 2).toFixed(1)}px, ` +
-        `${(halfH + cy / k - cellH / 2).toFixed(1)}px, ${z.toFixed(1)}px)` +
-        ` rotateY(${(-u * WARP.tilt).toFixed(2)}deg) rotateX(${(v * WARP.tilt).toFixed(2)}deg)` +
-        ` scale(${((1 + WARP.stretch * r2) / k).toFixed(4)})`;
+        `translate3d(${(originX + (mx - originX) / kh - cellW / 2).toFixed(1)}px, ` +
+        `${(originY + (my - originY) / kh - cellH / 2).toFixed(1)}px, ${z.toFixed(1)}px)` +
+        ` rotateY(${(-u * WARP.tilt).toFixed(2)}deg) rotateX(${(v * WARP.tiltRow).toFixed(2)}deg)` +
+        ` scale(${(grow / k).toFixed(4)})`;
     }
   }
 
