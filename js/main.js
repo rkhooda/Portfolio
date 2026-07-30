@@ -495,6 +495,98 @@
       gsap.to([dot, ring], { opacity: 1, duration: 0.25 }));
   }
 
+  /* ---------- Lab: a peek card that rides the cursor ---------- */
+  if (finePointer && !reduced) {
+    const lab = $("#lab");
+    const peek = document.createElement("div");
+    peek.id = "labPeek";
+    peek.setAttribute("aria-hidden", "true"); // pure decoration — the row itself is the label
+    peek.innerHTML = '<div class="peek-in"></div>';
+    document.body.appendChild(peek);
+    const inner = peek.firstElementChild;
+
+    const GAP = 28; // clears the cursor ring at its widest
+    const px = gsap.quickTo(peek, "x", { duration: 0.34, ease: "power3" });
+    const py = gsap.quickTo(peek, "y", { duration: 0.34, ease: "power3" });
+    let shown = false, current = -1, mx = 0, my = 0, pw = 0, ph = 0;
+
+    const peekHTML = (p, i) => `
+      <span class="peek-art">
+        ${p.img
+          ? `<img class="shot" src="${p.img}" alt="" loading="lazy">`
+          : `<span class="ghost">${p.title.trim()[0]}</span>
+             <span class="vinyl"><span class="v-label mono">B${i + 1}</span></span>`}
+        <span class="peek-badge mono">${p.wip ? "UNRELEASED" : "B" + String(i + 1).padStart(2, "0")}</span>
+      </span>
+      <span class="peek-body">
+        <span class="peek-meta mono"><span>${p.tags.join(" · ")}</span><span>${p.year} · ${p.dur}</span></span>
+        <strong class="peek-title">${p.title}</strong>
+        <span class="peek-desc">${p.blurb || p.desc}</span>
+        <span class="peek-foot mono">
+          <span class="peek-stack">${(p.stack || []).map((s) => `<i>${s}</i>`).join("")}</span>
+          <span class="peek-cta">${p.url ? "OPEN ↗" : "IN THE LAB"}</span>
+        </span>
+      </span>`;
+
+    /* the card sits below-right of the cursor, flipping at the viewport edge */
+    function follow(snap) {
+      let x = mx + GAP, y = my + GAP;
+      if (x + pw > innerWidth - 14) x = Math.max(14, mx - pw - GAP);
+      if (y + ph > innerHeight - 14) y = Math.max(14, my - ph - GAP);
+      if (snap) gsap.set(peek, { x, y });
+      else { px(x); py(y); }
+    }
+
+    function show(row) {
+      const i = +row.dataset.i;
+      if (shown && i === current) return follow();
+      const p = window.BSIDES[i];
+      current = i;
+      inner.style.setProperty("--tint", p.tint || "var(--accent)");
+      inner.innerHTML = peekHTML(p, i);
+      pw = peek.offsetWidth;
+      ph = peek.offsetHeight; // one read per row change, never per move
+      if (shown) {
+        follow();
+        gsap.fromTo(inner, { y: 10, opacity: 0.3 },
+          { y: 0, opacity: 1, duration: 0.32, ease: "power3.out" });
+      } else {
+        shown = true;
+        follow(true);
+        gsap.to(peek, { opacity: 1, duration: 0.22, ease: "power2.out" });
+        gsap.fromTo(inner, { scale: 0.9, y: 14, opacity: 0 },
+          { scale: 1, y: 0, opacity: 1, duration: 0.45, ease: "power3.out" });
+      }
+    }
+
+    function hide() {
+      if (!shown) return;
+      shown = false;
+      current = -1;
+      gsap.to(peek, { opacity: 0, duration: 0.2, ease: "power2.in" });
+      gsap.to(inner, { scale: 0.94, duration: 0.2, ease: "power2.in" });
+    }
+
+    lab.addEventListener("pointermove", (e) => {
+      if (e.pointerType !== "mouse") return;
+      mx = e.clientX;
+      my = e.clientY;
+      const row = e.target.closest(".bside");
+      if (row) show(row);
+      else hide();
+    }, { passive: true });
+    lab.addEventListener("pointerleave", hide);
+
+    /* scrolling slides a different row under a still cursor, and that fires no
+       pointer event — so re-read what's under it whenever the page moves */
+    addEventListener("scroll", () => {
+      if (!shown) return;
+      const row = document.elementFromPoint(mx, my)?.closest(".bside");
+      if (row && lab.contains(row)) show(row);
+      else hide();
+    }, { passive: true });
+  }
+
   /* keep triggers honest once fonts settle */
   document.fonts.ready.then(() => ScrollTrigger.refresh());
 })();

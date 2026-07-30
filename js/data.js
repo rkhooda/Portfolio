@@ -96,43 +96,64 @@ window.PROJECTS = [
   },
 ];
 
-/* SIDE B — experiments, games, small builds. Rendered as a tracklist. */
+/* SIDE B — experiments, games, small builds. Rendered as a tracklist.
+   `blurb`, `stack` and `tint` only feed the hover card that follows the
+   cursor — they are placeholders, swap them for the real copy. Adding an
+   `img` here replaces the generated art in the card, same as Side A. */
 window.BSIDES = [
   {
     title: "MaanKiBaat",
     desc: "Mental-health AI chatbot that actually listens.",
+    blurb: "A judgment-free chat companion in Hindi and English. Tuned to listen first and suggest second — and to know when to step back.",
+    stack: ["Python", "OpenAI", "Streamlit"],
     tags: ["AI"], year: "2024", dur: "02:31",
     url: "https://github.com/rkhooda/MaanKiBaat",
+    tint: "#8FA98F",
   },
   {
     title: "Recipify",
     desc: "AI recipe generator — fridge in, dinner out.",
+    blurb: "Photograph the fridge, get a dinner you'll actually cook. Ranks recipes by what you already own instead of what a brand wants to sell you.",
+    stack: ["Next.js", "OpenAI", "Tailwind"],
     tags: ["AI"], year: "2024", dur: "01:58",
     url: "https://github.com/rkhooda/Recipify",
+    tint: "#C2B28A",
   },
   {
     title: "SlotMachine",
     desc: "Multi-platform slot machine game.",
+    blurb: "One reel engine, three front-ends. Built to learn how RNG, payout tables and pacing actually feel once they're in your hands.",
+    stack: ["JavaScript", "Canvas", "Electron"],
     tags: ["GAMES"], year: "2024", dur: "02:14",
     url: "https://github.com/rkhooda/SlotMachine",
+    tint: "#A98F62",
   },
   {
     title: "Payline Slot Engine",
     desc: "Classic payline slot — fixed grid, medium volatility, readable wins.",
+    blurb: "A faithful payline slot: fixed 5×3 grid, medium volatility, wins you can read without a spreadsheet. Ships with its own maths sim.",
+    stack: ["TypeScript", "Canvas"],
     tags: ["GAMES"], year: "2026", dur: "--:--",
     url: null, wip: true,
+    tint: "#B08968",
   },
   {
     title: "Flappy-Bird",
     desc: "The clone every builder owes the universe.",
+    blurb: "Sixty lines of physics and a lifetime of regret. Collision maths written from scratch, because that was the whole point.",
+    stack: ["JavaScript", "Canvas"],
     tags: ["GAMES", "LAB"], year: "2023", dur: "00:45",
     url: "https://github.com/rkhooda/Flappy-Bird",
+    tint: "#7E9089",
   },
   {
     title: "Snake",
     desc: "Python classic. Eats apples, teaches loops.",
+    blurb: "Written the long way on purpose — no engine, no helpers, just a loop, a grid and a tail that keeps getting in the way.",
+    stack: ["Python", "Pygame"],
     tags: ["GAMES", "LAB"], year: "2023", dur: "00:32",
     url: "https://github.com/rkhooda/snake-game",
+    tint: "#9A9B6A",
   },
 ];
 

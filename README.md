@@ -26,7 +26,8 @@ Everything editable lives in **`js/data.js`**:
 - `PROJECTS` — Side A gallery. `wip: true` renders an UNRELEASED badge and
   skips the link. **Check the GitHub `url`s — they're best guesses from repo
   names.**
-- `BSIDES` — the Lab tracklist.
+- `BSIDES` — the Lab tracklist. `blurb`, `stack` and `tint` only feed the
+  hover card that follows the cursor — the current ones are placeholders.
 - `TRACKS` — mini-player titles per section.
 - `QUIPS` — loader one-liners.
 

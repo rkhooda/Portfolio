@@ -933,6 +933,97 @@ body.cursor-hover #cDot { width: 4px; height: 4px; margin: -2px 0 0 -2px; }
 /* pressed: ring snaps in */
 body.cursor-down #cRing { width: 24px; height: 24px; margin: -12px 0 0 -12px; }
 
+/* ---------------- Lab peek card (rides the cursor) ---------------- */
+#labPeek {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 120; /* under the cursor dot, over everything else */
+  width: 290px;
+  pointer-events: none;
+  opacity: 0;
+  will-change: transform;
+}
+.peek-in {
+  overflow: hidden;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--tint) 18%, var(--line));
+  /* the project's own tint washes down the panel so each card reads different */
+  background:
+    linear-gradient(165deg, color-mix(in srgb, var(--tint) 10%, transparent), transparent 58%),
+    color-mix(in srgb, var(--surface) 92%, transparent);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow:
+    0 26px 60px -20px rgba(0, 0, 0, 0.85),
+    0 0 0 1px color-mix(in srgb, var(--tint) 14%, transparent);
+  transform-origin: 18% 14%; /* grows out of the cursor, not the corner */
+}
+.peek-art {
+  display: block;
+  position: relative;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border-bottom: 1px solid var(--line);
+  background:
+    radial-gradient(ellipse 80% 70% at 78% 8%, color-mix(in srgb, var(--tint) 30%, transparent), transparent 68%),
+    linear-gradient(145deg, color-mix(in srgb, var(--tint) 20%, #0f110f), #0b0d0b 72%);
+}
+/* the shared album-art parts are sized for a full card — shrink them to fit */
+.peek-art .ghost { font-size: 5.4rem; left: 6%; top: -7%; opacity: 0.26; }
+.peek-art .vinyl { width: 46%; right: -6%; bottom: -17%; }
+.peek-art .shot { width: 100%; height: 100%; object-fit: cover; display: block; }
+.peek-badge {
+  position: absolute;
+  top: 0.6rem;
+  left: 0.7rem;
+  font-size: 8.5px;
+  letter-spacing: 0.16em;
+  color: var(--tint);
+  background: rgba(10, 11, 10, 0.5);
+  border: 1px solid color-mix(in srgb, var(--tint) 45%, transparent);
+  padding: 0.24rem 0.5rem;
+  border-radius: 999px;
+}
+.peek-body { display: block; padding: 0.85rem 0.95rem 0.8rem; }
+.peek-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.7rem;
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  color: var(--muted);
+}
+.peek-title {
+  display: block;
+  font-family: var(--font-d);
+  font-weight: 500;
+  font-size: 1.18rem;
+  line-height: 1.15;
+  margin: 0.42rem 0 0.36rem;
+}
+.peek-desc { display: block; font-size: 0.82rem; line-height: 1.45; color: var(--muted); }
+.peek-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.7rem;
+  margin-top: 0.75rem;
+  padding-top: 0.7rem;
+  border-top: 1px solid var(--line);
+  font-size: 8.5px;
+  letter-spacing: 0.14em;
+}
+.peek-stack { display: flex; flex-wrap: wrap; gap: 0.3rem; }
+.peek-stack i {
+  font-style: normal;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  padding: 0.22rem 0.4rem;
+  border-radius: 3px;
+}
+.peek-cta { color: var(--tint); white-space: nowrap; }
+
 /* ---------------- track-change overlay ---------------- */
 .track-overlay {
   position: fixed;
