@@ -9,8 +9,15 @@ Open `index.html` directly, or (needed for the ambient audio, which is
 fetched over HTTP):
 
 ```sh
-npx serve .        # or: python3 -m http.server 8000
+python3 serve.py        # http://localhost:8000, caching off
 ```
+
+Use `serve.py` rather than `python3 -m http.server` while editing: the stdlib
+server sends no `Cache-Control`, so browsers keep serving a stale `data.js`
+and your changes appear not to land.
+
+Note the loader only plays **once per tab session** (`sessionStorage`), so a
+reload skips it — open a new tab to see the greetings again.
 
 ## Edit content
 

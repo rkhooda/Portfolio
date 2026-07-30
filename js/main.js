@@ -349,7 +349,7 @@
         return;
       }
       hello.textContent = window.HELLOS[hi];
-    }, 185);
+    }, 110);
   }
 
   /* ---------- scroll reveals ---------- */
