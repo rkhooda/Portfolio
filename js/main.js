@@ -74,26 +74,23 @@
     return t < 0 ? -s : s;
   };
   let halfW = 0, halfH = 0; // stage centre, refreshed on build — never read per frame
-
-  /* hover: the card under the cursor leans toward it and keeps leaning for a
-     beat after the pointer stops — the lift itself is CSS */
-  const hover = { el: null, x: 0, y: 0, px: 0, py: 0 };
-  const HOVER_PULL = 0.09;
-  const canLean = finePointer && !reduced;
+  let persp = 1200; // read off the stage so JS and CSS can't drift apart
 
   /* the whole plane looks around with the cursor, like the desk diorama's
      camera — same viewport-normalised target, same eased follow */
   const look = { tx: 0, ty: 0, x: 0, y: 0 };
   const LOOK_SHIFT = 26, LOOK_TILT = 2.4;
+  const canParallax = finePointer && !reduced;
 
   const stageH = () => stage.clientHeight || Math.min(innerHeight * 0.78, 720);
 
   function buildGrid() {
-    /* five across and three down fill the stage exactly — the top and bottom
-       rows are the ones the edge fades bite into, leaving the middle clear */
+    /* five across, and three complete rows plus a sliver of the fourth — the
+       sliver is what the bottom fade dissolves, so the third row stays whole
+       instead of being chopped off mid-card */
     const w = stage.clientWidth || innerWidth;
     cellW = Math.round(w / (w < 1100 ? 4 : 5));
-    cellH = Math.round(stageH() / 3);
+    cellH = Math.round((stageH() - 110) / 3);
     /* pool = the 3x3 project pattern repeated enough to cover the stage;
        cells wrap around the pool span, so content never needs to change */
     const cols = Math.ceil((innerWidth / cellW + 2) / 3) * 3;
@@ -102,7 +99,7 @@
     spanY = rows * cellH;
     halfW = (stage.clientWidth || innerWidth) / 2;
     halfH = stageH() / 2;
-    hover.el = null; // the node it pointed at is about to be replaced
+    persp = parseFloat(getComputedStyle(stage).perspective) || 1200;
     plane.innerHTML = "";
     cells = [];
     for (let iy = 0; iy < rows; iy++) {
@@ -124,21 +121,22 @@
       const y = (((c.iy * cellH + cam.y) % spanY) + spanY) % spanY - cellH;
       if (reduced) { c.el.style.transform = `translate3d(${x}px, ${y}px, 0)`; continue; }
       /* -1…1 across the stage, measured from each card's own centre */
-      const u = bend((x + cellW / 2 - halfW) / halfW);
-      const v = bend((y + cellH / 2 - halfH) / halfH);
+      const cx = x + cellW / 2 - halfW, cy = y + cellH / 2 - halfH;
+      const u = bend(cx / halfW);
+      const v = bend(cy / halfH);
       const r2 = Math.min(u * u + v * v, WARP.maxR2);
+      const z = WARP.depth * r2;
+      /* perspective magnifies anything brought forward, which would fan the
+         outer cards apart. Pre-divide both the offset and the scale by that
+         magnification: every card lands back on an evenly spaced grid and
+         only the tilt — plus a hair of stretch — survives the projection. */
+      const k = persp / (persp - z);
       c.el.style.transform =
-        `translate3d(${x}px, ${y}px, ${(WARP.depth * r2).toFixed(1)}px)` +
+        `translate3d(${(halfW + cx / k - cellW / 2).toFixed(1)}px, ` +
+        `${(halfH + cy / k - cellH / 2).toFixed(1)}px, ${z.toFixed(1)}px)` +
         ` rotateY(${(-u * WARP.tilt).toFixed(2)}deg) rotateX(${(v * WARP.tilt).toFixed(2)}deg)` +
-        ` scale(${(1 + WARP.stretch * r2).toFixed(3)})`;
+        ` scale(${((1 + WARP.stretch * r2) / k).toFixed(4)})`;
     }
-  }
-
-  function setHover(el) {
-    if (el === hover.el) return;
-    if (hover.el) gsap.to(hover.el, { x: 0, y: 0, duration: 0.5, ease: "power3.out" });
-    hover.el = el;
-    hover.x = hover.y = 0;
   }
 
   (function galleryTick() {
@@ -150,22 +148,13 @@
       cam.vx *= 0.94;
       cam.vy *= 0.94;
     }
-    if (canLean && (Math.abs(look.tx - look.x) > 0.001 || Math.abs(look.ty - look.y) > 0.001)) {
+    if (canParallax && (Math.abs(look.tx - look.x) > 0.001 || Math.abs(look.ty - look.y) > 0.001)) {
       look.x += (look.tx - look.x) * 0.07;
       look.y += (look.ty - look.y) * 0.07;
       gsap.set(plane, {
         x: look.x * LOOK_SHIFT, y: look.y * LOOK_SHIFT,
         rotationY: look.x * LOOK_TILT, rotationX: -look.y * LOOK_TILT,
       });
-    }
-    /* the one layout read of the frame, taken before any style is written */
-    if (hover.el) {
-      const r = hover.el.getBoundingClientRect();
-      const tx = (hover.px - (r.left + r.width / 2)) * HOVER_PULL;
-      const ty = (hover.py - (r.top + r.height / 2)) * HOVER_PULL;
-      hover.x += (tx - hover.x) * 0.12;
-      hover.y += (ty - hover.y) * 0.12;
-      gsap.set(hover.el, { x: hover.x, y: hover.y });
     }
     const k = reduced ? 1 : 0.14;
     const nx = cam.x + (cam.tx - cam.x) * k;
@@ -184,17 +173,13 @@
     downY = e.clientY;
     lastPt = { x: e.clientX, y: e.clientY };
     cam.vx = cam.vy = 0;
-    setHover(null); // dragging owns the plane; drop the lean
     try { stage.setPointerCapture(e.pointerId); } catch (_) {}
     stage.classList.add("grabbing");
     if (!reduced) gsap.to(plane, { scale: 0.96, duration: 0.45, ease: "power3.out" });
   });
   stage.addEventListener("pointermove", (e) => {
     if (!grabbing) {
-      if (canLean) {
-        setHover(e.target.closest(".gcard"));
-        hover.px = e.clientX;
-        hover.py = e.clientY;
+      if (canParallax) {
         look.tx = (e.clientX / innerWidth) * 2 - 1;
         look.ty = (e.clientY / innerHeight) * 2 - 1;
       }
@@ -221,7 +206,6 @@
   stage.addEventListener("pointerup", endDrag);
   stage.addEventListener("pointercancel", endDrag);
   stage.addEventListener("pointerleave", () => {
-    setHover(null);
     look.tx = look.ty = 0; // the plane settles back to square
   });
 
@@ -387,10 +371,7 @@
         scrollTrigger: { trigger: h, start: "top 82%", once: true },
       });
     });
-    gsap.from("#gstage", {
-      opacity: 0, y: 44, duration: 0.9, ease: "power3.out",
-      scrollTrigger: { trigger: "#work", start: "top 75%", once: true },
-    });
+    /* the gallery does not fade or slide in — all three rows stay up */
     gsap.set("#lab .bside", { x: -24, opacity: 0 });
     ScrollTrigger.batch("#lab .bside", {
       start: "top 90%", once: true,

@@ -302,19 +302,23 @@ section { padding: clamp(6rem, 14vh, 10rem) var(--pad); position: relative; }
   perspective-origin: 50% 50%;
 }
 .stage.grabbing { cursor: grabbing; }
-/* top and bottom rows dip into the page — just enough to hide the hard cut */
+/* top and bottom rows dip into the page — the bottom runs longer and softer
+   so the last row melts out instead of stopping on a hard line */
 .stage::before,
 .stage::after {
   content: "";
   position: absolute;
   left: 0;
   right: 0;
-  height: 62px;
   z-index: 4;
   pointer-events: none;
 }
-.stage::before { top: 0; background: linear-gradient(var(--bg), transparent 88%); }
-.stage::after { bottom: 0; background: linear-gradient(transparent 88%, var(--bg)); }
+.stage::before { top: 0; height: 62px; background: linear-gradient(var(--bg), transparent 88%); }
+.stage::after {
+  bottom: 0;
+  height: 122px;
+  background: linear-gradient(transparent, rgba(10, 11, 10, 0.6) 48%, var(--bg) 90%);
+}
 /* the outer ring loses a little light, nothing more — the stretched corner
    cards are the point of the dish, so they stay legible */
 .stage-fade {
@@ -362,7 +366,6 @@ section { padding: clamp(6rem, 14vh, 10rem) var(--pad); position: relative; }
   gap: 1rem;
   font-size: 9px;
   letter-spacing: 0.14em;
-  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .g-top span:first-child { color: var(--muted); }
 .g-top span:last-child {
@@ -392,11 +395,7 @@ section { padding: clamp(6rem, 14vh, 10rem) var(--pad); position: relative; }
   font-size: 9px;
   letter-spacing: 0.12em;
   color: var(--muted);
-  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
 }
-/* heading and footer open away from the cover, so the whole card reacts */
-.gcard:hover .g-top, .gcard:focus-visible .g-top { transform: translateY(-5px); }
-.gcard:hover .g-bot, .gcard:focus-visible .g-bot { transform: translateY(5px); }
 .g-chips { display: flex; gap: 0.3rem; flex-wrap: wrap; }
 .g-chips i {
   font-style: normal;
@@ -462,15 +461,21 @@ section { padding: clamp(6rem, 14vh, 10rem) var(--pad); position: relative; }
   background:
     radial-gradient(ellipse 80% 70% at 78% 8%, color-mix(in srgb, var(--tint) 28%, transparent), transparent 68%),
     linear-gradient(145deg, color-mix(in srgb, var(--tint) 20%, #0f110f), #0b0d0b 72%);
-  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), filter 0.4s, box-shadow 0.5s;
+  transition: filter 0.45s;
 }
-/* the tile lifts off the dome; main.js leans the whole card toward the cursor */
-.gcard:hover .cover,
-.gcard:focus-visible .cover {
-  transform: translateY(-7px) scale(1.045);
-  filter: brightness(1.3);
-  box-shadow: 0 22px 46px -20px color-mix(in srgb, var(--tint) 60%, transparent);
+/* hover is deliberately quiet: the tint washes across the cover, nothing moves */
+.cover::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  opacity: 0;
+  pointer-events: none;
+  background: linear-gradient(150deg, color-mix(in srgb, var(--tint) 26%, transparent), transparent 62%);
+  transition: opacity 0.45s;
 }
+.gcard:hover .cover, .gcard:focus-visible .cover { filter: brightness(1.12); }
+.gcard:hover .cover::after, .gcard:focus-visible .cover::after { opacity: 1; }
 .cover .shot { width: 100%; height: 100%; object-fit: cover; display: block; }
 
 .ghost {
@@ -501,9 +506,7 @@ section { padding: clamp(6rem, 14vh, 10rem) var(--pad); position: relative; }
   border: 1px solid rgba(234, 234, 226, 0.07);
   display: grid;
   place-items: center;
-  transition: transform 1.1s cubic-bezier(0.22, 1, 0.36, 1);
 }
-.gcard:hover .vinyl, .gcard:focus-visible .vinyl { transform: rotate(22deg); }
 .v-label {
   width: 27%;
   aspect-ratio: 1;
