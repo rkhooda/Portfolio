@@ -59,10 +59,10 @@
   const cam = { x: 0, y: 0, tx: 0, ty: 0, vx: 0, vy: 0 };
   let grabbing = false, moved = false, downX = 0, downY = 0;
 
-  /* the plane is bent over an invisible dome: cards drift back, shrink and
-     turn away from the viewer the further they sit from the stage centre.
-     depth stays modest so the perspective pull-in never uncovers the edge. */
-  const WARP = { depth: 150, tilt: 17, shrink: 0.05, edge: 1.8 };
+  /* the plane is pressed into a dish, not blown into a bubble: the middle
+     sits back and the four corners come forward, so cards stretch and grow
+     as they travel out to the edges. r2 is capped or the far ring explodes. */
+  const WARP = { depth: 175, tilt: 21, stretch: 0.06, edge: 1.8, maxR2: 2.4 };
   const clamp = (n, m) => (n < -m ? -m : n > m ? m : n);
   let halfW = 0, halfH = 0; // stage centre, refreshed on build — never read per frame
 
@@ -72,13 +72,18 @@
   const HOVER_PULL = 0.09;
   const canLean = finePointer && !reduced;
 
+  /* the whole plane looks around with the cursor, like the desk diorama's
+     camera — same viewport-normalised target, same eased follow */
+  const look = { tx: 0, ty: 0, x: 0, y: 0 };
+  const LOOK_SHIFT = 26, LOOK_TILT = 2.4;
+
   const stageH = () => stage.clientHeight || Math.min(innerHeight * 0.78, 720);
 
   function buildGrid() {
     /* the cell is sized from the artwork out: ~4.6 columns across the
        viewport, then just enough height for the cover plus its two meta rows,
        so the captions sit flush with the artwork's edges */
-    cellW = Math.max(240, Math.round(innerWidth / 4.6));
+    cellW = Math.max(260, Math.round(innerWidth / 4));
     cellH = Math.round(cellW / 1.62) + 58;
     /* pool = the 3x3 project pattern repeated enough to cover the stage;
        cells wrap around the pool span, so content never needs to change */
@@ -112,11 +117,11 @@
       /* -1…1 across the stage, measured from each card's own centre */
       const u = clamp((x + cellW / 2 - halfW) / halfW, WARP.edge);
       const v = clamp((y + cellH / 2 - halfH) / halfH, WARP.edge);
-      const r2 = u * u + v * v;
+      const r2 = Math.min(u * u + v * v, WARP.maxR2);
       c.el.style.transform =
-        `translate3d(${x}px, ${y}px, ${(-WARP.depth * r2).toFixed(1)}px)` +
-        ` rotateY(${(u * WARP.tilt).toFixed(2)}deg) rotateX(${(-v * WARP.tilt).toFixed(2)}deg)` +
-        ` scale(${(1 - WARP.shrink * r2).toFixed(3)})`;
+        `translate3d(${x}px, ${y}px, ${(WARP.depth * r2).toFixed(1)}px)` +
+        ` rotateY(${(-u * WARP.tilt).toFixed(2)}deg) rotateX(${(v * WARP.tilt).toFixed(2)}deg)` +
+        ` scale(${(1 + WARP.stretch * r2).toFixed(3)})`;
     }
   }
 
@@ -135,6 +140,14 @@
       cam.ty += cam.vy;
       cam.vx *= 0.94;
       cam.vy *= 0.94;
+    }
+    if (canLean && (Math.abs(look.tx - look.x) > 0.001 || Math.abs(look.ty - look.y) > 0.001)) {
+      look.x += (look.tx - look.x) * 0.07;
+      look.y += (look.ty - look.y) * 0.07;
+      gsap.set(plane, {
+        x: look.x * LOOK_SHIFT, y: look.y * LOOK_SHIFT,
+        rotationY: look.x * LOOK_TILT, rotationX: -look.y * LOOK_TILT,
+      });
     }
     /* the one layout read of the frame, taken before any style is written */
     if (hover.el) {
@@ -173,6 +186,8 @@
         setHover(e.target.closest(".gcard"));
         hover.px = e.clientX;
         hover.py = e.clientY;
+        look.tx = (e.clientX / innerWidth) * 2 - 1;
+        look.ty = (e.clientY / innerHeight) * 2 - 1;
       }
       return;
     }
@@ -196,7 +211,10 @@
   };
   stage.addEventListener("pointerup", endDrag);
   stage.addEventListener("pointercancel", endDrag);
-  stage.addEventListener("pointerleave", () => setHover(null));
+  stage.addEventListener("pointerleave", () => {
+    setHover(null);
+    look.tx = look.ty = 0; // the plane settles back to square
+  });
 
   /* a real click (no drag) plays the track-change transition;
      the moved flag is consumed here so a stale drag never swallows
@@ -349,7 +367,7 @@
         return;
       }
       hello.textContent = window.HELLOS[hi];
-    }, 110);
+    }, 185);
   }
 
   /* ---------- scroll reveals ---------- */

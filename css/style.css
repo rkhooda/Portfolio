@@ -291,14 +291,14 @@ section { padding: clamp(6rem, 14vh, 10rem) var(--pad); position: relative; }
 
 .stage {
   position: relative;
-  height: min(78vh, 720px);
+  height: min(86vh, 800px);
   overflow: hidden;
   cursor: grab;
   touch-action: pan-y; /* vertical swipe still scrolls the page on touch */
   user-select: none;
   -webkit-user-select: none;
   /* the grid is bent over a dome — see WARP in main.js */
-  perspective: 1400px;
+  perspective: 1200px;
   perspective-origin: 50% 50%;
 }
 .stage.grabbing { cursor: grabbing; }
@@ -322,8 +322,8 @@ section { padding: clamp(6rem, 14vh, 10rem) var(--pad); position: relative; }
   z-index: 4;
   pointer-events: none;
   background:
-    radial-gradient(115% 105% at 50% 50%, transparent 42%, rgba(10, 11, 10, 0.5) 76%, var(--bg) 100%),
-    linear-gradient(90deg, var(--bg), transparent 15%, transparent 85%, var(--bg));
+    radial-gradient(125% 115% at 50% 50%, transparent 58%, rgba(10, 11, 10, 0.34) 84%, var(--bg) 100%),
+    linear-gradient(90deg, var(--bg), transparent 10%, transparent 90%, var(--bg));
 }
 
 .plane {
@@ -361,6 +361,7 @@ section { padding: clamp(6rem, 14vh, 10rem) var(--pad); position: relative; }
   gap: 1rem;
   font-size: 9px;
   letter-spacing: 0.14em;
+  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .g-top span:first-child { color: var(--muted); }
 .g-top span:last-child {
@@ -390,7 +391,11 @@ section { padding: clamp(6rem, 14vh, 10rem) var(--pad); position: relative; }
   font-size: 9px;
   letter-spacing: 0.12em;
   color: var(--muted);
+  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
 }
+/* heading and footer open away from the cover, so the whole card reacts */
+.gcard:hover .g-top, .gcard:focus-visible .g-top { transform: translateY(-5px); }
+.gcard:hover .g-bot, .gcard:focus-visible .g-bot { transform: translateY(5px); }
 .g-chips { display: flex; gap: 0.3rem; flex-wrap: wrap; }
 .g-chips i {
   font-style: normal;
