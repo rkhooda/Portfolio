@@ -28,6 +28,7 @@ window.PROJECTS = [
     tags: ["WEB3", "PLATFORM"],
     year: "2025", dur: "04:12",
     url: "https://cred-vaulte.vercel.app",
+    img: "assets/img/covers/credvault.jpg",
     tint: "#8FA98F",
   },
   {
@@ -44,6 +45,7 @@ window.PROJECTS = [
     tags: ["AUTOMATION", "TOOLS"],
     year: "2025", dur: "05:01",
     url: "https://cult-bot.vercel.app",
+    img: "assets/img/covers/cult-bot.jpg",
     tint: "#9A9B6A",
   },
   {
@@ -52,6 +54,7 @@ window.PROJECTS = [
     tags: ["WEB3", "WEB"],
     year: "2026", dur: "03:47",
     url: "https://github.com/rkhooda/Clixo",
+    img: "assets/img/covers/clixo.png",
     tint: "#7C8F6E",
   },
   {
@@ -60,6 +63,7 @@ window.PROJECTS = [
     tags: ["TOOLS"],
     year: "2025", dur: "02:48",
     url: "https://bellsy.vercel.app",
+    img: "assets/img/covers/bellsy.jpg",
     tint: "#C2B28A",
   },
   {
@@ -68,6 +72,7 @@ window.PROJECTS = [
     tags: ["APPS", "TOOLS"],
     year: "2025", dur: "03:24",
     url: "https://flowpane.vercel.app",
+    img: "assets/img/covers/flowpane.jpg",
     tint: "#A9A18F",
   },
   {
@@ -76,14 +81,16 @@ window.PROJECTS = [
     tags: ["APPS"],
     year: "2026", dur: "03:12",
     url: "https://github.com/rkhooda/ProcrastiNO",
+    img: "assets/img/covers/procrastino.png",
     tint: "#B08968",
   },
   {
     title: "StatisticalStudies",
     desc: "Educational platform for statistics & math — lectures, UGC-NET prep, premium content.",
     tags: ["WEB", "APPS"],
-    year: "2025", dur: "--:--",
-    url: null, wip: true,
+    year: "2025", dur: "04:37",
+    url: "https://statistical-studies.vercel.app",
+    img: "assets/img/covers/statisticalstudies.jpg",
     tint: "#7E9089",
   },
   {
@@ -108,6 +115,7 @@ window.BSIDES = [
     stack: ["JavaScript", "HTML/CSS"],
     tags: ["AI"], year: "2024", dur: "02:31",
     url: "https://maan-ki-baat.vercel.app",
+    img: "assets/img/covers/maankibaat.jpg",
     tint: "#8FA98F",
   },
   {
@@ -117,6 +125,7 @@ window.BSIDES = [
     stack: ["JavaScript", "Python"],
     tags: ["AI"], year: "2024", dur: "01:58",
     url: "https://recipifyi.vercel.app",
+    img: "assets/img/covers/recipify.jpg",
     tint: "#C2B28A",
   },
   {
@@ -126,6 +135,7 @@ window.BSIDES = [
     stack: ["Python", "JavaScript"],
     tags: ["GAMES"], year: "2024", dur: "02:14",
     url: "https://slot-machine-casino.vercel.app",
+    img: "assets/img/covers/slotmachine.jpg",
     tint: "#A98F62",
   },
   {
@@ -144,6 +154,7 @@ window.BSIDES = [
     stack: ["Python", "Pygame"],
     tags: ["GAMES", "LAB"], year: "2023", dur: "00:45",
     url: "https://github.com/rkhooda/Flappy-Bird",
+    img: "assets/img/covers/flappy-bird.png",
     tint: "#7E9089",
   },
   {
@@ -153,6 +164,7 @@ window.BSIDES = [
     stack: ["Python", "Pygame"],
     tags: ["GAMES", "LAB"], year: "2023", dur: "00:32",
     url: "https://github.com/rkhooda/snake-game",
+    img: "assets/img/covers/snake-game.png",
     tint: "#9A9B6A",
   },
 ];

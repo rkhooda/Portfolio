@@ -228,7 +228,10 @@
   stage.addEventListener("click", (e) => {
     const wasDrag = moved;
     moved = false;
-    const g = e.target.closest(".gcard");
+    /* setPointerCapture retargets the click to the stage itself, so the card
+       has to be re-found under the pointer instead of read off e.target */
+    const g = e.target.closest(".gcard") ||
+      document.elementFromPoint(e.clientX, e.clientY)?.closest(".gcard");
     if (!g) return;
     if (wasDrag) { e.preventDefault(); return; }
     playTransition(P[+g.dataset.i]);
@@ -413,10 +416,10 @@
 
   function playTransition(p) {
     if (transitioning) return;
-    if (reduced) { // no theatre for reduced motion — just go
-      if (p.url) window.open(p.url, "_blank", "noopener");
-      return;
-    }
+    /* open synchronously — popup blockers kill window.open once the click's
+       user activation expires, so it can't wait for the animation */
+    if (p.url) window.open(p.url, "_blank", "noopener");
+    if (reduced) return; // no theatre for reduced motion
     transitioning = true;
     tLabel.textContent = p.wip ? "STILL IN THE STUDIO…" : "NOW PLAYING…";
     tName.textContent = p.title;
@@ -426,7 +429,6 @@
       onComplete: () => {
         overlay.classList.remove("open");
         transitioning = false;
-        if (p.url) window.open(p.url, "_blank", "noopener");
       },
     })
       .fromTo(overlay, { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power2.out" })
