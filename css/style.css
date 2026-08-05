@@ -478,7 +478,7 @@ section { padding: clamp(6rem, 14vh, 10rem) var(--pad); position: relative; }
 }
 .gcard:hover .cover, .gcard:focus-visible .cover { filter: brightness(1.12); }
 .gcard:hover .cover::after, .gcard:focus-visible .cover::after { opacity: 1; }
-.cover .shot { width: 100%; height: 100%; object-fit: cover; display: block; }
+.cover .shot { width: 100%; height: 100%; object-fit: cover; display: block; -webkit-user-drag: none; user-select: none; }
 
 .ghost {
   position: absolute;

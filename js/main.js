@@ -20,7 +20,7 @@
   const catNo = (i) => "RH-" + String(i + 1).padStart(2, "0");
 
   function coverHTML(p, i) {
-    if (p.img) return `<img class="shot" src="${p.img}" alt="" loading="lazy">`;
+    if (p.img) return `<img class="shot" src="${p.img}" alt="" loading="lazy" draggable="false">`;
     return `<span class="ghost" aria-hidden="true">${p.title.trim()[0]}</span>
       <span class="vinyl" aria-hidden="true"><span class="v-label mono">${catNo(i)}</span></span>
       ${p.wip ? '<span class="cov-wip mono">UNRELEASED</span>' : ""}`;
@@ -515,7 +515,7 @@
     const peekHTML = (p, i) => `
       <span class="peek-art">
         ${p.img
-          ? `<img class="shot" src="${p.img}" alt="" loading="lazy">`
+          ? `<img class="shot" src="${p.img}" alt="" loading="lazy" draggable="false">`
           : `<span class="ghost">${p.title.trim()[0]}</span>
              <span class="vinyl"><span class="v-label mono">B${i + 1}</span></span>`}
         <span class="peek-badge mono">${p.wip ? "UNRELEASED" : "B" + String(i + 1).padStart(2, "0")}</span>
