@@ -510,7 +510,16 @@
     const GAP = 28; // clears the cursor ring at its widest
     const px = gsap.quickTo(peek, "x", { duration: 0.34, ease: "power3" });
     const py = gsap.quickTo(peek, "y", { duration: 0.34, ease: "power3" });
-    let shown = false, current = -1, mx = 0, my = 0, pw = 0, ph = 0;
+    let shown = false, current = -1, mx = NaN, my = NaN, pw = 0, ph = 0;
+
+    /* the cursor's position must be known before it ever enters the lab,
+       or a scroll that slides a row under a still cursor can't summon the
+       card — NaN means the pointer hasn't been seen yet */
+    addEventListener("pointermove", (e) => {
+      if (e.pointerType && e.pointerType !== "mouse") return;
+      mx = e.clientX;
+      my = e.clientY;
+    }, { passive: true });
 
     const peekHTML = (p, i) => `
       <span class="peek-art">
@@ -579,10 +588,12 @@
     }, { passive: true });
     lab.addEventListener("pointerleave", hide);
 
-    /* scrolling slides a different row under a still cursor, and that fires no
-       pointer event — so re-read what's under it whenever the page moves */
+    /* scrolling slides a row under a still cursor and fires no pointer event —
+       so re-read what's under it whenever the page moves. This must also run
+       when nothing is shown yet: that's how the card first appears when the
+       user scrolls into the lab without moving the mouse. */
     addEventListener("scroll", () => {
-      if (!shown) return;
+      if (Number.isNaN(mx)) return; // pointer never seen — nowhere to look
       const row = document.elementFromPoint(mx, my)?.closest(".bside");
       if (row && lab.contains(row)) show(row);
       else hide();
