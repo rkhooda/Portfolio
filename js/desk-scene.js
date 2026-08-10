@@ -3,8 +3,13 @@
    entirely from three.js primitives in the night-sage palette.
    Vanilla ES module (vendored three core, no addons); talks to the
    page via the rh:hero-in event and the body.sound-on class.
+
+   three is ~690 KB and the diorama only ever boots at ≥1024px, so the
+   library is pulled in on demand instead of by a static import: narrow
+   viewports never download a scene they are never going to render.
    ------------------------------------------------------------------ */
-import * as THREE from "three";
+
+let THREE = null; // filled in by boot(), before init() ever runs
 
 const CONFIG = {
   bg: 0x0a0b0a,
@@ -30,11 +35,12 @@ if (cvs && gsap) {
   else wideMQ.addEventListener("change", (e) => e.matches && boot(), { once: true });
 }
 
-function boot() {
+async function boot() {
   try {
+    THREE = await import("three");
     init();
   } catch (err) {
-    /* no webgl, no drama — the hero simply stays as it was */
+    /* no webgl, no three, no drama — the hero simply stays as it was */
     console.warn("desk scene unavailable:", err);
     cvs.remove();
   }
