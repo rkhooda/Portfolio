@@ -401,7 +401,9 @@ section { padding: clamp(6rem, 14vh, 10rem) var(--pad); position: relative; }
 .hero-cue span { color: var(--accent); animation: bob 1.8s ease-in-out infinite; }
 @keyframes bob { 50% { transform: translateY(4px); } }
 
-/* the animated field behind everything — under the text and the diorama */
+/* the animated field behind everything — under the text and the diorama.
+   The mask dissolves it toward the hero's edges so the map never ends on
+   a hard line; the scrubbed fade into the work section lives in JS. */
 .hero-bg {
   position: absolute;
   inset: 0;
@@ -410,6 +412,8 @@ section { padding: clamp(6rem, 14vh, 10rem) var(--pad); position: relative; }
   pointer-events: none;
   opacity: 0;
   transition: opacity 1.6s ease;
+  -webkit-mask-image: linear-gradient(to bottom, #000 58%, rgba(0, 0, 0, 0.55) 80%, transparent 99%);
+  mask-image: linear-gradient(to bottom, #000 58%, rgba(0, 0, 0, 0.55) 80%, transparent 99%);
 }
 .hero-bg.in { opacity: 1; }
 

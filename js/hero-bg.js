@@ -16,6 +16,10 @@
      · nothing reads layout during scroll: the hero's document offset
        is measured on resize and pointer coords are resolved in-frame.
 
+   The field dissolves into the work section rather than stopping dead
+   at the hero's edge — a CSS mask softens the border, and a scrubbed
+   ScrollTrigger fades the draw out entirely by the time the gallery
+   is on screen (which also parks the loop).
    ------------------------------------------------------------------ */
 
 (() => {
@@ -228,13 +232,33 @@
     ptr.ty = H * (0.5 + 0.26 * Math.sin(t * 0.15 + 0.9));
   }
 
+  /* ---------- the hand-off into the work section ---------- */
+  let dim = 1;   // 1 in the hero, 0 once the work section owns the screen
+  if (!reduced && window.gsap && window.ScrollTrigger) {
+    const work = document.getElementById("work");
+    if (work) {
+      const read = (st) => (dim = 1 - st.progress);
+      ScrollTrigger.create({
+        trigger: work, start: "top 88%", end: "top 38%",
+        onUpdate: read, onRefresh: read,
+      });
+    }
+  }
+
   /* ---------- frame ---------- */
-  let level = 0;
+  let level = 0, cleared = false;
 
   /* dt drives motion and is clamped so a stall can't fling anything;
      raw is the real elapsed time and drives decay, so a long frame or a
      throttled tab can't leave the whole map revealed on the way back */
   function frame(t, dt, raw) {
+    /* faded out under the work section: clear once, then do nothing */
+    if (dim <= 0.004) {
+      if (!cleared) { ctx.clearRect(0, 0, W, H); cleared = true; }
+      return;
+    }
+    cleared = false;
+
     const beat = window.Player && window.Player.level ? window.Player.level() : 0;
     level += (beat - level) * 0.08;
 
@@ -293,14 +317,16 @@
     /* ---- composite: the map, cut to the light ---- */
     ctx.globalCompositeOperation = "source-over";
     ctx.clearRect(0, 0, W, H);
+    ctx.globalAlpha = dim;
     ctx.drawImage(map, 0, 0, W, H);
+    ctx.globalAlpha = 1;
     ctx.globalCompositeOperation = "destination-in";
     ctx.drawImage(lamp, 0, 0, W, H);
 
     /* ---- warm core + dust that catches the light ---- */
     ctx.globalCompositeOperation = "lighter";
     const cs = R * 0.85;
-    ctx.globalAlpha = 0.21 + level * 0.1;
+    ctx.globalAlpha = (0.21 + level * 0.1) * dim;
     ctx.drawImage(core, ptr.x - cs, ptr.y - cs, cs * 2, cs * 2);
 
     for (const m of motes) {
@@ -309,7 +335,7 @@
       if (m.x < -20) m.x = W + 20; else if (m.x > W + 20) m.x = -20;
       const near = 1 - Math.min(1, Math.hypot(m.x - ptr.x, m.y - ptr.y) / (R * 1.4));
       const s = m.r * (3.4 + near * 3);
-      ctx.globalAlpha = m.a * (0.22 + near * 0.78) * (0.8 + level * 0.4);
+      ctx.globalAlpha = m.a * (0.22 + near * 0.78) * (0.8 + level * 0.4) * dim;
       ctx.drawImage(dot, m.x - s, m.y - s, s * 2, s * 2);
     }
     ctx.globalAlpha = 1;
