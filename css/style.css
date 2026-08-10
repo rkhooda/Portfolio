@@ -175,7 +175,7 @@ body::after {
 /* ---- contracted state ---- */
 #nav.shrunk { padding-top: 0.6rem; }
 #nav.shrunk .nav-shell {
-  max-width: min(566px, 100%); /* hugs the contracted content */
+  max-width: min(608px, 100%); /* hugs the contracted content */
   padding: 0.34rem 0.5rem 0.34rem 1.2rem;
   gap: 0.9rem;
   background: rgba(19, 21, 19, 0.68);
@@ -213,11 +213,34 @@ body::after {
 .nav-links {
   display: flex;
   align-items: center;
-  gap: clamp(1.1rem, 2.4vw, 2.2rem);
+  /* the links carry their own padding now — that padding *is* the pill's
+     body, so the gap only has to keep neighbouring pills from touching */
+  gap: clamp(0.3rem, 1.1vw, 1rem);
   font-size: 11px;
   letter-spacing: 0.12em;
   transition: gap var(--nav-ease-t, 0.75s) var(--nav-ease, cubic-bezier(0.32, 0.72, 0, 1));
 }
+/* ---- the sliding indicator ----
+   One highlight travels between the links instead of five lighting up on
+   their own. It follows the cursor and, when the cursor leaves, settles
+   back on the section you're actually reading. JS owns x/width/height;
+   this is only the material. */
+.nav-links { position: relative; }
+.nav-pill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  border-radius: 999px;
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(rgba(168, 181, 138, 0.19), rgba(168, 181, 138, 0.075));
+  border: 1px solid rgba(168, 181, 138, 0.24);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.13),
+    0 1px 8px rgba(0, 0, 0, 0.22);
+  will-change: transform, width;
+}
+
 /* Plain text, no chrome — the glass capsule is the only surface here. */
 .nav-links a,
 #soundToggle {
@@ -229,11 +252,11 @@ body::after {
     padding var(--nav-ease-t, 0.75s) var(--nav-ease, cubic-bezier(0.32, 0.72, 0, 1)),
     max-width var(--nav-ease-t, 0.75s) var(--nav-ease, cubic-bezier(0.32, 0.72, 0, 1));
 }
-.nav-links a { padding: 0.44rem 0.2rem; }
+.nav-links a { padding: 0.46rem 0.85rem; }
 .nav-links a:hover { color: var(--accent); }
 .nav-links a:active { color: var(--accent); opacity: 0.65; transition-duration: 0.06s; }
 
-/* the section you're reading, said in colour alone */
+/* the section you're reading — the indicator is parked here by default */
 .nav-links a.is-active { color: var(--accent); }
 .nav-links a.is-active span { color: rgba(168, 181, 138, 0.55); }
 /* the track numbers are the first thing to go when space gets tight */
@@ -249,7 +272,7 @@ body::after {
     margin-right var(--nav-ease-t, 0.75s) var(--nav-ease, cubic-bezier(0.32, 0.72, 0, 1)),
     opacity 0.3s ease;
 }
-#nav.shrunk .nav-links { gap: 0.95rem; }
+#nav.shrunk .nav-links { gap: 0.15rem; }
 #nav.shrunk .nav-links a span { max-width: 0; margin-right: 0; opacity: 0; }
 
 .nav-right {

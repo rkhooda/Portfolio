@@ -276,6 +276,65 @@
     }, { passive: true });
   }
 
+  /* ---------- nav: the sliding indicator ----------
+     One highlight for the whole menu. It follows the cursor and settles
+     back on the current section when the cursor leaves. Position is read
+     from live geometry rather than stored, so it stays honest while the
+     bar is mid-contraction and the links are still changing width. */
+  const navLinks = $$(".nav-links a");
+  const linkWrap = $(".nav-links");
+  const pill = $(".nav-pill");
+  const pillX = gsap.quickTo(pill, "x", { duration: 0.55, ease: "power3.out" });
+  const pillW = gsap.quickTo(pill, "width", { duration: 0.55, ease: "power3.out" });
+  let activeLink = null;  // the section being read
+  let pillOn = null;      // where the indicator currently sits
+
+  function movePill(el, snap) {
+    pillOn = el;
+    /* display:none under 768px — nothing to measure, nothing to show */
+    if (!el || !linkWrap.offsetParent) {
+      gsap.to(pill, { opacity: 0, duration: 0.2, overwrite: true });
+      return;
+    }
+    const wrap = linkWrap.getBoundingClientRect();
+    const r = el.getBoundingClientRect();
+    pill.style.top = r.top - wrap.top + "px";
+    pill.style.height = r.height + "px";
+    if (snap || reduced) {
+      gsap.set(pill, { x: r.left - wrap.left, width: r.width, opacity: 1 });
+    } else {
+      gsap.to(pill, { opacity: 1, duration: 0.22, overwrite: "auto" });
+      pillX(r.left - wrap.left);
+      pillW(r.width);
+    }
+  }
+
+  /* the bar's own contraction retimes every link under it — glue the
+     indicator to the layout for the length of that transition */
+  let gluedUntil = 0, gluing = false;
+  function glue(ms) {
+    gluedUntil = performance.now() + ms;
+    if (gluing) return;
+    gluing = true;
+    (function step() {
+      movePill(pillOn, true);
+      if (performance.now() < gluedUntil) requestAnimationFrame(step);
+      else gluing = false;
+    })();
+  }
+
+  navLinks.forEach((a) => {
+    a.addEventListener("mouseenter", () => movePill(a));
+    a.addEventListener("focus", () => movePill(a));
+  });
+  linkWrap.addEventListener("mouseleave", () => movePill(activeLink));
+  linkWrap.addEventListener("focusout", (e) => {
+    if (!linkWrap.contains(e.relatedTarget)) movePill(activeLink);
+  });
+  addEventListener("resize", () => movePill(pillOn, true));
+  /* webfonts land after first paint and every label changes width */
+  if (document.fonts) document.fonts.ready.then(() => movePill(pillOn, true));
+
   /* ---------- nav: full-width bar → pill once you leave the top ----------
      Hysteresis keeps the bar from flickering when a scroll settles right
      on the boundary. */
@@ -286,6 +345,7 @@
     if (shrink === navShrunk) return;
     navShrunk = shrink;
     navEl.classList.toggle("shrunk", shrink);
+    glue(820); // a little past the 750ms shell transition
   }
   if (lenis) lenis.on("scroll", ({ scroll }) => syncNav(scroll));
   addEventListener("scroll", () => syncNav(scrollY), { passive: true });
@@ -304,15 +364,21 @@
     })
   );
 
-  /* ---------- track title + lit nav key per section ---------- */
-  const navLinks = $$(".nav-links a");
+  /* ---------- track title + current section per section ---------- */
   function markNav(id) {
+    activeLink = null;
     navLinks.forEach((a) => {
       const on = a.getAttribute("href") === "#" + id;
       a.classList.toggle("is-active", on);
-      if (on) a.setAttribute("aria-current", "true");
-      else a.removeAttribute("aria-current");
+      if (on) {
+        a.setAttribute("aria-current", "true");
+        activeLink = a;
+      } else a.removeAttribute("aria-current");
     });
+    /* don't yank it out from under a cursor — or a keyboard focus — that's
+       parked on another link */
+    const held = linkWrap.matches(":hover") || linkWrap.contains(document.activeElement);
+    if (!held) movePill(activeLink);
   }
   window.TRACKS.forEach((t) => {
     ScrollTrigger.create({
