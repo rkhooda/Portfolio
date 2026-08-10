@@ -17,7 +17,11 @@ window.Player = (() => {
   const eqBars = [...eqEl.querySelectorAll("i")];
 
   const TOTAL = window.SITE.albumLength;
-  const AUDIO_URL = "assets/audio/night-sage.wav";
+  /* FLAC first, wav second. The FLAC is lossless — it decodes to exactly the
+     same samples as the wav, so the loop stays seamless — at a little over
+     half the bytes. A lossy format would have been smaller still, but the
+     encoder's priming samples would put an audible gap at the loop point. */
+  const AUDIO_SRC = ["assets/audio/night-sage.flac", "assets/audio/night-sage.wav"];
   const fmt = (s) => {
     s = Math.round(s);
     return String(Math.floor(s / 60)).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0");
@@ -103,9 +107,18 @@ window.Player = (() => {
     ui("…");
     try {
       ctx = new (window.AudioContext || window.webkitAudioContext)();
-      const res = await fetch(AUDIO_URL);
-      if (!res.ok) throw new Error(res.status);
-      const buf = await ctx.decodeAudioData(await res.arrayBuffer());
+      let buf = null, lastErr = null;
+      for (const url of AUDIO_SRC) {
+        try {
+          const res = await fetch(url);
+          if (!res.ok) throw new Error(res.status);
+          buf = await ctx.decodeAudioData(await res.arrayBuffer());
+          break;
+        } catch (err) {
+          lastErr = err; // couldn't fetch or couldn't decode — try the next one
+        }
+      }
+      if (!buf) throw lastErr || new Error("no decodable audio source");
       const src = ctx.createBufferSource();
       src.buffer = buf;
       src.loop = true;
@@ -122,7 +135,8 @@ window.Player = (() => {
       try { ctx && ctx.close(); } catch (_) {}
       ctx = null;
       analyser = null;
-      el = new Audio(AUDIO_URL);
+      el = new Audio();
+      el.src = el.canPlayType("audio/flac") ? AUDIO_SRC[0] : AUDIO_SRC[1];
       el.loop = true;
       el.volume = VOL;
       return true;

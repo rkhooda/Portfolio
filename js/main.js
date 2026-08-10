@@ -19,8 +19,22 @@
   /* ---------- shared render helpers ---------- */
   const catNo = (i) => "RH-" + String(i + 1).padStart(2, "0");
 
+  /* Covers ship as WebP (~60% lighter) wherever the browser takes them and
+     fall back to the original JPG/PNG where it doesn't. The decision is made
+     once, here, rather than with a <picture>/<source> pair per card — the
+     gallery alone renders 54 of them, and the markup stays as it was. */
+  const WEBP = (() => {
+    try {
+      return document.createElement("canvas")
+        .toDataURL("image/webp").indexOf("data:image/webp") === 0;
+    } catch (_) {
+      return false;
+    }
+  })();
+  const cover = (src) => (WEBP ? src.replace(/\.(jpe?g|png)$/i, ".webp") : src);
+
   function coverHTML(p, i) {
-    if (p.img) return `<img class="shot" src="${p.img}" alt="" loading="lazy" draggable="false">`;
+    if (p.img) return `<img class="shot" src="${cover(p.img)}" alt="" loading="lazy" decoding="async" draggable="false">`;
     return `<span class="ghost" aria-hidden="true">${p.title.trim()[0]}</span>
       <span class="vinyl" aria-hidden="true"><span class="v-label mono">${catNo(i)}</span></span>
       ${p.wip ? '<span class="cov-wip mono">UNRELEASED</span>' : ""}`;
