@@ -285,8 +285,11 @@
     }
     if (trail.length > CONFIG.maxTrail) trail.splice(0, trail.length - CONFIG.maxTrail);
 
-    /* ---- the light map: sprite stamps, half res, opaque floor ---- */
-    lctx.globalCompositeOperation = "source-over";
+    /* ---- the light map: sprite stamps, half res, opaque floor ----
+       "copy" so the floor REPLACES last frame's light instead of
+       compositing over it — in source-over the map would light up a
+       little more every frame until the whole hero was revealed. */
+    lctx.globalCompositeOperation = "copy";
     lctx.fillStyle = `rgba(255,255,255,${CONFIG.whisper + level * 0.03})`;
     lctx.fillRect(0, 0, W, H);
     lctx.globalCompositeOperation = "lighter";
