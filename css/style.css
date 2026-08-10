@@ -209,18 +209,26 @@ body::after {
   padding-left: 0.25rem;
 }
 .nav-logo em { font-style: normal; color: var(--accent); }
-/* The name stays whole while the bar contracts — it's the one thing worth
-   not trading away for width. Only under 768px does it fold to RH, where
-   the pill genuinely runs out of room. */
-.nav-logo .nl-rest {
+/* The wordmark folds by trading AKSHIT for a single K — RAKSHIT HOODA →
+   RK HOODA — so the surname survives the contraction instead of the whole
+   name dropping to initials. Under 768px the tail goes too and it lands
+   on RK, where the pill genuinely runs out of room. */
+.nav-logo .nl-first,
+.nav-logo .nl-k,
+.nav-logo .nl-tail {
   display: inline-block;
-  max-width: 8em;
   overflow: hidden;
   vertical-align: bottom;
   transition:
     max-width var(--nav-ease-t, 1.15s) var(--nav-ease, cubic-bezier(0.62, 0.02, 0.24, 1)),
     opacity 0.5s ease;
 }
+.nav-logo .nl-first,
+.nav-logo .nl-tail { max-width: 8em; }
+.nav-logo .nl-k { max-width: 0; opacity: 0; } /* only exists in the pill */
+
+#nav.shrunk .nav-logo .nl-first { max-width: 0; opacity: 0; }
+#nav.shrunk .nav-logo .nl-k { max-width: 1.4em; opacity: 1; }
 
 .nav-links {
   display: flex;
@@ -1331,8 +1339,8 @@ body.cursor-down #cRing { width: 24px; height: 24px; margin: -12px 0 0 -12px; }
     visibility: visible;
     transition: opacity 0.3s ease;
   }
-  /* the one width the phone can't spare: RAKSHIT HOODA → RH */
-  #nav.shrunk .nav-logo .nl-rest { max-width: 0; opacity: 0; }
+  /* the one width the phone can't spare: the surname goes too, → RK */
+  #nav.shrunk .nav-logo .nl-tail { max-width: 0; opacity: 0; }
   #nav.shrunk .nav-shell { padding: 0.5rem 0.5rem 0.5rem 0.9rem; }
   .stage { height: min(64vh, 560px); }
   .p-label { display: none; }
