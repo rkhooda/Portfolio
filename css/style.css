@@ -273,6 +273,18 @@ section { padding: clamp(6rem, 14vh, 10rem) var(--pad); position: relative; }
 .hero-cue span { color: var(--accent); animation: bob 1.8s ease-in-out infinite; }
 @keyframes bob { 50% { transform: translateY(4px); } }
 
+/* the animated field behind everything — under the text and the diorama */
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: block;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 1.6s ease;
+}
+.hero-bg.in { opacity: 1; }
+
 /* the 3d desk diorama lives in the hero's empty right half; text stacks above it */
 .hero-scene {
   position: absolute;
