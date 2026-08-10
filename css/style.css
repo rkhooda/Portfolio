@@ -340,6 +340,11 @@ section {
   flex-direction: column;
   padding: calc(var(--nav-h) + var(--sec-gap)) var(--pad) calc(var(--dock) + var(--sec-gap));
 }
+/* a column flex box would otherwise squeeze its children under their own
+   content and let the text spill over the dock — only the two blocks meant
+   to breathe are allowed to resize */
+section > * { flex-shrink: 0; }
+.work-body, .about-grid { flex-shrink: 1; }
 
 .sec-head {
   display: grid;
@@ -710,7 +715,7 @@ section {
   gap: 1.2rem;
   width: 100%;
   text-align: left;
-  padding: 1.15rem 0.6rem;
+  padding: clamp(0.7rem, 1.9vh, 1.15rem) 0.6rem;
   border-bottom: 1px solid var(--line);
   transition: background 0.3s, padding-left 0.3s;
 }
@@ -1255,6 +1260,22 @@ body.cursor-down #cRing { width: 24px; height: 24px; margin: -12px 0 0 -12px; }
 .err p { margin: 1.6rem 0 2.6rem; color: var(--muted); font-size: 1.05rem; }
 
 /* ---------------- responsive ---------------- */
+/* short screens: the two wordiest tracks trade type size for the promise
+   that a whole section still lands inside one viewport */
+@media (min-width: 901px) and (max-height: 820px) {
+  .a-bio { font-size: 1.05rem; }
+  .a-bio.sub { font-size: 0.92rem; }
+  .stat b { font-size: 1.5rem; }
+  .np-card, .studio-card { padding: 1.05rem 1.2rem; }
+  .np-head { margin-bottom: 0.8rem; }
+  .np-row { padding: 0.34rem 0; }
+  .studio-card { margin-top: 0.9rem; }
+  .studio-card li { padding: 0.32rem 0; }
+  .contact-title { font-size: clamp(2.6rem, 8vw, 6rem); }
+  .contact-sub { margin-top: 1rem; }
+  .cta-row { margin-top: 1.8rem; }
+}
+
 @media (max-width: 1023px) {
   .hero-scene { display: none; } /* small screens keep the clean hero */
 }
