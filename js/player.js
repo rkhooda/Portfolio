@@ -195,11 +195,21 @@ window.Player = (() => {
     raf = requestAnimationFrame(step);
   }
 
+  /* current ambient level (0..1) — whatever wants to move with the
+     music can ask for it; silent or fallback audio simply reads 0 */
+  function level() {
+    if (!on || !analyser) return 0;
+    analyser.getByteFrequencyData(freq);
+    let s = 0;
+    for (let i = 1; i < 9; i++) s += freq[i];
+    return Math.min(1, (s / (8 * 255)) * 1.7);
+  }
+
   navToggle.addEventListener("click", toggle);
   playBtn.addEventListener("click", toggle);
 
   setTrack(window.TRACKS[0].name);
   onScroll(0);
 
-  return { onScroll, setTrack };
+  return { onScroll, setTrack, level };
 })();
