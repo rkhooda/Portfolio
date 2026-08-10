@@ -21,6 +21,9 @@
   --nav-h: 5rem;
   /* breathing room inside that frame; shrinks first on short viewports */
   --sec-gap: clamp(1rem, 3.5vh, 2.4rem);
+  /* the footer's own height, dock clearance included — the outro subtracts
+     it so the two share one screen */
+  --footer-h: 7.5rem;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -367,7 +370,7 @@ section {
    content and let the text spill over the dock — only the two blocks meant
    to breathe are allowed to resize */
 section > * { flex-shrink: 0; }
-.work-body, .about-grid { flex-shrink: 1; }
+.about-grid { flex-shrink: 1; }
 
 .sec-head {
   display: grid;
@@ -474,20 +477,11 @@ section > * { flex-shrink: 0; }
 .hero-cue { z-index: 1; }
 
 /* ---------------- work gallery: draggable infinite grid ---------------- */
-/* the gallery takes whatever the head leaves — the section frames it, not a
-   viewport fraction that would push the last row past the fold */
-.work-body {
-  position: relative;
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-}
+.work-body { position: relative; }
 
 .stage {
   position: relative;
-  flex: 1;
-  min-height: 300px;
+  height: min(86vh, 800px);
   overflow: hidden;
   cursor: grab;
   touch-action: pan-y; /* vertical swipe still scrolls the page on touch */
@@ -884,7 +878,13 @@ body.sound-on .np-eq i:nth-child(3) { animation-delay: 0.36s; }
 }
 
 /* ---------------- contact / outro ---------------- */
-#contact { text-align: left; }
+/* the footer is part of this last screen, so the outro reserves room for it
+   rather than running a full viewport and leaving a dead band above it */
+#contact {
+  text-align: left;
+  min-height: calc(100svh - var(--footer-h));
+  padding-bottom: var(--sec-gap);
+}
 .contact-title {
   font-weight: 600;
   font-size: clamp(3.2rem, 12vw, 9.5rem);
@@ -1323,7 +1323,7 @@ body.cursor-down #cRing { width: 24px; height: 24px; margin: -12px 0 0 -12px; }
     transition: opacity 0.3s ease;
   }
   #nav.shrunk .nav-shell { padding: 0.5rem 0.5rem 0.5rem 0.9rem; }
-  .stage { min-height: 240px; }
+  .stage { height: min(64vh, 560px); }
   .p-label { display: none; }
   .hero-cue { display: none; }
 }
