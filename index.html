@@ -12,10 +12,26 @@
 
   <link rel="preconnect" href="https://api.fontshare.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- the woff2s live here, not on api.fontshare.com, and the browser only
+       finds that out after the stylesheet parses — open the socket now -->
+  <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin>
   <link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css?v=9">
   <script type="importmap">{ "imports": { "three": "./js/vendor/three.module.min.js" } }</script>
+
+  <!-- Deferred, so they download in parallel with the HTML parse instead of
+       waiting at the end of it. `defer` keeps execution in source order and
+       still before DOMContentLoaded, so gsap → ScrollTrigger → lenis → app
+       runs exactly as it did from the bottom of <body>. Modules defer too. -->
+  <script defer src="js/vendor/gsap.min.js"></script>
+  <script defer src="js/vendor/ScrollTrigger.min.js"></script>
+  <script defer src="js/vendor/lenis.min.js"></script>
+  <script defer src="js/data.js?v=9"></script>
+  <script defer src="js/player.js?v=9"></script>
+  <script defer src="js/main.js?v=9"></script>
+  <script defer src="js/hero-bg.js?v=9"></script>
+  <script type="module" src="js/desk-scene.js?v=9"></script>
 </head>
 <body>
   <a class="skip" href="#work">skip to the work</a>
@@ -208,13 +224,5 @@
     </p>
   </noscript>
 
-  <script src="js/vendor/gsap.min.js"></script>
-  <script src="js/vendor/ScrollTrigger.min.js"></script>
-  <script src="js/vendor/lenis.min.js"></script>
-  <script src="js/data.js?v=7"></script>
-  <script src="js/player.js?v=7"></script>
-  <script src="js/main.js?v=7"></script>
-  <script src="js/hero-bg.js?v=7"></script>
-  <script type="module" src="js/desk-scene.js?v=7"></script>
 </body>
 </html>
