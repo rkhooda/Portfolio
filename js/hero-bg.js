@@ -5,8 +5,17 @@
    takes a few seconds to go dark again. Click to send a pulse.
 
    Contours are marching-squares iso-lines, rendered once per resize
-   into an offscreen canvas; every frame just masks that bitmap with a
-   light map (destination-in), so the per-frame cost is two blits.
+   into an offscreen canvas. Every frame then costs two full-size
+   blits and a handful of sprite draws:
+
+     · the light map is built from ONE pre-rendered radial sprite —
+       no per-frame gradient objects — at half resolution, since it is
+       all soft falloff and nothing about it survives a sharp edge;
+     · its opaque floor doubles as the ambient whisper of the map, so
+       the unlit contours come free instead of a second full blit;
+     · nothing reads layout during scroll: the hero's document offset
+       is measured on resize and pointer coords are resolved in-frame.
+
    ------------------------------------------------------------------ */
 
 (() => {
@@ -20,10 +29,12 @@
     sage: "168,181,138",
     warm: "255,201,138",
     levels: 16,       // iso-lines in the map
-    grid: 10,         // px between samples — smaller is smoother and slower
+    grid: 12,         // px between samples — smaller is smoother and slower
     torch: 285,       // px radius of the light
     trail: 2.6,       // seconds a revealed spot takes to fade out
+    whisper: 0.05,    // how much of the map survives outside the light
     motes: 46,
+    maxTrail: 56,
   };
 
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -60,28 +71,33 @@
   /* ---------- layers ---------- */
   const map = document.createElement("canvas");   // the hidden contours
   const mctx = map.getContext("2d");
-  const lamp = document.createElement("canvas");  // this frame's light
+  const lamp = document.createElement("canvas");  // this frame's light, half-res
   const lctx = lamp.getContext("2d");
 
-  function glow(rgb, size) {
+  function glow(rgb, size, peak, mid) {
     const c = document.createElement("canvas");
     c.width = c.height = size;
     const g = c.getContext("2d");
     const grad = g.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
-    grad.addColorStop(0, `rgba(${rgb},0.9)`);
-    grad.addColorStop(0.4, `rgba(${rgb},0.22)`);
+    grad.addColorStop(0, `rgba(${rgb},${peak})`);
+    grad.addColorStop(0.4, `rgba(${rgb},${mid})`);
     grad.addColorStop(1, `rgba(${rgb},0)`);
     g.fillStyle = grad;
     g.fillRect(0, 0, size, size);
     return c;
   }
-  const dot = glow(CONFIG.sage, 40);
-  const core = glow(CONFIG.warm, 320);
+  const dot = glow(CONFIG.sage, 40, 0.9, 0.22);
+  const core = glow(CONFIG.warm, 320, 0.9, 0.22);
+  /* the one light sprite every torch and trail point is stamped from */
+  const light = glow("255,255,255", 160, 1, 0.45);
 
-  let W = 0, H = 0, dpr = 1, motes = [];
+  let W = 0, H = 0, dpr = 1, ldpr = 1, motes = [];
+  let heroTop = 0, heroLeft = 0;
   const rnd = (a, b) => a + Math.random() * (b - a);
 
-  /* ---------- the map: iso-lines through a noise terrain ---------- */
+  /* ---------- the map: iso-lines through a noise terrain ----------
+     No closures or arrays in the cell loop — at 16 levels over a few
+     thousand cells that allocation was the whole cost of a resize. */
   function drawMap() {
     const step = CONFIG.grid;
     const cols = Math.ceil(W / step) + 1;
@@ -110,27 +126,49 @@
 
       for (let j = 0; j < rows - 1; j++) {
         for (let i = 0; i < cols - 1; i++) {
-          const x = i * step, y = j * step;
           const a = f[j * cols + i], b = f[j * cols + i + 1];
           const c = f[(j + 1) * cols + i + 1], d = f[(j + 1) * cols + i];
           const k = (a > iso ? 8 : 0) | (b > iso ? 4 : 0) | (c > iso ? 2 : 0) | (d > iso ? 1 : 0);
           if (k === 0 || k === 15) continue;
 
-          const top = () => [x + step * ((iso - a) / (b - a)), y];
-          const right = () => [x + step, y + step * ((iso - b) / (c - b))];
-          const bottom = () => [x + step * ((iso - d) / (c - d)), y + step];
-          const left = () => [x, y + step * ((iso - a) / (d - a))];
-          const seg = (p, q) => { mctx.moveTo(p[0], p[1]); mctx.lineTo(q[0], q[1]); };
-
+          const x = i * step, y = j * step;
           switch (k) {
-            case 1: case 14: seg(left(), bottom()); break;
-            case 2: case 13: seg(bottom(), right()); break;
-            case 3: case 12: seg(left(), right()); break;
-            case 4: case 11: seg(top(), right()); break;
-            case 6: case 9: seg(top(), bottom()); break;
-            case 7: case 8: seg(top(), left()); break;
-            case 5: seg(top(), left()); seg(bottom(), right()); break;
-            case 10: seg(top(), right()); seg(left(), bottom()); break;
+            case 1: case 14:  // left → bottom
+              mctx.moveTo(x, y + step * ((iso - a) / (d - a)));
+              mctx.lineTo(x + step * ((iso - d) / (c - d)), y + step);
+              break;
+            case 2: case 13:  // bottom → right
+              mctx.moveTo(x + step * ((iso - d) / (c - d)), y + step);
+              mctx.lineTo(x + step, y + step * ((iso - b) / (c - b)));
+              break;
+            case 3: case 12:  // left → right
+              mctx.moveTo(x, y + step * ((iso - a) / (d - a)));
+              mctx.lineTo(x + step, y + step * ((iso - b) / (c - b)));
+              break;
+            case 4: case 11:  // top → right
+              mctx.moveTo(x + step * ((iso - a) / (b - a)), y);
+              mctx.lineTo(x + step, y + step * ((iso - b) / (c - b)));
+              break;
+            case 6: case 9:   // top → bottom
+              mctx.moveTo(x + step * ((iso - a) / (b - a)), y);
+              mctx.lineTo(x + step * ((iso - d) / (c - d)), y + step);
+              break;
+            case 7: case 8:   // top → left
+              mctx.moveTo(x + step * ((iso - a) / (b - a)), y);
+              mctx.lineTo(x, y + step * ((iso - a) / (d - a)));
+              break;
+            case 5:           // saddle
+              mctx.moveTo(x + step * ((iso - a) / (b - a)), y);
+              mctx.lineTo(x, y + step * ((iso - a) / (d - a)));
+              mctx.moveTo(x + step * ((iso - d) / (c - d)), y + step);
+              mctx.lineTo(x + step, y + step * ((iso - b) / (c - b)));
+              break;
+            case 10:          // the other saddle
+              mctx.moveTo(x + step * ((iso - a) / (b - a)), y);
+              mctx.lineTo(x + step, y + step * ((iso - b) / (c - b)));
+              mctx.moveTo(x, y + step * ((iso - a) / (d - a)));
+              mctx.lineTo(x + step * ((iso - d) / (c - d)), y + step);
+              break;
           }
         }
       }
@@ -142,15 +180,20 @@
     const rect = hero.getBoundingClientRect();
     W = Math.max(1, Math.round(rect.width));
     H = Math.max(1, Math.round(rect.height));
+    /* measured once here so the frame loop never touches layout */
+    heroTop = rect.top + scrollY;
+    heroLeft = rect.left;
     dpr = Math.min(devicePixelRatio || 1, 1.6);
-    for (const c of [cvs, map, lamp]) {
-      c.width = Math.round(W * dpr);
-      c.height = Math.round(H * dpr);
-    }
+    ldpr = Math.max(0.5, dpr * 0.5);
+
+    cvs.width = map.width = Math.round(W * dpr);
+    cvs.height = map.height = Math.round(H * dpr);
+    lamp.width = Math.round(W * ldpr);
+    lamp.height = Math.round(H * ldpr);
     cvs.style.width = W + "px";
     cvs.style.height = H + "px";
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    lctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    lctx.setTransform(ldpr, 0, 0, ldpr, 0, 0);
 
     motes = [];
     for (let i = 0; i < CONFIG.motes; i++) {
@@ -164,19 +207,20 @@
   }
 
   /* ---------- pointer, trail, pulses ---------- */
-  const ptr = { x: -999, y: -999, tx: -999, ty: -999, speed: 0, seen: 0, held: false };
-  let rect = hero.getBoundingClientRect();
+  const ptr = { x: -999, y: -999, tx: -999, ty: -999, cx: 0, cy: 0, speed: 0, seen: 0, has: false };
   const trail = [];
   const pulses = [];
 
   addEventListener("pointermove", (e) => {
-    ptr.tx = e.clientX - rect.left;
-    ptr.ty = e.clientY - rect.top;
+    ptr.cx = e.clientX;
+    ptr.cy = e.clientY;
+    ptr.has = true;
     ptr.seen = performance.now();
   }, { passive: true });
 
   hero.addEventListener("pointerdown", (e) => {
-    pulses.push({ x: e.clientX - rect.left, y: e.clientY - rect.top, r: 10, life: 1 });
+    pulses.push({ x: e.clientX - heroLeft, y: e.clientY + scrollY - heroTop, r: 10, life: 1 });
+    if (pulses.length > 4) pulses.shift();
   }, { passive: true });
 
   function wander(t) {
@@ -187,12 +231,23 @@
   /* ---------- frame ---------- */
   let level = 0;
 
-  function frame(t, dt) {
+  /* dt drives motion and is clamped so a stall can't fling anything;
+     raw is the real elapsed time and drives decay, so a long frame or a
+     throttled tab can't leave the whole map revealed on the way back */
+  function frame(t, dt, raw) {
     const beat = window.Player && window.Player.level ? window.Player.level() : 0;
     level += (beat - level) * 0.08;
 
+    /* one scroll read per frame, none per event */
+    const sy = scrollY;
+    if (coarse || !ptr.has || t * 1000 - ptr.seen > 2600) {
+      wander(t);
+    } else {
+      ptr.tx = ptr.cx - heroLeft;
+      ptr.ty = ptr.cy + sy - heroTop;
+    }
+
     const px = ptr.x, py = ptr.y;
-    if (coarse || t * 1000 - ptr.seen > 2600) wander(t);
     ptr.x += (ptr.tx - ptr.x) * 0.16;
     ptr.y += (ptr.ty - ptr.y) * 0.16;
     const moved = Math.hypot(ptr.x - px, ptr.y - py);
@@ -201,37 +256,31 @@
     /* the trail is what makes the light feel like it has memory */
     if (moved > 5 || !trail.length) trail.push({ x: ptr.x, y: ptr.y, life: 1 });
     for (let i = trail.length - 1; i >= 0; i--) {
-      trail[i].life -= dt / CONFIG.trail;
+      trail[i].life -= raw / CONFIG.trail;
       if (trail[i].life <= 0) trail.splice(i, 1);
     }
-    if (trail.length > 90) trail.splice(0, trail.length - 90);
+    if (trail.length > CONFIG.maxTrail) trail.splice(0, trail.length - CONFIG.maxTrail);
 
-    /* ---- the light map ---- */
-    lctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    lctx.clearRect(0, 0, W, H);
+    /* ---- the light map: sprite stamps, half res, opaque floor ---- */
+    lctx.globalCompositeOperation = "source-over";
+    lctx.fillStyle = `rgba(255,255,255,${CONFIG.whisper + level * 0.03})`;
+    lctx.fillRect(0, 0, W, H);
     lctx.globalCompositeOperation = "lighter";
 
     for (const p of trail) {
       const r = 92 * p.life + 26;
-      const g = lctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r);
-      g.addColorStop(0, `rgba(255,255,255,${(p.life * 0.5).toFixed(3)})`);
-      g.addColorStop(1, "rgba(255,255,255,0)");
-      lctx.fillStyle = g;
-      lctx.fillRect(p.x - r, p.y - r, r * 2, r * 2);
+      lctx.globalAlpha = p.life * 0.5;
+      lctx.drawImage(light, p.x - r, p.y - r, r * 2, r * 2);
     }
 
     const R = CONFIG.torch * (1 + level * 0.22 + Math.sin(t * 0.7) * 0.04) + ptr.speed * 1.6;
-    const tg = lctx.createRadialGradient(ptr.x, ptr.y, 0, ptr.x, ptr.y, R);
-    tg.addColorStop(0, "rgba(255,255,255,1)");
-    tg.addColorStop(0.45, "rgba(255,255,255,0.5)");
-    tg.addColorStop(1, "rgba(255,255,255,0)");
-    lctx.fillStyle = tg;
-    lctx.fillRect(ptr.x - R, ptr.y - R, R * 2, R * 2);
+    lctx.globalAlpha = 1;
+    lctx.drawImage(light, ptr.x - R, ptr.y - R, R * 2, R * 2);
 
     for (let i = pulses.length - 1; i >= 0; i--) {
       const p = pulses[i];
       p.r += dt * 620;
-      p.life -= dt * 0.85;
+      p.life -= raw * 0.85;
       if (p.life <= 0) { pulses.splice(i, 1); continue; }
       lctx.strokeStyle = `rgba(255,255,255,${(p.life * 0.55).toFixed(3)})`;
       lctx.lineWidth = 46 * p.life + 8;
@@ -239,20 +288,14 @@
       lctx.arc(p.x, p.y, p.r, 0, 6.2832);
       lctx.stroke();
     }
-    lctx.globalCompositeOperation = "source-over";
+    lctx.globalAlpha = 1;
 
-    /* ---- composite: map, cut to the light, plus a whisper everywhere ---- */
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    /* ---- composite: the map, cut to the light ---- */
+    ctx.globalCompositeOperation = "source-over";
     ctx.clearRect(0, 0, W, H);
     ctx.drawImage(map, 0, 0, W, H);
     ctx.globalCompositeOperation = "destination-in";
     ctx.drawImage(lamp, 0, 0, W, H);
-    ctx.globalCompositeOperation = "source-over";
-
-    /* so the hero is never a black rectangle before you touch it */
-    ctx.globalAlpha = 0.04 + level * 0.03;
-    ctx.drawImage(map, 0, 0, W, H);
-    ctx.globalAlpha = 1;
 
     /* ---- warm core + dust that catches the light ---- */
     ctx.globalCompositeOperation = "lighter";
@@ -279,9 +322,9 @@
   function tick(now) {
     raf = requestAnimationFrame(tick);
     if (!t0) { t0 = now; last = now; }
-    const dt = Math.min(0.05, (now - last) / 1000);
+    const raw = (now - last) / 1000;
     last = now;
-    frame((now - t0) / 1000, dt);
+    frame((now - t0) / 1000, Math.min(0.05, raw), Math.min(0.4, raw));
   }
   function play() {
     if (raf || reduced || !visible) return;
@@ -294,19 +337,17 @@
   addEventListener("resize", () => {
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(() => {   // the map is expensive; only redraw once you settle
-      rect = hero.getBoundingClientRect();
       build();
       if (reduced) still();
     }, 180);
   }, { passive: true });
-  addEventListener("scroll", () => { rect = hero.getBoundingClientRect(); }, { passive: true });
 
   /* reduced motion: a single lit frame, no loop, no trail */
   function still() {
     ptr.x = ptr.tx = W * 0.32;
     ptr.y = ptr.ty = H * 0.55;
     trail.length = 0;
-    frame(0, 0.016);
+    frame(0, 0.016, 0.016);
   }
 
   if (reduced) {
@@ -320,6 +361,7 @@
     play();
   }
 
+  /* fade in with the rest of the hero, once the loader lifts */
   const reveal = () => cvs.classList.add("in");
   if (window.__rhHeroIn) reveal();
   else document.addEventListener("rh:hero-in", reveal, { once: true });
