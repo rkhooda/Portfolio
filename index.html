@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=3">
+  <link rel="stylesheet" href="css/style.css?v=4">
   <script type="importmap">{ "imports": { "three": "./js/vendor/three.module.min.js" } }</script>
 </head>
 <body>
@@ -29,16 +29,19 @@
 
   <!-- nav -->
   <header id="nav">
-    <a class="nav-logo" href="#top">RAKSHIT HOODA <em>◉</em></a>
-    <nav class="nav-links mono" aria-label="Sections">
-      <a href="#work"><span>02</span>WORK</a>
-      <a href="#lab"><span>03</span>B-SIDES</a>
-      <a href="#about"><span>04</span>ABOUT</a>
-      <a href="#contact"><span>05</span>CONTACT</a>
-    </nav>
-    <div class="nav-right">
-      <button id="soundToggle" type="button" aria-label="Toggle ambient sound" title="your ears will thank you">[SOUND: OFF]</button>
-      <a class="btn-talk magnetic" href="#contact">LET'S TALK</a>
+    <div class="nav-shell">
+      <!-- the wordmark folds down to its initials when the bar contracts -->
+      <a class="nav-logo" href="#top">R<span class="nl-rest">AKSHIT&nbsp;</span>H<span class="nl-rest">OODA</span> <em>◉</em></a>
+      <nav class="nav-links mono" aria-label="Sections">
+        <a href="#work"><span>02</span>WORK</a>
+        <a href="#lab"><span>03</span>B-SIDES</a>
+        <a href="#about"><span>04</span>ABOUT</a>
+        <a href="#contact"><span>05</span>CONTACT</a>
+      </nav>
+      <div class="nav-right">
+        <button id="soundToggle" type="button" aria-label="Toggle ambient sound" title="your ears will thank you">[SOUND: OFF]</button>
+        <a class="btn-talk magnetic" href="#contact">LET'S TALK</a>
+      </div>
     </div>
   </header>
 
@@ -204,9 +207,9 @@
   <script src="js/vendor/gsap.min.js"></script>
   <script src="js/vendor/ScrollTrigger.min.js"></script>
   <script src="js/vendor/lenis.min.js"></script>
-  <script src="js/data.js?v=3"></script>
-  <script src="js/player.js?v=3"></script>
-  <script src="js/main.js?v=3"></script>
-  <script type="module" src="js/desk-scene.js?v=3"></script>
+  <script src="js/data.js?v=4"></script>
+  <script src="js/player.js?v=4"></script>
+  <script src="js/main.js?v=4"></script>
+  <script type="module" src="js/desk-scene.js?v=4"></script>
 </body>
 </html>
