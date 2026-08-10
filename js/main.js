@@ -291,24 +291,39 @@
   addEventListener("scroll", () => syncNav(scrollY), { passive: true });
   syncNav(scrollY); // restored scroll positions land in the right state
 
-  /* anchor links glide (nav + logo) */
+  /* anchor links glide (nav + logo) — flush to the section's top edge. Each
+     section already reserves the bar's height inside its own padding, so no
+     offset is needed and none is wanted: any would open a dead band above. */
   $$('a[href^="#"]').forEach((a) =>
     a.addEventListener("click", (e) => {
       const el = $(a.getAttribute("href"));
       if (!el) return;
       e.preventDefault();
-      if (lenis) lenis.scrollTo(el, { offset: -56, duration: 1.2 });
-      else el.scrollIntoView();
+      if (lenis) lenis.scrollTo(el, { offset: 0, duration: 1.2 });
+      else el.scrollIntoView({ block: "start" });
     })
   );
 
-  /* ---------- track title per section ---------- */
+  /* ---------- track title + lit nav key per section ---------- */
+  const navLinks = $$(".nav-links a");
+  function markNav(id) {
+    navLinks.forEach((a) => {
+      const on = a.getAttribute("href") === "#" + id;
+      a.classList.toggle("is-active", on);
+      if (on) a.setAttribute("aria-current", "true");
+      else a.removeAttribute("aria-current");
+    });
+  }
   window.TRACKS.forEach((t) => {
     ScrollTrigger.create({
       trigger: "#" + t.id,
       start: "top 55%",
       end: "bottom 55%",
-      onToggle: (s) => s.isActive && Player.setTrack(t.name),
+      onToggle: (s) => {
+        if (!s.isActive) return;
+        Player.setTrack(t.name);
+        markNav(t.id);
+      },
     });
   });
 
