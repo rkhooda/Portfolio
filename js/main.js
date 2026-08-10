@@ -276,6 +276,21 @@
     }, { passive: true });
   }
 
+  /* ---------- nav: full-width bar → pill once you leave the top ----------
+     Hysteresis keeps the bar from flickering when a scroll settles right
+     on the boundary. */
+  const navEl = $("#nav");
+  let navShrunk = false;
+  function syncNav(y) {
+    const shrink = navShrunk ? y > 40 : y > 96;
+    if (shrink === navShrunk) return;
+    navShrunk = shrink;
+    navEl.classList.toggle("shrunk", shrink);
+  }
+  if (lenis) lenis.on("scroll", ({ scroll }) => syncNav(scroll));
+  addEventListener("scroll", () => syncNav(scrollY), { passive: true });
+  syncNav(scrollY); // restored scroll positions land in the right state
+
   /* anchor links glide (nav + logo) */
   $$('a[href^="#"]').forEach((a) =>
     a.addEventListener("click", (e) => {
@@ -345,9 +360,10 @@
       .from([".hero-tag", ".hero-roles"], {
         y: 24, opacity: 0, duration: 0.7, ease: "power3.out", stagger: 0.12,
       }, "<0.15")
-      .from("#nav > *", {
-        y: -18, opacity: 0, duration: 0.6, ease: "power3.out", stagger: 0.08,
-      }, "<")
+      .from(".nav-shell", { y: -22, opacity: 0, duration: 0.7, ease: "power3.out" }, "<")
+      .from(".nav-shell > *", {
+        y: -12, opacity: 0, duration: 0.6, ease: "power3.out", stagger: 0.08,
+      }, "<0.08")
       .from("#player", { yPercent: 100, duration: 0.8, ease: "power3.out" }, "<0.1")
       .from(".hero-cue", { opacity: 0, duration: 0.6, ease: "none" }, "-=0.35");
   }
@@ -363,7 +379,7 @@
     const hello = $(".l-hello"), quip = $(".l-quip");
     let qi = 0;
     quip.textContent = window.QUIPS[0];
-    const rot = setInterval(() => (quip.textContent = window.QUIPS[++qi % window.QUIPS.length]), 700);
+    const rot = setInterval(() => (quip.textContent = window.QUIPS[++qi % window.QUIPS.length]), 360);
     /* flash "hello" through each language once, then slide the loader up */
     let hi = 0;
     const flash = setInterval(() => {
@@ -371,12 +387,12 @@
       if (hi >= window.HELLOS.length) {
         clearInterval(flash);
         clearInterval(rot);
-        gsap.to(loader, { yPercent: -100, duration: 0.7, ease: "power3.inOut", onComplete: () => loader.remove() });
+        gsap.to(loader, { yPercent: -100, duration: 0.55, ease: "power3.inOut", onComplete: () => loader.remove() });
         heroIn(false);
         return;
       }
       hello.textContent = window.HELLOS[hi];
-    }, 185);
+    }, 95);
   }
 
   /* ---------- scroll reveals ---------- */
