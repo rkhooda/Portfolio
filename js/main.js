@@ -341,11 +341,13 @@
   const navEl = $("#nav");
   let navShrunk = false;
   function syncNav(y) {
-    const shrink = navShrunk ? y > 40 : y > 96;
+    /* a wider deadband than the bar's own travel: a nudge of a scroll
+       shouldn't commit the reader to a second-long contraction */
+    const shrink = navShrunk ? y > 56 : y > 120;
     if (shrink === navShrunk) return;
     navShrunk = shrink;
     navEl.classList.toggle("shrunk", shrink);
-    glue(820); // a little past the 750ms shell transition
+    glue(1300); // a little past the 1.15s shell transition
   }
   if (lenis) lenis.on("scroll", ({ scroll }) => syncNav(scroll));
   addEventListener("scroll", () => syncNav(scrollY), { passive: true });

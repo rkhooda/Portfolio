@@ -114,8 +114,11 @@ body::after {
 
 /* ---------------- nav ----------------
    A floating glass bar. At rest it spans the page; once the reader is
-   past the hero it contracts into a pill — narrower, tighter, rounder —
-   the way the macOS/Apple Music transport dock behaves.
+   past the hero it eases into a wide pill — the way the macOS/Apple Music
+   transport dock behaves. The contraction is deliberately partial and
+   slow: the wordmark stays whole, only the track numbers and the sound
+   readout step aside, and the ease is symmetric so the bar neither snaps
+   at the start nor lands hard at the end.
    ------------------------------------------------------------------ */
 #nav {
   position: fixed;
@@ -127,12 +130,14 @@ body::after {
   justify-content: center;
   padding: 0.85rem var(--pad);
   pointer-events: none; /* only the glass itself is interactive */
-  transition: padding-top var(--nav-ease-t, 0.75s) var(--nav-ease, cubic-bezier(0.32, 0.72, 0, 1));
+  transition: padding-top var(--nav-ease-t, 1.15s) var(--nav-ease, cubic-bezier(0.62, 0.02, 0.24, 1));
 }
 
 .nav-shell {
-  --nav-ease: cubic-bezier(0.32, 0.72, 0, 1);
-  --nav-ease-t: 0.75s;
+  /* eased in *and* out — the old curve spent its speed in the first
+     100ms, which is what made the collapse read as a snap */
+  --nav-ease: cubic-bezier(0.62, 0.02, 0.24, 1);
+  --nav-ease-t: 1.15s;
   pointer-events: auto;
   position: relative;
   width: 100%;
@@ -175,12 +180,15 @@ body::after {
   );
 }
 
-/* ---- contracted state ---- */
-#nav.shrunk { padding-top: 0.6rem; }
+/* ---- contracted state ----
+   A wide pill, not a badge: it keeps a hand's width of air around the
+   content (~645px) so the travel reads as a settle rather than a snap
+   shut, and the vertical squeeze is half what it was. */
+#nav.shrunk { padding-top: 0.7rem; }
 #nav.shrunk .nav-shell {
-  max-width: min(608px, 100%); /* hugs the contracted content */
-  padding: 0.34rem 0.5rem 0.34rem 1.2rem;
-  gap: 0.9rem;
+  max-width: min(760px, 100%);
+  padding: 0.44rem 0.85rem 0.44rem 1.3rem;
+  gap: 0.95rem;
   background: rgba(19, 21, 19, 0.68);
   border-color: rgba(234, 234, 226, 0.14);
   box-shadow:
@@ -201,17 +209,18 @@ body::after {
   padding-left: 0.25rem;
 }
 .nav-logo em { font-style: normal; color: var(--accent); }
-/* RAKSHIT HOODA → RH once the bar contracts */
+/* The name stays whole while the bar contracts — it's the one thing worth
+   not trading away for width. Only under 768px does it fold to RH, where
+   the pill genuinely runs out of room. */
 .nav-logo .nl-rest {
   display: inline-block;
   max-width: 8em;
   overflow: hidden;
   vertical-align: bottom;
   transition:
-    max-width var(--nav-ease-t, 0.75s) var(--nav-ease, cubic-bezier(0.32, 0.72, 0, 1)),
-    opacity 0.35s ease;
+    max-width var(--nav-ease-t, 1.15s) var(--nav-ease, cubic-bezier(0.62, 0.02, 0.24, 1)),
+    opacity 0.5s ease;
 }
-#nav.shrunk .nav-logo .nl-rest { max-width: 0; opacity: 0; }
 
 .nav-links {
   display: flex;
@@ -221,7 +230,7 @@ body::after {
   gap: clamp(0.3rem, 1.1vw, 1rem);
   font-size: 11px;
   letter-spacing: 0.12em;
-  transition: gap var(--nav-ease-t, 0.75s) var(--nav-ease, cubic-bezier(0.32, 0.72, 0, 1));
+  transition: gap var(--nav-ease-t, 1.15s) var(--nav-ease, cubic-bezier(0.62, 0.02, 0.24, 1));
 }
 /* ---- the sliding indicator ----
    One highlight travels between the links instead of five lighting up on
@@ -252,8 +261,8 @@ body::after {
   transition:
     color 0.25s,
     opacity 0.3s ease,
-    padding var(--nav-ease-t, 0.75s) var(--nav-ease, cubic-bezier(0.32, 0.72, 0, 1)),
-    max-width var(--nav-ease-t, 0.75s) var(--nav-ease, cubic-bezier(0.32, 0.72, 0, 1));
+    padding var(--nav-ease-t, 1.15s) var(--nav-ease, cubic-bezier(0.62, 0.02, 0.24, 1)),
+    max-width var(--nav-ease-t, 1.15s) var(--nav-ease, cubic-bezier(0.62, 0.02, 0.24, 1));
 }
 .nav-links a { padding: 0.46rem 0.85rem; }
 .nav-links a:hover { color: var(--accent); }
@@ -271,20 +280,20 @@ body::after {
   margin-right: 0.4em;
   vertical-align: bottom;
   transition:
-    max-width var(--nav-ease-t, 0.75s) var(--nav-ease, cubic-bezier(0.32, 0.72, 0, 1)),
-    margin-right var(--nav-ease-t, 0.75s) var(--nav-ease, cubic-bezier(0.32, 0.72, 0, 1)),
-    opacity 0.3s ease;
+    max-width var(--nav-ease-t, 1.15s) var(--nav-ease, cubic-bezier(0.62, 0.02, 0.24, 1)),
+    margin-right var(--nav-ease-t, 1.15s) var(--nav-ease, cubic-bezier(0.62, 0.02, 0.24, 1)),
+    opacity 0.55s ease;
 }
-#nav.shrunk .nav-links { gap: 0.15rem; }
+#nav.shrunk .nav-links { gap: 0.45rem; }
 #nav.shrunk .nav-links a span { max-width: 0; margin-right: 0; opacity: 0; }
 
 .nav-right {
   display: flex;
   align-items: center;
   gap: 1.1rem;
-  transition: gap var(--nav-ease-t, 0.75s) var(--nav-ease, cubic-bezier(0.32, 0.72, 0, 1));
+  transition: gap var(--nav-ease-t, 1.15s) var(--nav-ease, cubic-bezier(0.62, 0.02, 0.24, 1));
 }
-#nav.shrunk .nav-right { gap: 0.5rem; }
+#nav.shrunk .nav-right { gap: 0.7rem; }
 /* the sound readout is the widest passenger — it steps aside in the pill */
 #soundToggle {
   display: inline-block;
@@ -296,9 +305,9 @@ body::after {
   opacity: 0;
   visibility: hidden; /* also drops it out of the tab order */
   transition:
-    max-width var(--nav-ease-t, 0.75s) var(--nav-ease, cubic-bezier(0.32, 0.72, 0, 1)),
-    opacity 0.3s ease,
-    visibility 0s linear 0.4s;
+    max-width var(--nav-ease-t, 1.15s) var(--nav-ease, cubic-bezier(0.62, 0.02, 0.24, 1)),
+    opacity 0.5s ease,
+    visibility 0s linear 0.6s;
 }
 #soundToggle {
   font-family: var(--font-m);
@@ -1322,6 +1331,8 @@ body.cursor-down #cRing { width: 24px; height: 24px; margin: -12px 0 0 -12px; }
     visibility: visible;
     transition: opacity 0.3s ease;
   }
+  /* the one width the phone can't spare: RAKSHIT HOODA → RH */
+  #nav.shrunk .nav-logo .nl-rest { max-width: 0; opacity: 0; }
   #nav.shrunk .nav-shell { padding: 0.5rem 0.5rem 0.5rem 0.9rem; }
   .stage { height: min(64vh, 560px); }
   .p-label { display: none; }
