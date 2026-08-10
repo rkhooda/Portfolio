@@ -554,8 +554,12 @@ section > * { flex-shrink: 0; }
   pointer-events: auto;
   transform-style: preserve-3d;
   backface-visibility: hidden;
-  will-change: transform;
 }
+/* The grid is 54 cells, so promoting them unconditionally pins 54 compositor
+   layers for the whole session. `.live` is set by an observer with a wide
+   margin, so promotion is always in place before the gallery is on screen —
+   it is only released once you are well past it. */
+.stage.live .gcell { will-change: transform; }
 .gcard {
   display: flex;
   flex-direction: column;

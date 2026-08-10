@@ -166,14 +166,31 @@
     }
   }
 
-  (function galleryTick() {
-    requestAnimationFrame(galleryTick);
+  /* The loop runs only while there is motion left to resolve and the section
+     is near the viewport; wake() starts it again. A permanent rAF here spent
+     the hero's frame budget on a gallery nobody was looking at. Every easing
+     curve below is untouched — only the empty frames are gone. */
+  let galleryRaf = 0, onStage = false;
+
+  /* Deliberately not gated on onStage: an interaction must always be able to
+     start the loop, even if the observer below never reports. The idling is
+     what buys the frames back — the observer only decides when to promote
+     layers and when to pick the loop back up after a scroll. */
+  function wake() {
+    if (galleryRaf || stage.hidden || !cells.length) return;
+    galleryRaf = requestAnimationFrame(galleryTick);
+  }
+
+  function galleryTick() {
+    galleryRaf = 0;
     if (stage.hidden || !cells.length) return;
+    let busy = grabbing;
     if (!grabbing) {
       cam.tx += cam.vx;
       cam.ty += cam.vy;
       cam.vx *= 0.94;
       cam.vy *= 0.94;
+      if (Math.abs(cam.vx) > 0.01 || Math.abs(cam.vy) > 0.01) busy = true;
     }
     if (canParallax && (Math.abs(look.tx - look.x) > 0.001 || Math.abs(look.ty - look.y) > 0.001)) {
       look.x += (look.tx - look.x) * 0.07;
@@ -182,15 +199,31 @@
         x: look.x * LOOK_SHIFT, y: look.y * LOOK_SHIFT,
         rotationY: look.x * LOOK_TILT, rotationX: -look.y * LOOK_TILT,
       });
+      busy = true;
     }
     const k = reduced ? 1 : 0.14;
     const nx = cam.x + (cam.tx - cam.x) * k;
     const ny = cam.y + (cam.ty - cam.y) * k;
-    if (Math.abs(nx - cam.x) < 0.01 && Math.abs(ny - cam.y) < 0.01) return;
-    cam.x = nx;
-    cam.y = ny;
-    place();
-  })();
+    if (Math.abs(nx - cam.x) >= 0.01 || Math.abs(ny - cam.y) >= 0.01) {
+      cam.x = nx;
+      cam.y = ny;
+      place();
+      busy = true;
+    }
+    if (busy) galleryRaf = requestAnimationFrame(galleryTick);
+  }
+
+  /* Releases the cells' 54 compositor layers once the gallery is nowhere
+     near the screen — reading the outro shouldn't cost gallery GPU memory.
+     Note the section sits directly under the hero, so at the top of the page
+     it is already within the margin and already promoted: this buys memory
+     further down, not hero frame time. The margin is deliberately generous
+     so promotion always lands before the first pixel does, never during. */
+  new IntersectionObserver((es) => {
+    onStage = es[0].isIntersecting;
+    stage.classList.toggle("live", onStage);
+    if (onStage) wake();
+  }, { rootMargin: "50% 0px" }).observe($("#work"));
 
   let lastPt = null;
   stage.addEventListener("pointerdown", (e) => {
@@ -202,6 +235,7 @@
     cam.vx = cam.vy = 0;
     try { stage.setPointerCapture(e.pointerId); } catch (_) {}
     stage.classList.add("grabbing");
+    wake();
     if (!reduced) gsap.to(plane, { scale: 0.96, duration: 0.45, ease: "power3.out" });
   });
   stage.addEventListener("pointermove", (e) => {
@@ -209,9 +243,11 @@
       if (canParallax) {
         look.tx = (e.clientX / innerWidth) * 2 - 1;
         look.ty = (e.clientY / innerHeight) * 2 - 1;
+        wake();
       }
       return;
     }
+    wake();
     const dx = e.clientX - lastPt.x, dy = e.clientY - lastPt.y;
     lastPt = { x: e.clientX, y: e.clientY };
     cam.tx += dx;
@@ -229,11 +265,13 @@
     stage.classList.remove("grabbing");
     if (reduced) cam.vx = cam.vy = 0;
     else gsap.to(plane, { scale: 1, duration: 0.6, ease: "power3.out" });
+    wake(); // the throw still has to spend its inertia
   };
   stage.addEventListener("pointerup", endDrag);
   stage.addEventListener("pointercancel", endDrag);
   stage.addEventListener("pointerleave", () => {
     look.tx = look.ty = 0; // the plane settles back to square
+    wake();
   });
 
   /* a real click (no drag) plays the track-change transition;
@@ -259,7 +297,7 @@
     workList.hidden = grid;
     vg.setAttribute("aria-pressed", grid);
     vl.setAttribute("aria-pressed", !grid);
-    if (grid) buildGrid();
+    if (grid) { buildGrid(); wake(); }
     if (window.ScrollTrigger) ScrollTrigger.refresh();
   }
   vg.addEventListener("click", () => setView("grid"));
@@ -270,7 +308,7 @@
   addEventListener("resize", () => {
     if (innerWidth === lastW) return; // ignore mobile url-bar height churn
     lastW = innerWidth;
-    if (!stage.hidden) buildGrid();
+    if (!stage.hidden) { buildGrid(); wake(); }
   });
 
   /* ---------- gsap / lenis setup ---------- */
@@ -637,7 +675,7 @@
     const peekHTML = (p, i) => `
       <span class="peek-art">
         ${p.img
-          ? `<img class="shot" src="${p.img}" alt="" loading="lazy" draggable="false">`
+          ? `<img class="shot" src="${cover(p.img)}" alt="" loading="lazy" decoding="async" draggable="false">`
           : `<span class="ghost">${p.title.trim()[0]}</span>
              <span class="vinyl"><span class="v-label mono">B${i + 1}</span></span>`}
         <span class="peek-badge mono">${p.wip ? "UNRELEASED" : "B" + String(i + 1).padStart(2, "0")}</span>
@@ -704,12 +742,29 @@
     /* scrolling slides a row under a still cursor and fires no pointer event —
        so re-read what's under it whenever the page moves. This must also run
        when nothing is shown yet: that's how the card first appears when the
-       user scrolls into the lab without moving the mouse. */
+       user scrolls into the lab without moving the mouse.
+
+       elementFromPoint forces a hit-test against fresh layout, so it is held
+       to one call per frame and only while the lab is actually in reach.
+       Everywhere else — the hero above all — the scroll handler now costs a
+       boolean. */
+    /* starts true so that if the observer never reports, the behaviour is
+       simply what it was before — the gate can only ever remove work */
+    let labNear = true, queued = false;
+    new IntersectionObserver((es) => {
+      labNear = es[0].isIntersecting;
+      if (!labNear) hide(); // scrolled clean past it with the card still up
+    }, { rootMargin: "20% 0px" }).observe(lab);
+
     addEventListener("scroll", () => {
-      if (Number.isNaN(mx)) return; // pointer never seen — nowhere to look
-      const row = document.elementFromPoint(mx, my)?.closest(".bside");
-      if (row && lab.contains(row)) show(row);
-      else hide();
+      if (!labNear || queued || Number.isNaN(mx)) return; // NaN = pointer never seen
+      queued = true;
+      requestAnimationFrame(() => {
+        queued = false;
+        const row = document.elementFromPoint(mx, my)?.closest(".bside");
+        if (row && lab.contains(row)) show(row);
+        else hide();
+      });
     }, { passive: true });
   }
 
