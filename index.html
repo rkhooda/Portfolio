@@ -200,12 +200,18 @@
           </div>
         </div>
 
-        <!-- the sleeve: the back of the record, where the signal lives -->
+        <!-- the sleeve: the back of the record — the signal, and the names -->
         <aside class="sleeve" id="sleeve">
+          <div class="sleeve-head mono">
+            <span>SIGNATURES</span>
+            <span class="sig-count" id="sigCount">—</span>
+          </div>
           <button class="sleeve-wave" id="waveBtn" type="button" aria-label="Toggle ambient sound">
             <canvas id="waveCanvas" aria-hidden="true"></canvas>
             <span class="wave-label mono" id="waveLabel">SIGNAL — MUTED</span>
           </button>
+          <ol class="sigs" id="sigs" data-lenis-prevent aria-live="polite"></ol>
+          <button class="sleeve-sign mono" id="signBtn" type="button">SIGN THE SLEEVE</button>
         </aside>
       </div>
     </section>
@@ -245,6 +251,24 @@
       <p class="t-dur mono" id="tDur"></p>
       <div class="t-line"><span id="tLine"></span></div>
     </div>
+  </div>
+
+  <!-- sign the sleeve -->
+  <div class="sign-modal" id="signModal" hidden>
+    <div class="sign-scrim" id="signScrim"></div>
+    <form class="sign-card" id="signForm" role="dialog" aria-modal="true" aria-labelledby="signTitle" novalidate>
+      <p class="sign-kicker mono">SIDE B — YOUR TURN</p>
+      <p class="sign-title" id="signTitle">Sign the sleeve</p>
+      <input class="sign-in mono" id="sigName" name="name" maxlength="24" placeholder="name" aria-label="Your name" autocomplete="name" required>
+      <input class="sign-in mono" id="sigNote" name="note" maxlength="140" placeholder="say something" aria-label="Your note" required>
+      <!-- honeypot: off-screen rather than display:none, which more bots skip -->
+      <input class="sign-hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <p class="sign-msg mono" id="sigMsg" role="alert"></p>
+      <div class="sign-row">
+        <button type="button" class="sign-x mono" id="sigCancel">CANCEL</button>
+        <button type="submit" class="sign-go mono" id="sigGo">SIGN <span aria-hidden="true">↗</span></button>
+      </div>
+    </form>
   </div>
 
   <noscript>

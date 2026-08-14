@@ -993,6 +993,132 @@ body.sound-on .np-eq i:nth-child(3),
   pointer-events: none;
 }
 .sleeve-wave:hover .wave-label { color: var(--accent); }
+
+.sleeve-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.9rem 1.1rem 0.8rem;
+  font-size: 10px;
+  letter-spacing: 0.24em;
+  color: var(--accent);
+  border-bottom: 1px solid var(--line);
+}
+.sig-count { color: var(--muted); letter-spacing: 0.1em; }
+
+.sigs {
+  list-style: none;
+  /* three signatures deep, and the rest scroll — the panel has one screen
+     to live inside, and Lenis is told to keep its hands off this box */
+  max-height: clamp(112px, 15vh, 148px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #262a26 transparent;
+  border-top: 1px solid var(--line);
+}
+.sigs li { padding: 0.7rem 1.1rem; border-bottom: 1px solid var(--line); }
+.sigs li:last-child { border-bottom: 0; }
+.sig-note {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 0.92rem;
+  line-height: 1.35;
+  /* a stranger can paste one very long word; it wraps rather than widening
+     the panel out from under the rest of the layout */
+  overflow-wrap: anywhere;
+}
+.sig-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.8rem;
+  margin-top: 0.35rem;
+  font-size: 9.5px;
+  letter-spacing: 0.16em;
+}
+.sig-who { color: var(--accent); text-transform: uppercase; overflow-wrap: anywhere; }
+.sig-when { color: var(--muted); flex: none; }
+.sig-empty { color: var(--muted); font-size: 9.5px; letter-spacing: 0.18em; }
+
+.sleeve-sign {
+  display: block;
+  width: 100%;
+  padding: 0.95rem 1.1rem;
+  border-top: 1px solid var(--line);
+  font-size: 10.5px;
+  letter-spacing: 0.24em;
+  color: var(--muted);
+  transition: color 0.3s, background 0.3s;
+}
+.sleeve-sign:hover:not(:disabled) { color: var(--accent); background: var(--accent-dim); }
+.sleeve-sign:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ---------------- sign the sleeve (dialog) ---------------- */
+.sign-modal { position: fixed; inset: 0; z-index: 120; display: grid; place-items: center; }
+/* display:grid beats the hidden attribute on its own, which would leave an
+   invisible scrim over the whole page swallowing every click on the site */
+.sign-modal[hidden] { display: none; }
+.sign-scrim {
+  position: absolute;
+  inset: 0;
+  background: rgba(10, 11, 10, 0.82);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.sign-card {
+  position: relative;
+  width: min(420px, calc(100vw - 2 * var(--pad)));
+  padding: 1.9rem 1.8rem 1.6rem;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: linear-gradient(160deg, rgba(168, 181, 138, 0.06), transparent 55%), var(--surface);
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.55);
+  animation: signIn 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes signIn { from { opacity: 0; transform: translateY(14px) scale(0.97); } }
+.sign-kicker { font-size: 9.5px; letter-spacing: 0.3em; color: var(--accent); }
+.sign-title {
+  font-weight: 600;
+  font-size: clamp(1.6rem, 3.4vw, 2.1rem);
+  letter-spacing: -0.02em;
+  margin: 0.5rem 0 1.4rem;
+}
+.sign-in {
+  display: block;
+  width: 100%;
+  padding: 0.85rem 1rem;
+  margin-bottom: 0.7rem;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 12.5px;
+  letter-spacing: 0.06em;
+  transition: border-color 0.25s;
+}
+.sign-in::placeholder { color: var(--muted); }
+.sign-in:focus { outline: none; border-color: var(--accent); }
+/* off-screen rather than display:none — a bot that renders nothing still
+   sees a text input worth filling, and filling it is the tell */
+.sign-hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+.sign-msg { min-height: 1.2em; margin: 0.3rem 0 0.9rem; font-size: 10px; letter-spacing: 0.12em; color: var(--accent); }
+.sign-row { display: flex; justify-content: flex-end; gap: 0.6rem; }
+.sign-x, .sign-go {
+  padding: 0.8rem 1.4rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  color: var(--muted);
+  transition: color 0.3s, border-color 0.3s, background 0.3s;
+}
+.sign-x:hover { color: var(--text); border-color: var(--muted); }
+.sign-go { color: var(--accent); border-color: var(--accent); }
+.sign-go:hover:not(:disabled) { background: var(--accent); color: var(--bg); }
+.sign-go:disabled { opacity: 0.5; cursor: wait; }
+body.modal-open { overflow: hidden; }
 .cta { display: flex; flex-direction: column; gap: 0.55rem; }
 .btn-email {
   display: inline-flex;
