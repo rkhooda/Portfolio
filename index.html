@@ -23,7 +23,7 @@
   <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin>
   <link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=9">
+  <link rel="stylesheet" href="css/style.css?v=10">
   <script type="importmap">{ "imports": { "three": "./js/vendor/three.module.min.js" } }</script>
 
   <!-- Deferred, so they download in parallel with the HTML parse instead of
@@ -33,11 +33,12 @@
   <script defer src="js/vendor/gsap.min.js"></script>
   <script defer src="js/vendor/ScrollTrigger.min.js"></script>
   <script defer src="js/vendor/lenis.min.js"></script>
-  <script defer src="js/data.js?v=9"></script>
-  <script defer src="js/player.js?v=9"></script>
-  <script defer src="js/main.js?v=9"></script>
-  <script defer src="js/hero-bg.js?v=9"></script>
-  <script type="module" src="js/desk-scene.js?v=9"></script>
+  <script defer src="js/data.js?v=10"></script>
+  <script defer src="js/player.js?v=10"></script>
+  <script defer src="js/main.js?v=10"></script>
+  <script defer src="js/live.js?v=10"></script>
+  <script defer src="js/hero-bg.js?v=10"></script>
+  <script type="module" src="js/desk-scene.js?v=10"></script>
 </head>
 <body>
   <a class="skip" href="#work">skip to the work</a>
@@ -131,12 +132,19 @@
         <div class="a-left">
           <p class="a-bio">I pick things up fast and actually ship them. Web3, AI agents, full-stack apps, Linux, Discord bots — if it's interesting, I'll figure it out and build something real with it.</p>
           <p class="a-bio sub">No scammy products, no hollow AI wrappers, nothing built to manipulate. I'd rather make something genuinely useful — even if it's small.</p>
+          <!-- every number here is filled in by live.js: the first two from
+               GitHub, the last two counted off data.js. The em-dashes are
+               what stays if the endpoint can't be reached. -->
           <div class="stats">
-            <div class="stat"><b>12</b><span class="mono">PROJECTS SHIPPED</span></div>
-            <div class="stat"><b>03</b><span class="mono">IN THE STUDIO</span></div>
-            <div class="stat"><b>[∞]</b><span class="mono">COFFEE CONSUMED</span></div>
-            <div class="stat"><b>00</b><span class="mono">TUTORIALS HOARDED</span></div>
+            <div class="stat"><b data-stat="contrib">—</b><span class="mono">CONTRIBUTIONS</span></div>
+            <div class="stat"><b data-stat="streak">—</b><span class="mono">DAY STREAK</span></div>
+            <div class="stat"><b data-stat="shipped">—</b><span class="mono">PROJECTS SHIPPED</span></div>
+            <div class="stat"><b data-stat="studio">—</b><span class="mono">IN THE STUDIO</span></div>
           </div>
+          <figure class="cal" id="cal" hidden>
+            <svg role="img" aria-label="GitHub contributions over the last twelve months" viewBox="0 0 740 96"></svg>
+            <figcaption class="mono">LAST 12 MONTHS ON GITHUB</figcaption>
+          </figure>
           <div class="a-tags mono" aria-label="Domains">
             <i>WEB</i><i>AI</i><i>APPS</i><i>GAMES</i><i>WEB3</i><i>TOOLS</i><i>AUTOMATION</i><i>LAB</i>
           </div>

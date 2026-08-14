@@ -1,0 +1,90 @@
+/* ------------------------------------------------------------------
+   live.js — the numbers on this page that shouldn't be typed by hand.
+
+   Two sources: the shipped/studio counts fall straight out of data.js,
+   and the contribution calendar comes from /api/github.
+
+   All of it is progressive enhancement. If the endpoint isn't there —
+   serve.py, a dead upstream, a missing token — whatever shipped in the
+   HTML is what stays on screen, and nothing throws.
+   ------------------------------------------------------------------ */
+
+(() => {
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const $ = (s) => document.querySelector(s);
+
+  /* 12 and 03 read as track numbers; 1,284 reads as a number */
+  const fmt = (n) => (n < 100 ? String(n).padStart(2, "0") : n.toLocaleString());
+
+  function setStat(key, n) {
+    const el = document.querySelector(`[data-stat="${key}"]`);
+    if (!el) return;
+    if (reduced || !window.gsap) {
+      el.textContent = fmt(n);
+      return;
+    }
+    /* the counter rolls up as the strip arrives — same easing family as
+       every other entrance on the page */
+    gsap.to({ v: 0 }, {
+      v: n, duration: 1.1, ease: "power2.out",
+      onUpdate() { el.textContent = fmt(Math.round(this.targets()[0].v)); },
+    });
+  }
+
+  /* ---------- the contribution calendar ----------
+     GitHub's weeks always start on Sunday and the first one is partial,
+     so the weekday of the first day is the offset every square is laid
+     out from. The svg is sized in its own units and scaled by CSS, which
+     is what keeps it from ever overflowing a column. */
+  const CELL = 12, GAP = 2, PITCH = CELL + GAP;
+  const FILL = ["rgba(234,234,226,0.06)", 0.28, 0.48, 0.72, 1];
+
+  function drawCalendar({ from, days }) {
+    const fig = $("#cal");
+    if (!fig || !days || !days.length) return;
+
+    const off = new Date(from + "T00:00:00Z").getUTCDay();
+    const cols = Math.ceil((days.length + off) / 7);
+    const max = Math.max(1, ...days);
+
+    const rects = days.map((c, i) => {
+      const n = i + off;
+      const x = ((n / 7) | 0) * PITCH;
+      const y = (n % 7) * PITCH;
+      const lvl = c === 0 ? 0 : Math.min(4, Math.ceil((c / max) * 4));
+      const fill = lvl === 0 ? FILL[0] : `rgba(168,181,138,${FILL[lvl]})`;
+      return `<rect x="${x}" y="${y}" width="${CELL}" height="${CELL}" rx="2" fill="${fill}"/>`;
+    });
+
+    fig.querySelector("svg").setAttribute(
+      "viewBox", `0 0 ${cols * PITCH - GAP} ${7 * PITCH - GAP}`
+    );
+    fig.querySelector("svg").innerHTML = rects.join("");
+    fig.hidden = false;
+    if (window.ScrollTrigger) ScrollTrigger.refresh();
+  }
+
+  /* ---------- kick everything off when About first comes into reach ----------
+     A visitor who never scrolls that far costs no request at all. Same
+     observer discipline the gallery and the lab peek card already use. */
+  const about = $("#about");
+  if (!about) return;
+
+  new IntersectionObserver((entries, obs) => {
+    if (!entries[0].isIntersecting) return;
+    obs.disconnect();
+
+    const all = [...(window.PROJECTS || []), ...(window.BSIDES || [])];
+    setStat("shipped", all.filter((p) => !p.wip).length);
+    setStat("studio", all.filter((p) => p.wip).length);
+
+    fetch("/api/github")
+      .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
+      .then((d) => {
+        setStat("contrib", d.total);
+        setStat("streak", d.streak);
+        drawCalendar(d);
+      })
+      .catch(() => {}); /* the em-dashes in the markup are the fallback */
+  }, { rootMargin: "20% 0px" }).observe(about);
+})();
