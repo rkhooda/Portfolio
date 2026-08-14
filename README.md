@@ -32,11 +32,16 @@ handful of requests a day regardless of traffic:
 | Endpoint | Feeds | Env |
 |---|---|---|
 | `api/github.js` | the contribution calendar and two of the four About stats | `GH_TOKEN` (classic PAT, `read:user` only), optional `GH_USER` |
-| `api/nowplaying.js` | the NOW PLAYING card — what's on, or what was last | `SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET`, `SPOTIFY_REFRESH_TOKEN` |
+| `api/nowplaying.js` | the NOW PLAYING card — what's on, or what was last | `LASTFM_KEY`, `LASTFM_USER` |
 | `api/guestbook.js` | the signatures on the sleeve | `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` |
 
 Set these in Vercel's project settings, and in `.env.local` for `vercel dev`
 (gitignored). Missing env doesn't break the page — it falls back.
+
+Now Playing goes through Last.fm rather than Spotify's own API: Spotify gates
+the Web API behind a Premium subscription, while Last.fm scrobbles a free
+Spotify account and answers both "playing now" and "last played" in a single
+unauthenticated GET.
 
 The other two About stats are counted off `data.js`, so they can't drift.
 
