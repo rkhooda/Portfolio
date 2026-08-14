@@ -19,13 +19,18 @@ const NAME_MAX = 24;
 const NOTE_MAX = 140;
 const EVERY = 3600;    // one signature per IP per hour
 
-const url = () => process.env.UPSTASH_REDIS_REST_URL;
+/* Vercel's Upstash integration injects these as KV_REST_API_*; a database
+   created straight from Upstash names them UPSTASH_REDIS_REST_*. Same REST
+   API either way, so take whichever is present rather than making the
+   provisioning route matter. */
+const url = () => process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
+const token = () => process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
 
 async function send(payload, path) {
   const r = await fetch(url() + path, {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}`,
+      Authorization: `Bearer ${token()}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify(payload),
@@ -70,7 +75,7 @@ const rateKey = (req) =>
     .digest("hex").slice(0, 16);
 
 module.exports = async (req, res) => {
-  if (!url()) return res.status(500).json({ error: "UPSTASH_REDIS_REST_URL is not set" });
+  if (!url()) return res.status(500).json({ error: "no redis url in env (KV_REST_API_URL)" });
 
   try {
     if (req.method === "GET") {

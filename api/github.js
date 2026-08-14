@@ -46,7 +46,12 @@ module.exports = async (req, res) => {
       body: JSON.stringify({ query: QUERY, variables: { login } }),
     });
     const json = await r.json();
+    /* a bad or expired token fails outside GraphQL's own error channel —
+       it comes back as a flat {message,status}, so checking only `errors`
+       turns a 401 into an unreadable "cannot read property of undefined" */
+    if (json.message) throw new Error(`${json.message} (http ${r.status})`);
     if (json.errors) throw new Error(json.errors[0].message);
+    if (!json.data || !json.data.user) throw new Error(`no such user: ${login}`);
 
     const cal = json.data.user.contributionsCollection.contributionCalendar;
     const days = cal.weeks.flatMap((w) => w.contributionDays);
