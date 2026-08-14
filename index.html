@@ -37,6 +37,7 @@
   <script defer src="js/player.js?v=10"></script>
   <script defer src="js/main.js?v=10"></script>
   <script defer src="js/live.js?v=10"></script>
+  <script defer src="js/sleeve.js?v=10"></script>
   <script defer src="js/hero-bg.js?v=10"></script>
   <script type="module" src="js/desk-scene.js?v=10"></script>
 </head>
@@ -180,20 +181,32 @@
         <p class="sec-meta">INBOX ALWAYS OPEN</p>
       </div>
       <p class="contact-title">Let's Talk</p>
-      <p class="contact-sub">Got an idea, a project, or a song recommendation? All three are welcome.</p>
-      <div class="cta-row">
-        <div class="cta">
-          <a class="btn-email magnetic" href="mailto:rakshit.official703@gmail.com">SAY HELLO <span aria-hidden="true">↗</span></a>
-          <span class="micro">no spam, i promise</span>
+      <div class="outro-grid">
+        <div class="outro-left">
+          <p class="contact-sub">Got an idea, a project, or a song recommendation? All three are welcome.</p>
+          <div class="cta-row">
+            <div class="cta">
+              <a class="btn-email magnetic" href="mailto:rakshit.official703@gmail.com">SAY HELLO <span aria-hidden="true">↗</span></a>
+              <span class="micro">no spam, i promise</span>
+            </div>
+            <div class="cta">
+              <a class="link-plain" href="https://github.com/rkhooda" target="_blank" rel="noopener">GITHUB ↗</a>
+              <span class="micro">where the code lives</span>
+            </div>
+            <div class="cta">
+              <a class="link-plain" href="https://www.linkedin.com/in/rakshit-hooda/" target="_blank" rel="noopener">LINKEDIN ↗</a>
+              <span class="micro">the formal version of me</span>
+            </div>
+          </div>
         </div>
-        <div class="cta">
-          <a class="link-plain" href="https://github.com/rkhooda" target="_blank" rel="noopener">GITHUB ↗</a>
-          <span class="micro">where the code lives</span>
-        </div>
-        <div class="cta">
-          <a class="link-plain" href="https://www.linkedin.com/in/rakshit-hooda/" target="_blank" rel="noopener">LINKEDIN ↗</a>
-          <span class="micro">the formal version of me</span>
-        </div>
+
+        <!-- the sleeve: the back of the record, where the signal lives -->
+        <aside class="sleeve" id="sleeve">
+          <button class="sleeve-wave" id="waveBtn" type="button" aria-label="Toggle ambient sound">
+            <canvas id="waveCanvas" aria-hidden="true"></canvas>
+            <span class="wave-label mono" id="waveLabel">SIGNAL — MUTED</span>
+          </button>
+        </aside>
       </div>
     </section>
   </main>

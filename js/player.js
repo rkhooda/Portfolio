@@ -125,7 +125,11 @@ window.Player = (() => {
       gain = ctx.createGain();
       gain.gain.value = 0;
       analyser = ctx.createAnalyser();
-      analyser.fftSize = 64;
+      /* 32 bins was plenty for five dancing bars, but far too coarse to
+         draw a waveform with. Every index below is scaled by the same 16x
+         so the bars and level() keep reading the frequencies they always
+         did — the resolution changed, not the sound. */
+      analyser.fftSize = 1024;
       freq = new Uint8Array(analyser.frequencyBinCount);
       src.connect(gain).connect(analyser).connect(ctx.destination);
       src.start(0);
@@ -201,7 +205,7 @@ window.Player = (() => {
       }
       analyser.getByteFrequencyData(freq);
       eqBars.forEach((b, i) => {
-        const v = freq[2 + i * 3] / 255;
+        const v = freq[32 + i * 48] / 255; // was 2 + i*3 at fftSize 64
         b.style.transform = `scaleY(${(0.18 + v * 0.82).toFixed(3)})`;
       });
       raf = requestAnimationFrame(step);
@@ -215,8 +219,20 @@ window.Player = (() => {
     if (!on || !analyser) return 0;
     analyser.getByteFrequencyData(freq);
     let s = 0;
-    for (let i = 1; i < 9; i++) s += freq[i];
+    for (let i = 1; i < 9; i++) s += freq[i * 16]; // was freq[i] at fftSize 64
     return Math.min(1, (s / (8 * 255)) * 1.7);
+  }
+
+  /* The raw waveform, for anything that wants to draw the signal itself.
+     Hands back the shared buffer — read it now, don't hold on to it — and
+     null whenever there's nothing to read: sound off, or the <audio>
+     fallback, which has no analyser at all. */
+  let timeBuf = null;
+  function wave() {
+    if (!on || !analyser) return null;
+    if (!timeBuf) timeBuf = new Uint8Array(analyser.fftSize);
+    analyser.getByteTimeDomainData(timeBuf);
+    return timeBuf;
   }
 
   navToggle.addEventListener("click", toggle);
@@ -225,5 +241,5 @@ window.Player = (() => {
   setTrack(window.TRACKS[0].name);
   onScroll(0);
 
-  return { onScroll, setTrack, level };
+  return { onScroll, setTrack, level, wave };
 })();
