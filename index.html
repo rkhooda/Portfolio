@@ -150,10 +150,13 @@
           </div>
         </div>
         <div class="a-right">
-          <aside class="np-card" aria-label="Currently listening">
-            <div class="np-head mono">NOW PLAYING <span class="np-eq" aria-hidden="true"><i></i><i></i><i></i></span></div>
-            <div class="np-row mono"><span>ARTIST</span><b>J. Cole</b></div>
-            <div class="np-row mono"><span>TRACK</span><b>Love Yourz</b></div>
+          <!-- ARTIST, TRACK and the header label are replaced by live.js from
+               /api/nowplaying. What's written here is the fallback, and it is
+               what a visitor sees whenever Spotify can't be reached. -->
+          <aside class="np-card" id="npCard" aria-label="Currently listening">
+            <div class="np-head mono"><span data-np="label">NOW PLAYING</span> <span class="np-eq" aria-hidden="true"><i></i><i></i><i></i></span></div>
+            <div class="np-row mono"><span>ARTIST</span><b data-np="artist">J. Cole</b></div>
+            <div class="np-row mono"><span>TRACK</span><b data-np="track">Love Yourz</b></div>
             <div class="np-row mono"><span>MOOD</span><b class="hl">Building</b></div>
             <div class="np-row mono"><span>STATUS</span><b class="hl blink">Shipping ideas…</b></div>
           </aside>

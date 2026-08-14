@@ -1,10 +1,11 @@
 /* ------------------------------------------------------------------
-   live.js — the numbers on this page that shouldn't be typed by hand.
+   live.js — the parts of this page that shouldn't be typed by hand.
 
-   Two sources: the shipped/studio counts fall straight out of data.js,
-   and the contribution calendar comes from /api/github.
+   Three sources: the shipped/studio counts fall straight out of data.js,
+   the contribution calendar comes from /api/github, and the Now Playing
+   card comes from /api/nowplaying.
 
-   All of it is progressive enhancement. If the endpoint isn't there —
+   All of it is progressive enhancement. If an endpoint isn't there —
    serve.py, a dead upstream, a missing token — whatever shipped in the
    HTML is what stays on screen, and nothing throws.
    ------------------------------------------------------------------ */
@@ -64,6 +65,36 @@
     if (window.ScrollTrigger) ScrollTrigger.refresh();
   }
 
+  /* ---------- the Now Playing card ----------
+     The relative time is worked out here rather than server-side: the
+     response is edge-cached for half a minute, so a "3 minutes ago" baked
+     into it would arrive already wrong. */
+  const ago = (iso) => {
+    const s = (Date.now() - new Date(iso)) / 1000;
+    if (!(s >= 0)) return "";
+    /* narrow, because this has to sit in a 10px header next to the label:
+       "3 min. ago", not "3 minutes ago" */
+    const rtf = new Intl.RelativeTimeFormat("en", { numeric: "auto", style: "narrow" });
+    for (const [unit, n] of [["day", 86400], ["hour", 3600], ["minute", 60]]) {
+      if (s >= n) return rtf.format(-Math.floor(s / n), unit);
+    }
+    return "just now";
+  };
+
+  function setNowPlaying(d) {
+    if (!d || !d.track) return;
+    const set = (k, v) => {
+      const el = document.querySelector(`[data-np="${k}"]`);
+      if (el) el.textContent = v; /* someone else's track title — never innerHTML */
+    };
+    set("artist", d.artist);
+    set("track", d.track);
+    set("label", d.live ? "NOW PLAYING" : `LAST PLAYED${d.playedAt ? " · " + ago(d.playedAt) : ""}`);
+    /* the card's own bars dance whenever the music is live, whether or not
+       the visitor has turned the site's ambient loop on */
+    $("#npCard").classList.toggle("live", !!d.live);
+  }
+
   /* ---------- kick everything off when About first comes into reach ----------
      A visitor who never scrolls that far costs no request at all. Same
      observer discipline the gallery and the lab peek card already use. */
@@ -78,13 +109,18 @@
     setStat("shipped", all.filter((p) => !p.wip).length);
     setStat("studio", all.filter((p) => p.wip).length);
 
-    fetch("/api/github")
-      .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
+    /* both endpoints fail silently: the markup they'd have replaced is
+       already on screen and is the fallback */
+    const get = (url) => fetch(url).then((r) => (r.ok ? r.json() : Promise.reject(r.status)));
+
+    get("/api/github")
       .then((d) => {
         setStat("contrib", d.total);
         setStat("streak", d.streak);
         drawCalendar(d);
       })
-      .catch(() => {}); /* the em-dashes in the markup are the fallback */
+      .catch(() => {});
+
+    get("/api/nowplaying").then(setNowPlaying).catch(() => {});
   }, { rootMargin: "20% 0px" }).observe(about);
 })();
