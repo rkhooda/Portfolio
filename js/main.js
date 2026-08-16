@@ -410,9 +410,14 @@
      offset is needed and none is wanted: any would open a dead band above. */
   $$('a[href^="#"]').forEach((a) =>
     a.addEventListener("click", (e) => {
-      const el = $(a.getAttribute("href"));
+      const href = a.getAttribute("href");
+      const el = $(href);
       if (!el) return;
       e.preventDefault();
+      if (href !== "#top") {
+        const id = href.slice(1);
+        markNav(id);
+      }
       if (lenis) lenis.scrollTo(el, { offset: 0, duration: 1.2 });
       else el.scrollIntoView({ block: "start" });
     })
