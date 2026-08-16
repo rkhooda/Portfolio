@@ -376,10 +376,8 @@
   }
 
   navLinks.forEach((a) => {
-    a.addEventListener("mouseenter", () => movePill(a));
     a.addEventListener("focus", () => movePill(a));
   });
-  linkWrap.addEventListener("mouseleave", () => movePill(activeLink));
   linkWrap.addEventListener("focusout", (e) => {
     if (!linkWrap.contains(e.relatedTarget)) movePill(activeLink);
   });
