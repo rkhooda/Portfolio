@@ -28,6 +28,7 @@ const stub = http.createServer((req, res) => {
       if (op === "INCR") { return { result: ++store.count }; }
       if (op === "LRANGE") return { result: store.list.slice(0, 50) };
       if (op === "GET") return { result: String(store.count) };
+      if (op === "DEL") { store.list = []; store.count = 0; return { result: 1 }; }
       return { result: null };
     };
     res.setHeader("Content-Type", "application/json");
@@ -89,6 +90,13 @@ const call = async (handler, { method = "POST", body = {}, ip = "1.2.3.4", origi
 
   r = await call(handler, { body: { name: "someone", note: "else" }, ip: "9.9.9.9" });
   assert.equal(r.code, 201, "a different IP is unaffected");
+
+  r = await call(handler, { body: { name: "spammer", note: "buy crypto now" }, ip: "5.5.5.5" });
+  assert.equal(r.code, 400, "blocklisted word in note is rejected");
+  assert.equal(store.list.length, 2, "...and nothing is stored");
+
+  r = await call(handler, { body: { name: "fuck", note: "hello" }, ip: "6.6.6.6" });
+  assert.equal(r.code, 400, "blocklisted word in name is rejected");
 
   r = await call(handler, { method: "GET" });
   assert.equal(r.code, 200);

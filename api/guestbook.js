@@ -19,6 +19,14 @@ const NAME_MAX = 24;
 const NOTE_MAX = 140;
 const EVERY = 3600;    // one signature per IP per hour
 
+const BLOCKLIST = [
+  "fuck", "shit", "cunt", "bitch", "nigger", "nigga", "faggot", "fag", "retard",
+  "kys", "kill yourself", "go die", "suicide", "rape", "pedo", "hitler", "nazi",
+  "spam", "buy now", "click here", "http://", "https://", "www.", ".com", ".net",
+  "crypto", "bitcoin", "ethereum", "investment", "trading", "forex", "casino",
+  "porn", "sex", "xxx", "nude", "onlyfans", "escort", "viagra", "cialis"
+];
+
 /* Vercel's Upstash integration injects these as KV_REST_API_*; a database
    created straight from Upstash names them UPSTASH_REDIS_REST_*. Same REST
    API either way, so take whichever is present rather than making the
@@ -65,6 +73,11 @@ function clean(v, max) {
     .replace(/\s+/g, " ")
     .trim();
   return s && s.length <= max ? s : null;
+}
+
+function containsBlocked(text) {
+  const lower = text.toLowerCase();
+  return BLOCKLIST.some((word) => lower.includes(word));
 }
 
 /* the IP is hashed before it is ever a key: enough to rate limit the same
@@ -118,6 +131,10 @@ module.exports = async (req, res) => {
       return res.status(400).json({
         error: `a name (1-${NAME_MAX}) and a note (1-${NOTE_MAX}) are both required`,
       });
+    }
+
+    if (containsBlocked(name) || containsBlocked(note)) {
+      return res.status(400).json({ error: "that word isn't welcome here" });
     }
 
     const fresh = await redis(["SET", rateKey(req), "1", "NX", "EX", String(EVERY)]);
