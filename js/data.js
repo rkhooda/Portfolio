@@ -81,7 +81,7 @@ window.PROJECTS = [
     tags: ["APPS"],
     year: "2026", dur: "03:12",
     url: "https://github.com/rkhooda/ProcrastiNO",
-    img: "assets/img/covers/procrastino.png",
+    img: "assets/img/covers/procrastino.svg",
     tint: "#B08968",
   },
   {

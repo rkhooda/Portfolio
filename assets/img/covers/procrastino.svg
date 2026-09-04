@@ -1,0 +1,115 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice">
+  <!-- ProcrastiNO: the flame with the sweatband. Breathes, flickers, blinks,
+       and every few seconds does one jumping jack. -->
+  <style>
+    .hop    { animation: hop 7s cubic-bezier(.3,0,.2,1) infinite; }
+    .char   { transform-origin: 800px 770px; animation: breathe 1.9s ease-in-out infinite alternate; }
+    .crown  { transform-origin: 800px 520px; animation: flicker .85s ease-in-out infinite alternate; }
+    .inner  { animation: glow 1.1s ease-in-out infinite alternate; }
+    .leaf   { transform-origin: 930px 262px; animation: leaf 1.7s ease-in-out infinite alternate; }
+    .spark  { animation: spark 2.3s ease-out infinite; }
+    .eyes   { transform-box: fill-box; transform-origin: center; animation: blink 4.6s ease-in infinite; }
+    .armL   { transform-origin: 618px 540px; animation: armL 7s cubic-bezier(.3,0,.2,1) infinite; }
+    .armR   { transform-origin: 982px 540px; animation: armR 7s cubic-bezier(.3,0,.2,1) infinite; }
+    .shadow { transform-origin: 800px 792px; animation: shadow 7s cubic-bezier(.3,0,.2,1) infinite; }
+    @keyframes breathe { from { transform: scale(1,1); } to { transform: scale(1.025,.975); } }
+    @keyframes flicker { from { transform: rotate(-2.2deg) scaleY(1.015); } to { transform: rotate(2.2deg) scaleY(.985); } }
+    @keyframes glow    { from { opacity: .6; } to { opacity: .95; } }
+    @keyframes leaf    { from { transform: rotate(-9deg); } to { transform: rotate(9deg); } }
+    @keyframes spark {
+      0%   { transform: translate(0,0);     opacity: 0; }
+      15%  { opacity: 1; }
+      100% { transform: translate(-14px,-110px); opacity: 0; }
+    }
+    @keyframes blink {
+      0%,91%,100% { transform: scaleY(1); }
+      93.5%       { transform: scaleY(.08); }
+    }
+    /* the jumping jack: crouch, spring, arms up at the top, land */
+    @keyframes hop {
+      0%,55%   { transform: translateY(0); }
+      58%      { transform: translateY(14px); }
+      62%      { transform: translateY(-92px); }
+      66%      { transform: translateY(0); }
+      68%      { transform: translateY(6px); }
+      70%,100% { transform: translateY(0); }
+    }
+    @keyframes armL { 0%,57% { transform: rotate(0); } 61%,63% { transform: rotate(-80deg); } 67%,100% { transform: rotate(0); } }
+    @keyframes armR { 0%,57% { transform: rotate(0); } 61%,63% { transform: rotate(80deg); }  67%,100% { transform: rotate(0); } }
+    @keyframes shadow { 0%,57% { transform: scale(1); opacity: 1; } 62% { transform: scale(.72); opacity: .55; } 66%,100% { transform: scale(1); opacity: 1; } }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; } .spark { opacity: .9; } }
+  </style>
+  <defs>
+    <linearGradient id="ground" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#181916"/>
+      <stop offset="1" stop-color="#0b0c0b"/>
+    </linearGradient>
+    <radialGradient id="halo" cx="800" cy="520" r="520" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ff8a3c" stop-opacity="0.16"/>
+      <stop offset="1" stop-color="#ff8a3c" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="body" cx="700" cy="460" r="420" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffa14a"/>
+      <stop offset="0.55" stop-color="#f7722f"/>
+      <stop offset="1" stop-color="#d84a1f"/>
+    </radialGradient>
+    <radialGradient id="shade">
+      <stop offset="0" stop-color="#000" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#000" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="leafg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#a9ecc0"/>
+      <stop offset="1" stop-color="#5fbf86"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1600" height="1000" fill="url(#ground)"/>
+  <rect width="1600" height="1000" fill="url(#halo)"/>
+
+  <ellipse class="shadow" cx="800" cy="792" rx="230" ry="28" fill="url(#shade)"/>
+
+  <g class="hop"><g class="char">
+    <!-- flame crown: rounded tongues that overlap the body, sharing its
+         gradient so the whole thing reads as one shape -->
+    <g class="crown">
+      <path fill="url(#body)" d="M622 499 C605 453 626 412 633 399 C647 404 689 422 706 469 Z"/>
+      <path fill="url(#body)" d="M912 484 C929 423 974 393 988 385 C996 399 1020 447 1004 508 Z"/>
+      <path fill="url(#body)" d="M807 465 C820 356 881 293 900 275 C915 297 959 373 945 483 Z"/>
+      <path fill="url(#body)" d="M668 489 C646 331 703 221 722 189 C749 214 833 305 856 463 Z"/>
+      <path class="inner" fill="#ffc35a" opacity="0.85" d="M723 477 C710 384 737 320 746 302 C760 317 804 371 817 463 Z"/>
+      <path class="inner" fill="#ffc35a" opacity="0.75" d="M847 468 C853 414 881 382 890 373 C897 384 916 421 909 476 Z"/>
+    </g>
+
+    <!-- ember and leaf -->
+    <path class="spark" fill="#ffb03b" d="M648 318 C636 300 640 284 652 270 C664 284 668 300 656 318 Z"/>
+    <path class="leaf" fill="url(#leafg)" d="M930 262 C902 230 906 190 934 168 C962 190 966 230 938 262 Z"/>
+    <path class="leaf" fill="none" stroke="#e6fff0" stroke-width="3" stroke-linecap="round" opacity="0.6" d="M934 176 L934 254"/>
+
+    <!-- arms behind the body -->
+    <ellipse class="armL" cx="578" cy="520" rx="36" ry="62" fill="#ef652b" transform="rotate(34 618 540)"/>
+    <ellipse class="armR" cx="1022" cy="520" rx="36" ry="62" fill="#ef652b" transform="rotate(-34 982 540)"/>
+
+    <!-- body and feet -->
+    <ellipse cx="800" cy="560" rx="205" ry="215" fill="url(#body)"/>
+    <ellipse cx="740" cy="766" rx="42" ry="19" fill="#e85d27"/>
+    <ellipse cx="862" cy="766" rx="42" ry="19" fill="#e85d27"/>
+
+    <!-- sweatband, with the knot tails on the left -->
+    <g transform="rotate(-5 800 455)">
+      <path fill="#8c74c9" d="M598 438 L556 418 L566 452 L554 486 L598 470 Z"/>
+      <rect x="596" y="422" width="408" height="66" rx="33" fill="#a58fdd"/>
+      <rect x="596" y="446" width="408" height="18" fill="#f4f0ff"/>
+    </g>
+
+    <!-- face -->
+    <ellipse cx="706" cy="588" rx="27" ry="14" fill="#ff7a7a" opacity="0.7"/>
+    <ellipse cx="898" cy="588" rx="27" ry="14" fill="#ff7a7a" opacity="0.7"/>
+    <g class="eyes" fill="#2b1a14">
+      <ellipse cx="748" cy="548" rx="16" ry="21"/>
+      <ellipse cx="858" cy="548" rx="16" ry="21"/>
+      <circle cx="742" cy="540" r="5" fill="#fff"/>
+      <circle cx="852" cy="540" r="5" fill="#fff"/>
+    </g>
+    <path d="M776 586 Q803 612 830 586" fill="none" stroke="#2b1a14" stroke-width="8" stroke-linecap="round"/>
+  </g></g>
+</svg>
