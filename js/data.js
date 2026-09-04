@@ -28,7 +28,7 @@ window.PROJECTS = [
     tags: ["WEB3", "PLATFORM"],
     year: "2025", dur: "04:12",
     url: "https://cred-vaulte.vercel.app",
-    img: "assets/img/covers/credvault.jpg",
+    img: "assets/img/covers/credvault.svg",
     tint: "#8FA98F",
   },
   {

@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice">
+  <!-- CredVault: the shield from the repo. It hovers, a verification scan
+       runs down it (masked to its own silhouette), and it flashes confirmed.
+       Shown through an image tag the render can't load, so only the ground
+       shows until main.js inlines the file. -->
+  <style>
+    .hover  { transform-origin: 800px 500px; animation: hover 3.6s ease-in-out infinite alternate; }
+    .sway   { transform-origin: 800px 500px; animation: sway 5.2s ease-in-out infinite alternate; }
+    .scan   { animation: scan 5s cubic-bezier(.45,0,.3,1) infinite; }
+    .flash  { opacity: 0; animation: flash 5s ease-out infinite; }
+    .halo   { animation: halo 3.6s ease-in-out infinite alternate; }
+    .shadow { transform-origin: 800px 900px; animation: shadow 3.6s ease-in-out infinite alternate; }
+    @keyframes hover  { from { transform: translateY(-12px); } to { transform: translateY(12px); } }
+    @keyframes sway   { from { transform: rotate(-1.8deg); } to { transform: rotate(1.8deg); } }
+    @keyframes halo   { from { opacity: .75; } to { opacity: 1; } }
+    @keyframes shadow { from { transform: scale(.92); opacity: .7; } to { transform: scale(1.04); opacity: 1; } }
+    /* the bar runs top to bottom, then rests off the shield until the next pass */
+    @keyframes scan {
+      0%,8%    { transform: translateY(-80px); opacity: 0; }
+      12%      { opacity: 1; }
+      40%      { opacity: 1; }
+      44%,100% { transform: translateY(640px); opacity: 0; }
+    }
+    @keyframes flash { 0%,42% { opacity: 0; } 46% { opacity: .36; } 62%,100% { opacity: 0; } }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; } .scan { opacity: 0; } }
+  </style>
+  <defs>
+    <linearGradient id="ground" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#181916"/>
+      <stop offset="1" stop-color="#0b0c0b"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="800" cy="500" r="520" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#3fd8ff" stop-opacity="0.16"/>
+      <stop offset="1" stop-color="#3fd8ff" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="shade">
+      <stop offset="0" stop-color="#000" stop-opacity="0.6"/>
+      <stop offset="1" stop-color="#000" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="bar" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7ff0ff" stop-opacity="0"/>
+      <stop offset="0.5" stop-color="#bafaff" stop-opacity="0.85"/>
+      <stop offset="1" stop-color="#7ff0ff" stop-opacity="0"/>
+    </linearGradient>
+    <!-- the render's own alpha as the mask, so the scan and flash stay inside the shield -->
+    <mask id="shield" style="mask-type:alpha">
+      <image href="assets/img/covers/credvault-logo.webp" x="446" y="142" width="708" height="716"/>
+    </mask>
+  </defs>
+
+  <rect width="1600" height="1000" fill="url(#ground)"/>
+  <rect class="halo" width="1600" height="1000" fill="url(#glow)"/>
+  <ellipse class="shadow" cx="800" cy="900" rx="230" ry="26" fill="url(#shade)"/>
+
+  <g class="hover"><g class="sway">
+    <image href="assets/img/covers/credvault-logo.webp" x="446" y="142" width="708" height="716"/>
+    <g mask="url(#shield)">
+      <rect class="scan" x="446" y="142" width="708" height="90" fill="url(#bar)"/>
+      <rect class="flash" x="446" y="142" width="708" height="716" fill="#9df3ff"/>
+    </g>
+  </g></g>
+</svg>
