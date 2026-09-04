@@ -40,6 +40,23 @@
       ${p.wip ? '<span class="cov-wip mono">UNRELEASED</span>' : ""}`;
   }
 
+  /* An SVG cover is swapped for its own markup once the text arrives. Through
+     <img> it already animates on its own, but only inline can the page reach
+     into it — the FlowPane eyes follow the cursor. */
+  const SVGS = {};
+  function inlineCovers(root) {
+    root.querySelectorAll('img.shot[src$=".svg"]').forEach((img) => {
+      const txt = SVGS[img.getAttribute("src")];
+      if (!txt) return;
+      img.insertAdjacentHTML("afterend", txt);
+      img.nextElementSibling.classList.add("shot");
+      img.remove();
+    });
+  }
+  window.PROJECTS.filter((p) => /\.svg$/.test(p.img || "")).forEach((p) =>
+    fetch(p.img).then((r) => r.text()).then((t) => { SVGS[p.img] = t; inlineCovers(document); })
+  );
+
   const rowHTML = (p, i, src, idx) => {
     const tag = p.url ? `a href="${p.url}" target="_blank" rel="noopener"` : 'button type="button"';
     const end = p.url ? "a" : "button";
@@ -136,8 +153,43 @@
         cells.push({ el, ix, iy });
       }
     }
+    inlineCovers(plane);
     place();
   }
+
+  /* Googly-eye rule: while the mouse moves, every pupil points at it; a
+     couple of seconds of stillness and the idle glances take over again.
+     Recomputed per frame while it's on, because the eyes hop around under a
+     cursor that hasn't moved. */
+  let gazeRaf = 0, gazeT = 0, gx = 0, gy = 0;
+  function gaze() {
+    gazeRaf = 0;
+    if (!document.body.classList.contains("gazing")) return;
+    document.querySelectorAll(".eye").forEach((eye) => {
+      const r = eye.getBoundingClientRect();
+      const dx = gx - (r.left + r.width / 2), dy = gy - (r.top + r.height / 2);
+      const d = Math.hypot(dx, dy) || 1;
+      const k = Math.min(1, d / 140) / d; /* no full deflection at point-blank */
+      eye.style.setProperty("--gx", (dx * k * 36).toFixed(1) + "px");
+      eye.style.setProperty("--gy", (dy * k * 30).toFixed(1) + "px");
+    });
+    gazeRaf = requestAnimationFrame(gaze);
+  }
+  if (!reduced) addEventListener("pointermove", (e) => {
+    if (e.pointerType !== "mouse" || !stage.classList.contains("live")) return;
+    gx = e.clientX;
+    gy = e.clientY;
+    document.body.classList.add("gazing");
+    clearTimeout(gazeT);
+    gazeT = setTimeout(() => {
+      document.body.classList.remove("gazing");
+      document.querySelectorAll(".eye").forEach((eye) => {
+        eye.style.removeProperty("--gx");
+        eye.style.removeProperty("--gy");
+      });
+    }, 2200);
+    if (!gazeRaf) gazeRaf = requestAnimationFrame(gaze);
+  }, { passive: true });
 
   function place() {
     for (const c of cells) {

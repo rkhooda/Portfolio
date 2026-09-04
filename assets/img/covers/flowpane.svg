@@ -1,17 +1,22 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice">
   <!-- FlowPane: the eyes from the logo, loose in the frame. Still watching. -->
   <style>
-    .wander { transform-origin: 800px 500px; animation: wander 22s cubic-bezier(.45,.05,.2,1) infinite; }
+    .wander { transform-origin: 800px 500px; animation: wander 26s cubic-bezier(.3,1.25,.4,1) infinite; }
     .bob    { animation: bob 3.6s ease-in-out infinite alternate; }
     .look   { animation: look 9s cubic-bezier(.3,0,.1,1) infinite; }
     .lid    { animation: blink 6.4s ease-in infinite; }
+    /* inline in the page, main.js feeds --gx/--gy and the pupils track the
+       cursor instead of glancing on their own; as a plain image both are inert */
+    .gaze   { transform: translate(var(--gx, 0px), var(--gy, 0px)); transition: transform .35s cubic-bezier(.2,.8,.2,1); }
+    body.gazing .look { animation: none; }
     @keyframes wander {
-      0%   { transform: translate(0,0)         rotate(0deg); }
-      18%  { transform: translate(-360px,-150px) rotate(-4deg); }
-      36%  { transform: translate(-260px,190px)  rotate(2deg); }
-      55%  { transform: translate(360px,150px)   rotate(4deg); }
-      75%  { transform: translate(380px,-170px)  rotate(-2deg); }
-      100% { transform: translate(0,0)         rotate(0deg); }
+      0%,13%   { transform: translate(0,0)          rotate(0deg); }
+      15%,29%  { transform: translate(380px,-40px)  rotate(3deg); }
+      31%,45%  { transform: translate(-370px,70px)  rotate(-4deg); }
+      47%,61%  { transform: translate(30px,-190px)  rotate(2deg); }
+      63%,77%  { transform: translate(-50px,190px)  rotate(-2deg); }
+      79%,93%  { transform: translate(350px,150px)  rotate(3deg); }
+      95%,100% { transform: translate(0,0)          rotate(0deg); }
     }
     @keyframes bob { from { transform: translateY(-10px); } to { transform: translateY(10px); } }
     @keyframes look {
@@ -60,21 +65,21 @@
   <g class="wander"><g class="bob">
     <ellipse cx="800" cy="700" rx="330" ry="80" fill="url(#shade)"/>
 
-    <g transform="translate(676 522) rotate(-7) scale(1.28)">
+    <g class="eye" transform="translate(676 522) rotate(-7) scale(1.28)">
       <ellipse rx="112" ry="124" fill="url(#white)" stroke="#1a1713" stroke-opacity="0.45" stroke-width="3"/>
-      <g class="look">
+      <g class="gaze"><g class="look">
         <circle r="50" fill="url(#pupil)"/>
         <circle cx="-18" cy="-20" r="9" fill="#fff" opacity="0.8"/>
-      </g>
+      </g></g>
       <g clip-path="url(#eyeL)"><ellipse class="lid" rx="118" ry="130" fill="#121311"/></g>
     </g>
 
-    <g transform="translate(922 500) rotate(5) scale(1.28)">
+    <g class="eye" transform="translate(922 500) rotate(5) scale(1.28)">
       <ellipse rx="126" ry="140" fill="url(#white)" stroke="#1a1713" stroke-opacity="0.45" stroke-width="3"/>
-      <g class="look">
+      <g class="gaze"><g class="look">
         <circle r="56" fill="url(#pupil)"/>
         <circle cx="-20" cy="-22" r="10" fill="#fff" opacity="0.8"/>
-      </g>
+      </g></g>
       <g clip-path="url(#eyeR)"><ellipse class="lid" rx="132" ry="146" fill="#121311"/></g>
     </g>
   </g></g>
