@@ -53,8 +53,8 @@ window.PROJECTS = [
     desc: "Decentralised data-labelling platform on Ethereum.",
     tags: ["WEB3", "WEB"],
     year: "2026", dur: "03:47",
-    url: "https://github.com/rkhooda/Clixo",
-    img: "assets/img/covers/clixo.png",
+    url: "https://clixoo.vercel.app",
+    img: "assets/img/covers/clixo.svg",
     tint: "#7C8F6E",
   },
   {
