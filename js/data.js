@@ -72,7 +72,7 @@ window.PROJECTS = [
     tags: ["APPS", "TOOLS"],
     year: "2025", dur: "03:24",
     url: "https://flowpane.vercel.app",
-    img: "assets/img/covers/flowpane.jpg",
+    img: "assets/img/covers/flowpane.svg",
     tint: "#A9A18F",
   },
   {
