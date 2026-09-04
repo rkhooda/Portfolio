@@ -1,26 +1,65 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice">
-  <!-- ProcrastiNO: the mascot render, cut out. It breathes and sways, and
-       every few seconds jumps. Shown through an image tag the render can't
-       load, so only the ground shows until main.js inlines the file. -->
+  <!-- ProcrastiNO: the mascot render, cut out and split into body + two arms
+       (the same image, clipped three ways) with drawn eyelids on top. It
+       breathes, sways, waves a little, blinks, and jumps every few seconds.
+       Shown through an image tag the render can't load, so only the ground
+       shows until main.js inlines the file. -->
   <style>
-    .hop    { transform-origin: 797px 832px; animation: hop 7s cubic-bezier(.3,0,.2,1) infinite; }
+    .hop    { transform-origin: 797px 832px; animation: hop 7s infinite; }
     .sway   { transform-origin: 797px 832px; animation: sway 3.4s ease-in-out infinite alternate; }
     .char   { transform-origin: 797px 832px; animation: breathe 1.9s ease-in-out infinite alternate; }
-    .shadow { transform-origin: 797px 840px; animation: shadow 7s cubic-bezier(.3,0,.2,1) infinite; }
+    .armL   { transform-origin: 619px 619px; animation: armL 7s infinite; }
+    .armR   { transform-origin: 995px 559px; animation: armR 7s infinite; }
+    .waveL  { transform-origin: 619px 619px; animation: waveL 2.7s ease-in-out infinite alternate; }
+    .waveR  { transform-origin: 995px 559px; animation: waveR 2.3s ease-in-out infinite alternate; }
+    .lid    { transform-box: fill-box; transform-origin: 50% 0; transform: scaleY(0); animation: blink 4.6s ease-in infinite; }
+    .shadow { transform-origin: 797px 840px; animation: shadow 7s infinite; }
     .halo   { animation: halo 1.9s ease-in-out infinite alternate; }
-    @keyframes breathe { from { transform: scale(1,1); } to { transform: scale(1.022,.978); } }
-    @keyframes sway    { from { transform: rotate(-1.6deg); } to { transform: rotate(1.6deg); } }
+    @keyframes breathe { from { transform: scale(1,1); } to { transform: scale(1.02,.98); } }
+    @keyframes sway    { from { transform: rotate(-1.4deg); } to { transform: rotate(1.4deg); } }
+    @keyframes waveL   { from { transform: rotate(-5deg); } to { transform: rotate(5deg); } }
+    @keyframes waveR   { from { transform: rotate(5deg); } to { transform: rotate(-5deg); } }
     @keyframes halo    { from { opacity: .7; } to { opacity: 1; } }
-    /* the jump: crouch, spring with a lean, land, settle */
-    @keyframes hop {
-      0%,55%   { transform: translateY(0) rotate(0); }
-      58%      { transform: translateY(16px) scale(1.04,.94); }
-      62%      { transform: translateY(-96px) rotate(-5deg) scale(.97,1.05); }
-      66%      { transform: translateY(0) rotate(0) scale(1.03,.96); }
-      68%      { transform: translateY(0) scale(1,1); }
-      70%,100% { transform: translateY(0) rotate(0); }
+    @keyframes blink {
+      0%,91%,100% { transform: scaleY(0); }
+      93.5%       { transform: scaleY(1); }
     }
-    @keyframes shadow { 0%,57% { transform: scale(1); opacity: 1; } 62% { transform: scale(.7); opacity: .5; } 66%,100% { transform: scale(1); opacity: 1; } }
+    /* the jump: crouch, launch (fast, easing off to the apex), a beat of
+       hang time, fall (gathering speed), land squashed, recover, settle */
+    @keyframes hop {
+      0%,54%  { transform: translateY(0)      scale(1,1);      rotate: 0deg;  animation-timing-function: ease-in-out; }
+      57%     { transform: translateY(18px)   scale(1.07,.91); animation-timing-function: cubic-bezier(.2,.8,.3,1); }
+      60%     { transform: translateY(-112px) scale(.95,1.07); animation-timing-function: ease-in-out; }
+      61%     { transform: translateY(-120px) scale(1,1) rotate(-3deg); animation-timing-function: cubic-bezier(.6,0,.9,.4); }
+      64%     { transform: translateY(0)      scale(.98,1.03); animation-timing-function: ease-out; }
+      65.5%   { transform: translateY(8px)    scale(1.1,.88);  animation-timing-function: ease-out; }
+      68%     { transform: translateY(0)      scale(.99,1.02); animation-timing-function: ease-in-out; }
+      70%,100%{ transform: translateY(0)      scale(1,1); }
+    }
+    /* arms: back on the crouch, thrown up on launch, down hard on landing */
+    @keyframes armL {
+      0%,54%   { transform: rotate(0);     animation-timing-function: ease-in-out; }
+      57%      { transform: rotate(-22deg); animation-timing-function: cubic-bezier(.2,.8,.3,1); }
+      60%,61.5%{ transform: rotate(62deg);  animation-timing-function: ease-in; }
+      64%      { transform: rotate(20deg);  animation-timing-function: ease-out; }
+      65.5%    { transform: rotate(-18deg); animation-timing-function: ease-in-out; }
+      69%,100% { transform: rotate(0); }
+    }
+    @keyframes armR {
+      0%,54%   { transform: rotate(0);     animation-timing-function: ease-in-out; }
+      57%      { transform: rotate(22deg);  animation-timing-function: cubic-bezier(.2,.8,.3,1); }
+      60%,61.5%{ transform: rotate(-62deg); animation-timing-function: ease-in; }
+      64%      { transform: rotate(-20deg); animation-timing-function: ease-out; }
+      65.5%    { transform: rotate(18deg);  animation-timing-function: ease-in-out; }
+      69%,100% { transform: rotate(0); }
+    }
+    @keyframes shadow {
+      0%,54%   { transform: scale(1);    opacity: 1; }
+      57%      { transform: scale(1.06); opacity: 1; }
+      61%      { transform: scale(.66);  opacity: .45; }
+      65.5%    { transform: scale(1.1);  opacity: 1; }
+      69%,100% { transform: scale(1);    opacity: 1; }
+    }
     @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
   </style>
   <defs>
@@ -36,6 +75,10 @@
       <stop offset="0" stop-color="#000" stop-opacity="0.6"/>
       <stop offset="1" stop-color="#000" stop-opacity="0"/>
     </radialGradient>
+    <!-- clips are drawn in the render's own 564x470 pixel space -->
+    <clipPath id="cArmL"><polygon transform="translate(335 110) scale(1.6489 1.6511)" points="96,255 150,246 190,286 192,338 122,342 96,302"/></clipPath>
+    <clipPath id="cArmR"><polygon transform="translate(335 110) scale(1.6489 1.6511)" points="380,228 425,220 462,238 458,292 430,314 380,304"/></clipPath>
+    <clipPath id="cBody"><path transform="translate(335 110) scale(1.6489 1.6511)" clip-rule="evenodd" d="M0 0 H564 V470 H0 Z M96 255 L150 246 L163 286 L163 338 L122 342 L96 302 Z M402 228 L425 220 L462 238 L458 292 L430 314 L402 304 Z"/></clipPath>
   </defs>
 
   <rect width="1600" height="1000" fill="url(#ground)"/>
@@ -43,6 +86,11 @@
   <ellipse class="shadow" cx="797" cy="840" rx="255" ry="32" fill="url(#shade)"/>
 
   <g class="hop"><g class="sway"><g class="char">
-    <image href="assets/img/covers/procrastino-logo.webp" x="335" y="110" width="930" height="776"/>
+    <g class="armL"><g class="waveL"><image clip-path="url(#cArmL)" href="assets/img/covers/procrastino-logo.webp" x="335" y="110" width="930" height="776"/></g></g>
+    <g class="armR"><g class="waveR"><image clip-path="url(#cArmR)" href="assets/img/covers/procrastino-logo.webp" x="335" y="110" width="930" height="776"/></g></g>
+    <image clip-path="url(#cBody)" href="assets/img/covers/procrastino-logo.webp" x="335" y="110" width="930" height="776"/>
+    <!-- eyelids, in the skin tone around each eye -->
+    <ellipse class="lid" cx="736" cy="577" rx="29" ry="33" fill="#f09348"/>
+    <ellipse class="lid" cx="892" cy="564" rx="30" ry="34" fill="#e4773c"/>
   </g></g></g>
 </svg>
