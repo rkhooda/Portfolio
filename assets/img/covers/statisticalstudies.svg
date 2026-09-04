@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice">
+  <!-- StatisticalStudies: the bar-and-line mark. Bars grow from the
+       baseline, the line draws through, the nodes pop as it reaches them. -->
+  <style>
+    .bar  { transform-box: fill-box; transform-origin: 50% 100%; transform: scaleY(0); animation: grow 6s cubic-bezier(.2,1.2,.3,1) infinite; }
+    .bar:nth-child(2) { animation-delay: .12s; }
+    .bar:nth-child(3) { animation-delay: .24s; }
+    .bar:nth-child(4) { animation-delay: .36s; }
+    .line { stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw 6s cubic-bezier(.4,0,.2,1) infinite; }
+    .node { transform-box: fill-box; transform-origin: center; transform: scale(0); animation: pop 6s cubic-bezier(.2,1.5,.4,1) infinite; }
+    .node:nth-child(2) { animation-delay: .32s; }
+    .node:nth-child(3) { animation-delay: .62s; }
+    .node:nth-child(4) { animation-delay: 1s; }
+    @keyframes grow { 0%,4% { transform: scaleY(0); } 20%,88% { transform: scaleY(1); } 94%,100% { transform: scaleY(0); } }
+    @keyframes draw { 0%,24% { stroke-dashoffset: 1; opacity: 1; } 44%,88% { stroke-dashoffset: 0; opacity: 1; } 92%,100% { stroke-dashoffset: 0; opacity: 0; } }
+    @keyframes pop  { 0%,24% { transform: scale(0); } 30%,88% { transform: scale(1); } 92%,100% { transform: scale(0); } }
+    @media (prefers-reduced-motion: reduce) {
+      .bar, .line, .node { animation: none; }
+      .bar { transform: none; } .node { transform: none; } .line { stroke-dashoffset: 0; }
+    }
+  </style>
+  <defs>
+    <linearGradient id="ground" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#181916"/>
+      <stop offset="1" stop-color="#0b0c0b"/>
+    </linearGradient>
+    <radialGradient id="halo" cx="800" cy="520" r="520" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#3aa6e0" stop-opacity="0.14"/>
+      <stop offset="1" stop-color="#3aa6e0" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="barg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#63c8f2"/>
+      <stop offset="1" stop-color="#1d6a9e"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1600" height="1000" fill="url(#ground)"/>
+  <rect width="1600" height="1000" fill="url(#halo)"/>
+
+  <!-- the mark, drawn in its own 525-unit box and scaled up -->
+  <g transform="translate(485 185) scale(1.2)">
+    <line x1="30" y1="492" x2="520" y2="492" stroke="#eaeae2" stroke-opacity="0.12" stroke-width="3" stroke-linecap="round"/>
+    <g fill="url(#barg)">
+      <rect class="bar" x="57"  y="370" width="77" height="122" rx="7"/>
+      <rect class="bar" x="179" y="318" width="78" height="174" rx="7"/>
+      <rect class="bar" x="300" y="268" width="79" height="224" rx="7"/>
+      <rect class="bar" x="422" y="188" width="78" height="304" rx="7"/>
+    </g>
+    <path class="line" pathLength="1" d="M88 295 L248 145 L348 188 L484 52" fill="none" stroke="#2478ad" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+    <g fill="#2478ad">
+      <circle class="node" cx="88"  cy="295" r="33"/>
+      <circle class="node" cx="248" cy="145" r="35"/>
+      <circle class="node" cx="348" cy="188" r="33"/>
+      <circle class="node" cx="484" cy="52"  r="35"/>
+    </g>
+  </g>
+</svg>

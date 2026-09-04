@@ -90,7 +90,7 @@ window.PROJECTS = [
     tags: ["WEB", "APPS"],
     year: "2025", dur: "04:37",
     url: "https://statistical-studies.vercel.app",
-    img: "assets/img/covers/statisticalstudies.jpg",
+    img: "assets/img/covers/statisticalstudies.svg",
     tint: "#7E9089",
   },
   {
