@@ -100,6 +100,7 @@ window.PROJECTS = [
     tags: ["TOOLS", "LAB"],
     year: "2026", dur: "∞",
     url: null, wip: true,
+    img: "assets/img/covers/developer-brain.svg",
     tint: "#A98F62",
   },
 ];
