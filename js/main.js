@@ -34,10 +34,11 @@
   const cover = (src) => (WEBP ? src.replace(/\.(jpe?g|png)$/i, ".webp") : src);
 
   function coverHTML(p, i) {
-    if (p.img) return `<img class="shot" src="${cover(p.img)}" alt="" loading="lazy" decoding="async" draggable="false">`;
+    const wip = p.wip ? '<span class="cov-wip mono">UNRELEASED</span>' : "";
+    if (p.img) return `<img class="shot" src="${cover(p.img)}" alt="" loading="lazy" decoding="async" draggable="false">` + wip;
     return `<span class="ghost" aria-hidden="true">${p.title.trim()[0]}</span>
       <span class="vinyl" aria-hidden="true"><span class="v-label mono">${catNo(i)}</span></span>
-      ${p.wip ? '<span class="cov-wip mono">UNRELEASED</span>' : ""}`;
+      ${wip}`;
   }
 
   /* An SVG cover is swapped for its own markup once the text arrives. Through

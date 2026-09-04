@@ -37,6 +37,7 @@ window.PROJECTS = [
     tags: ["AI", "SYSTEM"],
     year: "2026", dur: "--:--",
     url: null, wip: true,
+    img: "assets/img/covers/multiagent-builder.svg",
     tint: "#A8B58A",
   },
   {
