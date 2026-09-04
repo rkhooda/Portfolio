@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice">
+  <!-- Bellsy: the bell from the logo, hung from the top of the card. -->
+  <style>
+    /* inline in the page, main.js feeds --swing/--clap/--ring off the drag;
+       as a plain image only the idle sway runs */
+    .hang    { transform-origin: 800px 0px; animation: sway 5.2s ease-in-out infinite alternate; }
+    .swing   { transform-origin: 800px 0px; transform: rotate(var(--swing, 0deg)); }
+    .clapper { transform-origin: 800px 330px; transform: rotate(var(--clap, 0deg)); }
+    .ring    { opacity: var(--ring, 0); }
+    @keyframes sway { from { transform: rotate(-1.6deg); } to { transform: rotate(1.6deg); } }
+    @media (prefers-reduced-motion: reduce) { .hang { animation: none; } }
+  </style>
+  <defs>
+    <linearGradient id="ground" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#181916"/>
+      <stop offset="1" stop-color="#0b0c0b"/>
+    </linearGradient>
+    <radialGradient id="halo" cx="800" cy="430" r="520" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#3b6cff" stop-opacity="0.16"/>
+      <stop offset="1" stop-color="#3b6cff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="body" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#5e8dff"/>
+      <stop offset="0.28" stop-color="#2a5ae6"/>
+      <stop offset="0.7" stop-color="#1235a8"/>
+      <stop offset="1" stop-color="#0b1f6a"/>
+    </linearGradient>
+    <linearGradient id="lip" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#7aa2ff"/>
+      <stop offset="0.3" stop-color="#3767ee"/>
+      <stop offset="0.75" stop-color="#1a40b8"/>
+      <stop offset="1" stop-color="#102a7e"/>
+    </linearGradient>
+    <linearGradient id="sheen" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff" stop-opacity="0.32"/>
+      <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="ball" cx="0.4" cy="0.35" r="0.7">
+      <stop offset="0" stop-color="#4f7dff"/>
+      <stop offset="1" stop-color="#0a1c5e"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1600" height="1000" fill="url(#ground)"/>
+  <rect width="1600" height="1000" fill="url(#halo)"/>
+
+  <g class="hang"><g class="swing">
+    <!-- the cord -->
+    <line x1="800" y1="0" x2="800" y2="150" stroke="#6f7369" stroke-width="5"/>
+
+    <!-- sound: lit by angular speed -->
+    <g class="ring" fill="none" stroke="#5f8eff" stroke-linecap="round">
+      <path d="M470 300 A330 330 0 0 0 470 560" stroke-width="30" opacity="0.18"/>
+      <path d="M470 300 A330 330 0 0 0 470 560" stroke-width="12"/>
+      <path d="M392 262 A410 410 0 0 0 392 598" stroke-width="30" opacity="0.14"/>
+      <path d="M392 262 A410 410 0 0 0 392 598" stroke-width="10"/>
+      <path d="M1130 300 A330 330 0 0 1 1130 560" stroke-width="30" opacity="0.18"/>
+      <path d="M1130 300 A330 330 0 0 1 1130 560" stroke-width="12"/>
+      <path d="M1208 262 A410 410 0 0 1 1208 598" stroke-width="30" opacity="0.14"/>
+      <path d="M1208 262 A410 410 0 0 1 1208 598" stroke-width="10"/>
+    </g>
+
+    <!-- clapper hangs inside, behind the lip -->
+    <g class="clapper">
+      <line x1="800" y1="330" x2="800" y2="640" stroke="#0a1c5e" stroke-width="14" stroke-linecap="round"/>
+      <circle cx="800" cy="668" r="44" fill="url(#ball)"/>
+    </g>
+
+    <!-- bell -->
+    <circle cx="800" cy="168" r="30" fill="url(#body)"/>
+    <path d="M800 182 C690 182 640 270 632 420 C627 505 600 562 552 592 L1048 592 C1000 562 973 505 968 420 C960 270 910 182 800 182 Z" fill="url(#body)"/>
+    <path d="M700 240 C660 290 648 360 646 430 C645 480 630 540 604 578 L660 578 C676 540 684 480 684 430 C686 360 700 300 740 240 Z" fill="url(#sheen)"/>
+    <rect x="536" y="586" width="528" height="60" rx="26" fill="url(#lip)"/>
+    <rect x="536" y="586" width="528" height="10" rx="5" fill="#fff" opacity="0.18"/>
+    <rect x="552" y="640" width="496" height="6" rx="3" fill="#061240" opacity="0.7"/>
+  </g></g>
+</svg>

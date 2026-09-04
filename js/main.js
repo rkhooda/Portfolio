@@ -44,6 +44,7 @@
      <img> it already animates on its own, but only inline can the page reach
      into it — the FlowPane eyes follow the cursor. */
   const SVGS = {};
+  let bellSvgs = [];
   function inlineCovers(root) {
     root.querySelectorAll('img.shot[src$=".svg"]').forEach((img) => {
       const txt = SVGS[img.getAttribute("src")];
@@ -52,6 +53,7 @@
       img.nextElementSibling.classList.add("shot");
       img.remove();
     });
+    bellSvgs = [...document.querySelectorAll("svg.shot .swing")].map((e) => e.ownerSVGElement);
   }
   window.PROJECTS.filter((p) => /\.svg$/.test(p.img || "")).forEach((p) =>
     fetch(p.img).then((r) => r.text()).then((t) => { SVGS[p.img] = t; inlineCovers(document); })
@@ -233,6 +235,30 @@
     galleryRaf = requestAnimationFrame(galleryTick);
   }
 
+  /* Bellsy's bell hangs off the top of its card and swings with the drag:
+     each frame's camera shift is the shove, a light spring rings it down.
+     The clapper is a looser spring chasing the bell, so it lags and knocks;
+     the sound arcs light up with angular speed. */
+  const bell = { th: 0, w: 0, ct: 0, cw: 0, dx: 0 };
+  function ringBells(dx) {
+    if (reduced || !bellSvgs.length) return false;
+    /* a steady glide leaves it hanging straight; only a change of pace
+       shoves it, so it kicks at the grab and again when the drag lets go */
+    bell.w = (bell.w - (dx - bell.dx) * 0.12 - bell.th * 0.008) * 0.988;
+    bell.dx = dx;
+    bell.th = Math.max(-40, Math.min(40, bell.th + bell.w));
+    bell.cw = (bell.cw + (bell.th - bell.ct) * 0.09) * 0.86;
+    bell.ct += bell.cw;
+    const clap = Math.max(-22, Math.min(22, (bell.ct - bell.th) * 0.9));
+    const ring = Math.min(1, Math.abs(bell.w) / 2.5);
+    for (const s of bellSvgs) {
+      s.style.setProperty("--swing", bell.th.toFixed(2) + "deg");
+      s.style.setProperty("--clap", clap.toFixed(2) + "deg");
+      s.style.setProperty("--ring", ring.toFixed(3));
+    }
+    return Math.abs(bell.w) > 0.003 || Math.abs(bell.th) > 0.02 || Math.abs(bell.cw) > 0.003;
+  }
+
   function galleryTick() {
     galleryRaf = 0;
     if (stage.hidden || !cells.length) return;
@@ -256,6 +282,7 @@
     const k = reduced ? 1 : 0.14;
     const nx = cam.x + (cam.tx - cam.x) * k;
     const ny = cam.y + (cam.ty - cam.y) * k;
+    if (ringBells(nx - cam.x)) busy = true;
     if (Math.abs(nx - cam.x) >= 0.01 || Math.abs(ny - cam.y) >= 0.01) {
       cam.x = nx;
       cam.y = ny;

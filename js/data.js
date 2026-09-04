@@ -63,7 +63,7 @@ window.PROJECTS = [
     tags: ["TOOLS"],
     year: "2025", dur: "02:48",
     url: "https://bellsy.vercel.app",
-    img: "assets/img/covers/bellsy.jpg",
+    img: "assets/img/covers/bellsy.svg",
     tint: "#C2B28A",
   },
   {
