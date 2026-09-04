@@ -15,98 +15,63 @@
       <stop offset="0" stop-color="#181916"/>
       <stop offset="1" stop-color="#0b0c0b"/>
     </linearGradient>
-    <radialGradient id="halo" cx="800" cy="440" r="540" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#3b6cff" stop-opacity="0.14"/>
+    <radialGradient id="halo" cx="800" cy="430" r="520" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#3b6cff" stop-opacity="0.16"/>
       <stop offset="1" stop-color="#3b6cff" stop-opacity="0"/>
     </radialGradient>
-    <!-- lit from the upper left: reflected light at the near edge, a specular
-         band, the core shadow, then a thin rim of bounce light on the far edge -->
     <linearGradient id="body" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0"    stop-color="#1c46c4"/>
-      <stop offset="0.14" stop-color="#3f74ff"/>
-      <stop offset="0.3"  stop-color="#7fa6ff"/>
-      <stop offset="0.48" stop-color="#2f5fe6"/>
-      <stop offset="0.8"  stop-color="#0c2378"/>
-      <stop offset="0.95" stop-color="#0a1d60"/>
-      <stop offset="1"    stop-color="#2b55c8"/>
-    </linearGradient>
-    <linearGradient id="mouth" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#0e2470"/>
-      <stop offset="0.5" stop-color="#050f38"/>
-      <stop offset="1" stop-color="#02071c"/>
+      <stop offset="0" stop-color="#5e8dff"/>
+      <stop offset="0.28" stop-color="#2a5ae6"/>
+      <stop offset="0.7" stop-color="#1235a8"/>
+      <stop offset="1" stop-color="#0b1f6a"/>
     </linearGradient>
     <linearGradient id="lip" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0" stop-color="#2652d0"/>
-      <stop offset="0.28" stop-color="#8db0ff"/>
-      <stop offset="0.6" stop-color="#3c6cf0"/>
-      <stop offset="1" stop-color="#132c86"/>
+      <stop offset="0" stop-color="#7aa2ff"/>
+      <stop offset="0.3" stop-color="#3767ee"/>
+      <stop offset="0.75" stop-color="#1a40b8"/>
+      <stop offset="1" stop-color="#102a7e"/>
     </linearGradient>
-    <linearGradient id="streak" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#fff" stop-opacity="0"/>
-      <stop offset="0.25" stop-color="#fff" stop-opacity="0.32"/>
-      <stop offset="0.8" stop-color="#fff" stop-opacity="0.2"/>
+    <linearGradient id="sheen" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff" stop-opacity="0.32"/>
       <stop offset="1" stop-color="#fff" stop-opacity="0"/>
     </linearGradient>
-    <radialGradient id="ball" cx="0.38" cy="0.32" r="0.72">
-      <stop offset="0" stop-color="#6d97ff"/>
-      <stop offset="0.6" stop-color="#1b3fae"/>
-      <stop offset="1" stop-color="#071548"/>
+    <radialGradient id="ball" cx="0.4" cy="0.35" r="0.7">
+      <stop offset="0" stop-color="#4f7dff"/>
+      <stop offset="1" stop-color="#0a1c5e"/>
     </radialGradient>
-    <linearGradient id="vshade" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0.45" stop-color="#020a30" stop-opacity="0"/>
-      <stop offset="1" stop-color="#020a30" stop-opacity="0.5"/>
-    </linearGradient>
-    <clipPath id="mouthClip"><ellipse cx="800" cy="620" rx="290" ry="52"/></clipPath>
-    <!-- profile: crown, shoulder, waist, sound bow, lip; the bottom edge is
-         the near half of the mouth, seen from a little below -->
-    <path id="profile" d="M800 158 C765 158 742 178 740 205 C738 232 700 238 655 250 C632 262 628 300 632 340 C636 400 626 470 590 540 C566 585 528 606 510 620 A290 52 0 0 0 1090 620 C1072 606 1034 585 1010 540 C974 470 964 400 968 340 C972 300 968 262 945 250 C900 238 862 232 860 205 C858 178 835 158 800 158 Z"/>
   </defs>
 
   <rect width="1600" height="1000" fill="url(#ground)"/>
   <rect width="1600" height="1000" fill="url(#halo)"/>
 
-  <g class="hang"><g class="swing"><g transform="matrix(1.12 0 0 1.12 -96 0)">
-    <!-- cord, through the hanger loop -->
-    <line x1="800" y1="0" x2="800" y2="128" stroke="#5d6058" stroke-width="7"/>
-    <line x1="798" y1="0" x2="798" y2="128" stroke="#a3a69b" stroke-width="1.5" opacity="0.6"/>
+  <g class="hang"><g class="swing">
+    <!-- the cord -->
+    <line x1="800" y1="0" x2="800" y2="150" stroke="#6f7369" stroke-width="5"/>
 
     <!-- sound: lit by angular speed -->
-    <g class="ring" fill="none" stroke-linecap="round">
-      <path d="M462 320 A310 310 0 0 0 462 560" stroke="#5f8eff" stroke-width="26" opacity="0.12"/>
-      <path d="M462 320 A310 310 0 0 0 462 560" stroke="#8fb1ff" stroke-width="9"/>
-      <path d="M384 276 A400 400 0 0 0 384 604" stroke="#5f8eff" stroke-width="26" opacity="0.08"/>
-      <path d="M384 276 A400 400 0 0 0 384 604" stroke="#8fb1ff" stroke-width="7" opacity="0.7"/>
-      <path d="M1138 320 A310 310 0 0 1 1138 560" stroke="#5f8eff" stroke-width="26" opacity="0.12"/>
-      <path d="M1138 320 A310 310 0 0 1 1138 560" stroke="#8fb1ff" stroke-width="9"/>
-      <path d="M1216 276 A400 400 0 0 1 1216 604" stroke="#5f8eff" stroke-width="26" opacity="0.08"/>
-      <path d="M1216 276 A400 400 0 0 1 1216 604" stroke="#8fb1ff" stroke-width="7" opacity="0.7"/>
+    <g class="ring" fill="none" stroke="#5f8eff" stroke-linecap="round">
+      <path d="M470 300 A330 330 0 0 0 470 560" stroke-width="30" opacity="0.18"/>
+      <path d="M470 300 A330 330 0 0 0 470 560" stroke-width="12"/>
+      <path d="M392 262 A410 410 0 0 0 392 598" stroke-width="30" opacity="0.14"/>
+      <path d="M392 262 A410 410 0 0 0 392 598" stroke-width="10"/>
+      <path d="M1130 300 A330 330 0 0 1 1130 560" stroke-width="30" opacity="0.18"/>
+      <path d="M1130 300 A330 330 0 0 1 1130 560" stroke-width="12"/>
+      <path d="M1208 262 A410 410 0 0 1 1208 598" stroke-width="30" opacity="0.14"/>
+      <path d="M1208 262 A410 410 0 0 1 1208 598" stroke-width="10"/>
     </g>
 
-    <!-- hanger loop -->
-    <circle cx="800" cy="140" r="24" fill="none" stroke="#12308f" stroke-width="12"/>
-    <path d="M779 132 A24 24 0 0 1 812 118" fill="none" stroke="#8db0ff" stroke-width="5" stroke-linecap="round"/>
+    <!-- clapper hangs inside, behind the lip -->
+    <g class="clapper">
+      <line x1="800" y1="330" x2="800" y2="640" stroke="#0a1c5e" stroke-width="14" stroke-linecap="round"/>
+      <circle cx="800" cy="668" r="44" fill="url(#ball)"/>
+    </g>
 
-    <!-- body -->
-    <use href="#profile" fill="url(#body)"/>
-    <use href="#profile" fill="url(#vshade)"/>
-    <!-- specular streak down the waist -->
-    <path d="M700 232 C676 300 676 400 650 500 C640 540 622 570 606 592 L642 592 C662 566 680 536 690 500 C714 400 716 300 736 232 Z" fill="url(#streak)"/>
-    <!-- crown highlight -->
-    <ellipse cx="778" cy="188" rx="22" ry="11" fill="#fff" opacity="0.35" transform="rotate(-30 778 188)"/>
-    <!-- cast bands, bowing down because we look up at them -->
-    <path d="M632 316 Q800 352 968 316" fill="none" stroke="#071852" stroke-width="5" opacity="0.6"/>
-    <path d="M632 310 Q800 346 968 310" fill="none" stroke="#fff" stroke-width="2" opacity="0.14"/>
-    <path d="M600 528 Q800 574 1000 528" fill="none" stroke="#071852" stroke-width="6" opacity="0.6"/>
-    <path d="M600 522 Q800 568 1000 522" fill="none" stroke="#fff" stroke-width="2" opacity="0.14"/>
-
-    <!-- the mouth: interior, clapper inside it, then the rim's thickness -->
-    <ellipse cx="800" cy="620" rx="290" ry="52" fill="url(#mouth)"/>
-    <g clip-path="url(#mouthClip)"><g class="clapper">
-      <line x1="800" y1="330" x2="800" y2="612" stroke="#0a1c5e" stroke-width="16" stroke-linecap="round"/>
-      <circle cx="800" cy="634" r="44" fill="url(#ball)"/>
-    </g></g>
-    <ellipse cx="800" cy="620" rx="290" ry="52" fill="none" stroke="url(#lip)" stroke-width="18"/>
-    <path d="M520 632 A290 52 0 0 0 1080 632" fill="none" stroke="#fff" stroke-width="3" opacity="0.22"/>
-    <path d="M540 596 A290 52 0 0 1 1060 596" fill="none" stroke="#04102e" stroke-width="3" opacity="0.5"/>
-  </g></g></g>
+    <!-- bell -->
+    <circle cx="800" cy="168" r="30" fill="url(#body)"/>
+    <path d="M800 182 C690 182 640 270 632 420 C627 505 600 562 552 592 L1048 592 C1000 562 973 505 968 420 C960 270 910 182 800 182 Z" fill="url(#body)"/>
+    <path d="M700 240 C660 290 648 360 646 430 C645 480 630 540 604 578 L660 578 C676 540 684 480 684 430 C686 360 700 300 740 240 Z" fill="url(#sheen)"/>
+    <rect x="536" y="586" width="528" height="60" rx="26" fill="url(#lip)"/>
+    <rect x="536" y="586" width="528" height="10" rx="5" fill="#fff" opacity="0.18"/>
+    <rect x="552" y="640" width="496" height="6" rx="3" fill="#061240" opacity="0.7"/>
+  </g></g>
 </svg>
