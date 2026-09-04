@@ -45,7 +45,7 @@ window.PROJECTS = [
     tags: ["AUTOMATION", "TOOLS"],
     year: "2025", dur: "05:01",
     url: "https://cult-bot.vercel.app",
-    img: "assets/img/covers/cult-bot.jpg",
+    img: "assets/img/covers/cult-bot.svg",
     tint: "#9A9B6A",
   },
   {

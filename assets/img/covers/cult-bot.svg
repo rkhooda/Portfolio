@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice">
+  <!-- Cult-Bot: the NerdCult mark. The check draws itself in and pops, the
+       brackets get bumped, and the XP floats up — one todo, done. -->
+  <style>
+    .check { stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw 6s cubic-bezier(.4,0,.2,1) infinite; }
+    .pop   { transform-origin: 800px 500px; animation: pop 6s cubic-bezier(.2,1.4,.4,1) infinite; }
+    .bl    { animation: bumpL 6s cubic-bezier(.2,1.4,.4,1) infinite; }
+    .br    { animation: bumpR 6s cubic-bezier(.2,1.4,.4,1) infinite; }
+    .xp    { font: 700 44px var(--font-m, ui-monospace, "JetBrains Mono", monospace); letter-spacing: .08em; fill: #f1c40f; opacity: 0; animation: xp 6s ease-out infinite; }
+    @keyframes draw {
+      0%,6%    { stroke-dashoffset: 1; opacity: 1; }
+      20%,86%  { stroke-dashoffset: 0; opacity: 1; }
+      92%,100% { stroke-dashoffset: 0; opacity: 0; }
+    }
+    @keyframes pop   { 0%,19% { transform: scale(1); } 22% { transform: scale(1.22); } 30%,100% { transform: scale(1); } }
+    @keyframes bumpL { 0%,19% { transform: translateX(0); } 24% { transform: translateX(-22px); } 34%,100% { transform: translateX(0); } }
+    @keyframes bumpR { 0%,19% { transform: translateX(0); } 24% { transform: translateX(22px); }  34%,100% { transform: translateX(0); } }
+    @keyframes xp {
+      0%,20%   { transform: translateY(0);     opacity: 0; }
+      26%      { opacity: 1; }
+      50%,100% { transform: translateY(-120px); opacity: 0; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .check, .pop, .bl, .br, .xp { animation: none; }
+      .check { stroke-dashoffset: 0; }
+    }
+  </style>
+  <defs>
+    <linearGradient id="ground" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#181916"/>
+      <stop offset="1" stop-color="#0b0c0b"/>
+    </linearGradient>
+    <radialGradient id="halo" cx="800" cy="500" r="520" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#6c6cff" stop-opacity="0.16"/>
+      <stop offset="1" stop-color="#6c6cff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="bracket" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#5b6dff"/>
+      <stop offset="1" stop-color="#b95fc0"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1600" height="1000" fill="url(#ground)"/>
+  <rect width="1600" height="1000" fill="url(#halo)"/>
+
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path class="bl" d="M718 322 L558 500 L718 678" stroke="url(#bracket)" stroke-width="48"/>
+    <path class="br" d="M882 322 L1042 500 L882 678" stroke="url(#bracket)" stroke-width="48"/>
+    <g class="pop">
+      <path class="check" pathLength="1" d="M746 510 L787 554 L870 442" stroke="#f1c40f" stroke-width="44"/>
+    </g>
+  </g>
+  <text class="xp" x="800" y="292" text-anchor="middle">+25 XP</text>
+</svg>
