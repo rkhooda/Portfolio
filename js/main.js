@@ -89,7 +89,7 @@
       </button>
     </div>`;
 
-  let cells = [], cellW, cellH, spanX, spanY;
+  let cells = [], cellW, cellH, rowsVis, spanX, spanY;
   const cam = { x: 0, y: 0, tx: 0, ty: 0, vx: 0, vy: 0 };
   let grabbing = false, moved = false, downX = 0, downY = 0;
 
@@ -102,7 +102,6 @@
     depth: 210, tilt: 26, tiltRow: 32, stretch: 0.11, maxGrow: 0.26, hold: 0.75,
     rimX: 0.8, rimY: 2 / 3, maxBend: 1.5, maxR2: 2.4,
   };
-  const SLIVER = 110; // strip of the fourth row the bottom fade dissolves
   /* mostly cubic, then rescaled so the rim is already full strength: the
      middle stays near flat and the bend piles up at the edge, where the
      cards both turn away and grow */
@@ -127,14 +126,16 @@
   const stageH = () => stage.clientHeight || Math.min(innerHeight * 0.78, 720);
 
   function buildGrid() {
-    /* five across, and three complete rows plus a sliver of the fourth — the
-       sliver is what the bottom fade dissolves, so the third row stays whole
-       instead of being chopped off mid-card */
+    /* A ~245px cell, and whatever row count keeps the tiles near-square —
+       always landing on a half row, which is the peek the bottom fade
+       dissolves, so the last whole row stays whole instead of being chopped
+       off mid-card. Both counts are derived, so the grid holds its shape
+       whatever the stage's own is. */
     const w = stage.clientWidth || innerWidth;
-    /* a ~245px cell at every width, so the tiles stay near-square against the
-       row height instead of stretching flat on a wide screen */
+    const h = stageH();
     cellW = Math.round(w / Math.max(3, Math.round(w / 245)));
-    cellH = Math.round((stageH() - SLIVER) / 3);
+    rowsVis = Math.max(1, Math.round(h / cellW - 0.25)) + 0.5;
+    cellH = Math.round(h / rowsVis);
     /* pool = the 3x3 project pattern repeated enough to cover the stage;
        cells wrap around the pool span, so content never needs to change */
     const cols = Math.ceil((innerWidth / cellW + 2) / 3) * 3;
@@ -143,7 +144,7 @@
     spanY = rows * cellH;
     originX = (stage.clientWidth || innerWidth) / 2;
     originY = stageH() / 2;
-    warpRy = (cellH * 3) / 2; // the three full rows, not the whole stage
+    warpRy = (cellH * (rowsVis - 0.5)) / 2; // the whole rows, not the whole stage
     warpCy = warpRy;
     persp = parseFloat(getComputedStyle(stage).perspective) || 1200;
     plane.innerHTML = "";
@@ -386,10 +387,14 @@
   vl.addEventListener("click", () => setView("list"));
   setView(finePointer ? "grid" : "list");
 
-  let lastW = innerWidth;
+  let lastW = innerWidth, lastH = innerHeight;
   addEventListener("resize", () => {
-    if (innerWidth === lastW) return; // ignore mobile url-bar height churn
+    /* the row count comes off the stage's height now, so a vertical resize
+       has to rebuild too — except on touch, where the height changing on its
+       own is just the url bar sliding away */
+    if (innerWidth === lastW && !(finePointer && innerHeight !== lastH)) return;
     lastW = innerWidth;
+    lastH = innerHeight;
     if (!stage.hidden) { buildGrid(); wake(); }
   });
 

@@ -495,6 +495,15 @@ section > * { flex-shrink: 0; }
 
 /* ---------------- work gallery: draggable infinite grid ---------------- */
 .work-body { position: relative; }
+/* the gallery is the rest of the screen: the section is one viewport tall,
+   so whatever the heading doesn't use, the stage takes. List view keeps its
+   natural height instead — a tracklist has no business being stretched. */
+.work-body:has(> .stage:not([hidden])) {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
 
 .stage {
   position: relative;
@@ -502,7 +511,10 @@ section > * { flex-shrink: 0; }
      padding, and clips hard at the screen edge — no framed panel */
   width: 100vw;
   margin-left: calc(50% - 50vw);
-  height: min(86vh, 800px);
+  /* takes the height its parent was handed, rather than a percentage of it —
+     a flex item's height is not a definite length for its children */
+  flex: 1;
+  min-height: 0;
   overflow: hidden;
   cursor: grab;
   touch-action: pan-y; /* vertical swipe still scrolls the page on touch */
@@ -513,8 +525,8 @@ section > * { flex-shrink: 0; }
   perspective-origin: 50% 50%;
 }
 .stage.grabbing { cursor: grabbing; }
-/* top and bottom rows dip into the page — the bottom runs longer and softer
-   so the last row melts out instead of stopping on a hard line */
+/* the clipped rows dip into the page rather than ending on a hard line —
+   short enough that the peeking row still shows its art, not just its meta */
 .stage::before,
 .stage::after {
   content: "";
@@ -524,11 +536,11 @@ section > * { flex-shrink: 0; }
   z-index: 4;
   pointer-events: none;
 }
-.stage::before { top: 0; height: 62px; background: linear-gradient(var(--bg), transparent 88%); }
+.stage::before { top: 0; height: 48px; background: linear-gradient(var(--bg), transparent 92%); }
 .stage::after {
   bottom: 0;
-  height: 122px;
-  background: linear-gradient(transparent, rgba(10, 11, 10, 0.6) 48%, var(--bg) 90%);
+  height: 48px;
+  background: linear-gradient(transparent, rgba(10, 11, 10, 0.5) 44%, var(--bg) 94%);
 }
 
 .plane {
@@ -1554,7 +1566,6 @@ body.cursor-down #cRing { width: 24px; height: 24px; margin: -12px 0 0 -12px; }
   /* the one width the phone can't spare: the surname goes too, → RK */
   #nav.shrunk .nav-logo .nl-tail { max-width: 0; opacity: 0; }
   #nav.shrunk .nav-shell { padding: 0.5rem 0.5rem 0.5rem 0.9rem; }
-  .stage { height: min(64vh, 560px); }
   .p-label { display: none; }
   .hero-cue { display: none; }
 }
