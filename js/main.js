@@ -131,7 +131,9 @@
        sliver is what the bottom fade dissolves, so the third row stays whole
        instead of being chopped off mid-card */
     const w = stage.clientWidth || innerWidth;
-    cellW = Math.round(w / (w < 1100 ? 4 : 5));
+    /* a ~245px cell at every width, so the tiles stay near-square against the
+       row height instead of stretching flat on a wide screen */
+    cellW = Math.round(w / Math.max(3, Math.round(w / 245)));
     cellH = Math.round((stageH() - SLIVER) / 3);
     /* pool = the 3x3 project pattern repeated enough to cover the stage;
        cells wrap around the pool span, so content never needs to change */
