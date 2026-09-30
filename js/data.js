@@ -24,6 +24,7 @@ window.TRACKS = [
 window.PROJECTS = [
   {
     title: "CredVault",
+    client: "WEB3 VAULT",
     desc: "Secure, decentralized issuance & verification of credentials on the blockchain.",
     tags: ["WEB3", "PLATFORM"],
     year: "2025", dur: "04:12",
@@ -33,6 +34,7 @@ window.PROJECTS = [
   },
   {
     title: "Multiagent Builder",
+    client: "AI LABS",
     desc: "Multi-agent AI system for end-to-end product development.",
     tags: ["AI", "SYSTEM"],
     year: "2026", dur: "--:--",
@@ -42,6 +44,7 @@ window.PROJECTS = [
   },
   {
     title: "Cult-Bot",
+    client: "DISCORD UTILS",
     desc: "Discord dev-productivity bot — todos, streaks, XP, GitHub/LeetCode/Codeforces stats. All buttons, no syntax.",
     tags: ["AUTOMATION", "TOOLS"],
     year: "2025", dur: "05:01",
@@ -51,6 +54,7 @@ window.PROJECTS = [
   },
   {
     title: "Clixo",
+    client: "ETH PROTOCOL",
     desc: "Decentralised data-labelling platform on Ethereum.",
     tags: ["WEB3", "WEB"],
     year: "2026", dur: "03:47",
@@ -60,6 +64,7 @@ window.PROJECTS = [
   },
   {
     title: "Bellsy",
+    client: "DEV TOOLS",
     desc: "npm package + VS Code extension that pings you when coding agents and CLI tasks finish, fail, or need approval.",
     tags: ["TOOLS"],
     year: "2025", dur: "02:48",
@@ -69,6 +74,7 @@ window.PROJECTS = [
   },
   {
     title: "FlowPane",
+    client: "DESKTOP APPS",
     desc: "Lightweight, always-on-top desktop to-do app with a translucent UI.",
     tags: ["APPS", "TOOLS"],
     year: "2025", dur: "03:24",
@@ -78,6 +84,7 @@ window.PROJECTS = [
   },
   {
     title: "ProcrastiNO",
+    client: "PRODUCTIVITY",
     desc: "Aesthetic productivity tracker for pairs — todos, workouts, video journals.",
     tags: ["APPS"],
     year: "2026", dur: "03:12",
@@ -87,6 +94,7 @@ window.PROJECTS = [
   },
   {
     title: "StatisticalStudies",
+    client: "EDU PLATFORM",
     desc: "Educational platform for statistics & math — lectures, UGC-NET prep, premium content.",
     tags: ["WEB", "APPS"],
     year: "2025", dur: "04:37",
@@ -96,6 +104,7 @@ window.PROJECTS = [
   },
   {
     title: "Developer Brain",
+    client: "ENGINEERING OS",
     desc: "My long-term engineering operating system — an AI-augmented knowledge base.",
     tags: ["TOOLS", "LAB"],
     year: "2026", dur: "∞",

@@ -94,11 +94,12 @@
 
   const cellHTML = (p, i) => {
     const icon = BRAND_ICONS[p.title] || `<svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="8" cy="8" r="5"/></svg>`;
+    const clientLabel = p.client ? `<span class="g-client">${p.client}</span>` : `<em class="g-cat">${catNo(i)}</em>`;
     return `
       <div class="gcell">
         <button type="button" class="gcard" data-i="${i}" aria-label="${p.title} — ${p.desc}">
           <div class="g-top mono">
-            <span class="g-brand">${icon}<em class="g-cat">${catNo(i)}</em></span>
+            <span class="g-brand">${icon}${clientLabel}</span>
             <span class="g-title">${p.title.toUpperCase()}</span>
           </div>
           <div class="g-mid">
