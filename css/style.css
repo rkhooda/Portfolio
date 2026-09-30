@@ -559,31 +559,36 @@ section > * { flex-shrink: 0; }
 }
 .phantom-bg-header {
   position: absolute;
-  top: 4.2rem;
-  left: 2rem;
-  z-index: 5;
+  top: 3.8rem;
+  left: 1.8rem;
+  z-index: 15;
   pointer-events: none;
   user-select: none;
-  display: flex;
+  display: inline-flex;
   flex-direction: column;
-  gap: 0.3rem;
+  gap: 0.15rem;
+  padding: 0.5rem 0.9rem;
+  border-radius: 6px;
+  background: rgba(10, 11, 10, 0.55);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
 }
 .phantom-bg-header .phead-sub {
-  font-size: 10px;
-  letter-spacing: 0.24em;
+  font-size: 8.5px;
+  letter-spacing: 0.22em;
   color: var(--accent);
-  opacity: 0.85;
+  opacity: 0.9;
 }
 .phantom-bg-header .phead-title {
   font-family: var(--font-d);
-  font-size: clamp(2.8rem, 6.5vw, 6rem);
+  font-size: clamp(1.2rem, 2.2vw, 1.9rem);
   font-weight: 600;
-  letter-spacing: -0.02em;
-  line-height: 0.95;
+  letter-spacing: -0.01em;
+  line-height: 1;
   text-transform: uppercase;
-  color: rgba(234, 234, 226, 0.22);
-  filter: blur(5px);
-  -webkit-filter: blur(5px);
+  color: rgba(234, 234, 226, 0.9);
   margin: 0;
   padding: 0;
 }
