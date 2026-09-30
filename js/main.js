@@ -104,10 +104,6 @@
           <div class="g-mid">
             <div class="cover" style="--tint:${p.tint}">
               ${coverHTML(p, i)}
-              <div class="g-cover-play">
-                <span class="g-play-icon">▶</span>
-                <span class="g-play-text mono">PLAY DEMO</span>
-              </div>
             </div>
           </div>
           <div class="g-bot mono">
@@ -868,7 +864,7 @@
       ry(e.clientY);
     }, { passive: true });
 
-    const HOVERABLE = "a, button, input, .card, .bside";
+    const HOVERABLE = "a, button, input, .card, .bside, .gcard, .pmodal-card button, .pmodal-card a, .pmodal-close, .pm-btn-sec, .pm-btn-pri, .pm-vm-play";
     document.addEventListener("mouseover", (e) => {
       if (e.target.closest(HOVERABLE)) document.body.classList.add("cursor-hover");
     });
