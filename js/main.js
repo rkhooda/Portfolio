@@ -80,14 +80,43 @@
   const stage = $("#gstage"), plane = $("#gplane"), workList = $("#worklist");
   const P = window.PROJECTS;
 
-  const cellHTML = (p, i) => `
-    <div class="gcell">
-      <button type="button" class="gcard" data-i="${i}" aria-label="${p.title} — ${p.desc}">
-        <span class="g-top mono"><span>${catNo(i)}</span><span>${p.title.toUpperCase()}</span></span>
-        <span class="g-mid"><span class="cover" style="--tint:${p.tint}">${coverHTML(p, i)}</span></span>
-        <span class="g-bot mono"><span class="g-chips">${p.tags.map((t) => `<i>${t}</i>`).join("")}</span><span>${p.year}</span></span>
-      </button>
-    </div>`;
+  const BRAND_ICONS = {
+    "CredVault": `<svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M8 1.5L2.5 4v4.5c0 3.5 2.5 6.5 5.5 7.5 3-1 5.5-4 5.5-7.5V4L8 1.5z"/></svg>`,
+    "Multiagent Builder": `<svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="8" cy="4" r="2"/><circle cx="4" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><path d="M8 6v2M6.5 10.5L8 8m1.5 2.5L8 8"/></svg>`,
+    "Cult-Bot": `<svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="2.5" y="4.5" width="11" height="8" rx="2"/><circle cx="6" cy="8.5" r="1" fill="currentColor"/><circle cx="10" cy="8.5" r="1" fill="currentColor"/></svg>`,
+    "Clixo": `<svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.3"><polygon points="8 1.5 14 5 14 11 8 14.5 2 11 2 5"/><line x1="8" y1="1.5" x2="8" y2="14.5"/></svg>`,
+    "Bellsy": `<svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M8 2a3.5 3.5 0 00-3.5 3.5v3L3 10.5h10L11.5 8.5v-3A3.5 3.5 0 008 2zM6.5 13a1.5 1.5 0 003 0"/></svg>`,
+    "FlowPane": `<svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="2" y="2.5" width="12" height="11" rx="1.5"/><line x1="2" y1="6" x2="14" y2="6"/></svg>`,
+    "ProcrastiNO": `<svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M8 2v6l4 2"/><circle cx="8" cy="8" r="6.5"/></svg>`,
+    "StatisticalStudies": `<svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M2 14h12M4 11l3-4 3 2 4-6"/></svg>`,
+    "Developer Brain": `<svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M5.5 3.5A3 3 0 002.5 6.5c0 1.3.8 2.4 2 2.8C4.2 10.5 5 12 7 12.5v1.5h2v-1.5c2-.5 2.8-2 2.5-3.2 1.2-.4 2-1.5 2-2.8a3 3 0 00-3-3c-.8 0-1.5.3-2 .8-.5-.5-1.2-.8-2-.8z"/></svg>`
+  };
+
+  const cellHTML = (p, i) => {
+    const icon = BRAND_ICONS[p.title] || `<svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="8" cy="8" r="5"/></svg>`;
+    return `
+      <div class="gcell">
+        <button type="button" class="gcard" data-i="${i}" aria-label="${p.title} — ${p.desc}">
+          <div class="g-top mono">
+            <span class="g-brand">${icon}<em class="g-cat">${catNo(i)}</em></span>
+            <span class="g-title">${p.title.toUpperCase()}</span>
+          </div>
+          <div class="g-mid">
+            <div class="cover" style="--tint:${p.tint}">
+              ${coverHTML(p, i)}
+              <div class="g-cover-play">
+                <span class="g-play-icon">▶</span>
+                <span class="g-play-text mono">PLAY DEMO</span>
+              </div>
+            </div>
+          </div>
+          <div class="g-bot mono">
+            <div class="g-chips">${p.tags.map((t) => `<i>${t}</i>`).join("")}</div>
+            <span class="g-year">${p.year}</span>
+          </div>
+        </button>
+      </div>`;
+  };
 
   let cells = [], cellW, cellH, rowsVis, spanX, spanY;
   const cam = { x: 0, y: 0, tx: 0, ty: 0, vx: 0, vy: 0 };
@@ -369,7 +398,8 @@
       document.elementFromPoint(e.clientX, e.clientY)?.closest(".gcard");
     if (!g) return;
     if (wasDrag) { e.preventDefault(); return; }
-    playTransition(P[+g.dataset.i]);
+    const idx = +g.dataset.i;
+    openProjectModal(P[idx], idx);
   }, true);
 
   /* grid <-> list toggle */
@@ -677,6 +707,121 @@
       .fromTo([tLabel, tDur], { opacity: 0 }, { opacity: 1, duration: 0.4 }, "<")
       .fromTo(tLine, { scaleX: 0 }, { scaleX: p.wip ? 0.38 : 1, duration: p.wip ? 0.5 : 0.85, ease: "power1.inOut" }, "<")
       .to(overlay, { opacity: 0, duration: 0.35, delay: 0.18 });
+  }
+  /* ---------- Project Showcase Modal (Video/Media overlay over blurred gallery) ---------- */
+  let currentModalIndex = 0;
+  const pModal = $("#projectModal");
+  const pmBackdrop = $("#pmBackdrop");
+  const pmClose = $("#pmClose");
+  const pmPrev = $("#pmPrev");
+  const pmNext = $("#pmNext");
+
+  function openProjectModal(p, i) {
+    if (!pModal) return;
+    currentModalIndex = i;
+    $("#pmCat").textContent = catNo(i);
+    $("#pmYear").textContent = p.year;
+    $("#pmTitle").textContent = p.title;
+    $("#pmDesc").textContent = p.desc;
+
+    const tagsEl = $("#pmTags");
+    if (tagsEl) tagsEl.innerHTML = p.tags.map((t) => `<i>${t}</i>`).join("");
+
+    const stackEl = $("#pmStack");
+    if (stackEl) {
+      const stackItems = p.stack || p.tags;
+      stackEl.innerHTML = stackItems.map((s) => `<span>#${s}</span>`).join(" ");
+    }
+
+    const urlBtn = $("#pmUrl");
+    if (urlBtn) {
+      if (p.url) {
+        urlBtn.href = p.url;
+        urlBtn.style.display = "inline-flex";
+        urlBtn.textContent = "LAUNCH PROJECT ↗";
+      } else if (p.wip) {
+        urlBtn.href = "#";
+        urlBtn.style.display = "inline-flex";
+        urlBtn.textContent = "IN THE STUDIO (UNRELEASED)";
+      } else {
+        urlBtn.style.display = "none";
+      }
+    }
+
+    const mediaContainer = $("#pmMediaContainer");
+    if (mediaContainer) {
+      if (p.video) {
+        mediaContainer.innerHTML = `<video class="pm-video" src="${p.video}" autoplay loop muted playsinline controls></video>`;
+      } else {
+        mediaContainer.innerHTML = `
+          <div class="pm-video-mock">
+            <div class="pm-vm-art" style="--tint:${p.tint}">
+              ${coverHTML(p, i)}
+            </div>
+            <div class="pm-vm-controls">
+              <button class="pm-vm-play" type="button" onclick="if('${p.url || ''}') window.open('${p.url}', '_blank')">▶ LAUNCH DEMO</button>
+              <div class="pm-vm-trackbar"><div class="pm-vm-progress"></div></div>
+              <span class="pm-vm-time mono">00:00 / ${p.dur || '03:45'}</span>
+              <span class="pm-vm-badge mono">1080p SHOWCASE</span>
+            </div>
+          </div>`;
+      }
+    }
+
+    pModal.classList.add("open");
+    pModal.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeProjectModal() {
+    if (!pModal) return;
+    pModal.classList.remove("open");
+    pModal.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = "";
+  }
+
+  if (pmClose) pmClose.addEventListener("click", closeProjectModal);
+  if (pmBackdrop) pmBackdrop.addEventListener("click", closeProjectModal);
+  if (pmPrev) pmPrev.addEventListener("click", () => {
+    const prevIdx = (currentModalIndex - 1 + P.length) % P.length;
+    openProjectModal(P[prevIdx], prevIdx);
+  });
+  if (pmNext) pmNext.addEventListener("click", () => {
+    const nextIdx = (currentModalIndex + 1) % P.length;
+    openProjectModal(P[nextIdx], nextIdx);
+  });
+
+  addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && pModal && pModal.classList.contains("open")) {
+      closeProjectModal();
+    }
+  });
+
+  /* ---------- Phantom Work Bar live clock & sound sync ---------- */
+  const clock1 = $("#workClock1");
+  const clock2 = $("#workClock2");
+  const workSound = $("#workSoundToggle");
+  const mainSound = $("#soundToggle");
+
+  function updateClocks() {
+    const now = new Date();
+    if (clock1) {
+      clock1.textContent = now.toLocaleTimeString("en-US", { hour12: false, timeZone: "Asia/Kolkata" }) + " IST";
+    }
+    if (clock2) {
+      clock2.textContent = now.toLocaleTimeString("en-US", { hour12: false, timeZone: "Europe/London" }) + " GMT+1";
+    }
+  }
+  updateClocks();
+  setInterval(updateClocks, 1000);
+
+  if (workSound && mainSound) {
+    workSound.addEventListener("click", () => mainSound.click());
+    const obs = new MutationObserver(() => {
+      workSound.textContent = mainSound.textContent;
+      workSound.classList.toggle("on", mainSound.classList.contains("on"));
+    });
+    obs.observe(mainSound, { attributes: true, childList: true, characterData: true, subtree: true });
   }
 
   document.addEventListener("click", (e) => {

@@ -88,12 +88,34 @@
     </section>
 
     <!-- TRACK 02 — selected work -->
-    <section id="work">
-      <div class="sec-head">
-        <p class="kicker">TRACK 02 — SIDE A</p>
-        <h2>Selected Work</h2>
-        <p class="sec-meta">09 TRACKS · MIXED 2023–2026</p>
+    <section id="work" class="phantom-work-sec">
+      <div class="phantom-bar mono">
+        <div class="pbar-left">
+          <a class="pbar-brand" href="#top" aria-label="Rakshit Hooda">
+            <svg class="pbar-logo-icon" viewBox="0 0 32 32" width="22" height="22" aria-hidden="true">
+              <circle cx="16" cy="16" r="15" fill="#0e100e"/>
+              <circle cx="16" cy="16" r="14" fill="none" stroke="#262a26" stroke-width="1"/>
+              <circle cx="16" cy="16" r="9" fill="none" stroke="#262a26" stroke-width="1"/>
+              <circle cx="16" cy="16" r="5" fill="#A8B58A"/>
+              <circle cx="16" cy="16" r="1.4" fill="#0e100e"/>
+            </svg>
+            <span class="pbar-name">RAKSHIT HOODA</span>
+          </a>
+          <button id="workSoundToggle" class="pbar-sound" type="button" aria-label="Toggle ambient sound">SOUND [OFF]</button>
+        </div>
+        <div class="pbar-center">
+          <span>RAKSHIT IS A FULL-STACK BUILDER CRAFTING DIGITAL EXPERIENCES, AI AGENTS & APPS.</span>
+        </div>
+        <div class="pbar-right">
+          <div class="pbar-clock-item">
+            <span class="pbar-dot">●</span> <span>GURUGRAM, IN</span> <b id="workClock1">--:-- IST</b>
+          </div>
+          <div class="pbar-clock-item">
+            <span class="pbar-dot">●</span> <span>LONDON, UK</span> <b id="workClock2">--:-- GMT+1</b>
+          </div>
+        </div>
       </div>
+
       <div class="work-body">
         <div class="stage" id="gstage">
           <div class="plane" id="gplane"></div>
@@ -249,6 +271,44 @@
       <p class="t-name" id="tName"></p>
       <p class="t-dur mono" id="tDur"></p>
       <div class="t-line"><span id="tLine"></span></div>
+    </div>
+  </div>
+
+  <!-- Selected Work Project Showcase Modal (Video/Media overlay with backdrop blur) -->
+  <div id="projectModal" class="pmodal-overlay" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="pmTitle">
+    <div class="pmodal-backdrop" id="pmBackdrop"></div>
+    <div class="pmodal-card">
+      <div class="pmodal-top-row">
+        <div class="pm-meta mono">
+          <span id="pmCat" class="pm-cat">RH-01</span>
+          <span id="pmYear" class="pm-year">2025</span>
+          <div id="pmTags" class="pm-tags"></div>
+        </div>
+        <button id="pmClose" class="pmodal-close mono" type="button" aria-label="Close modal">✕ CLOSE [ESC]</button>
+      </div>
+
+      <h2 id="pmTitle" class="pm-title">Project Title</h2>
+
+      <div class="pmodal-media-wrapper">
+        <div id="pmMediaContainer" class="pmodal-media">
+          <!-- Video or dynamic preview -->
+        </div>
+      </div>
+
+      <div class="pmodal-body">
+        <p id="pmDesc" class="pm-desc">Project description goes here...</p>
+        <div id="pmStack" class="pm-stack mono"></div>
+      </div>
+
+      <div class="pmodal-footer">
+        <div class="pm-nav">
+          <button id="pmPrev" class="pm-btn-sec mono" type="button">◄ PREV TRACK</button>
+          <button id="pmNext" class="pm-btn-sec mono" type="button">NEXT TRACK ►</button>
+        </div>
+        <div class="pm-actions">
+          <a id="pmUrl" class="pm-btn-pri mono magnetic" href="#" target="_blank" rel="noopener">LAUNCH PROJECT ↗</a>
+        </div>
+      </div>
     </div>
   </div>
 

@@ -498,6 +498,92 @@ section > * { flex-shrink: 0; }
 /* the gallery is the rest of the screen: the section is one viewport tall,
    so whatever the heading doesn't use, the stage takes. List view keeps its
    natural height instead — a tracklist has no business being stretched. */
+/* ---------------- Phantom.land Work Section & Top Bar ---------------- */
+.phantom-work-sec {
+  padding: 0 !important;
+  height: 100vh !important;
+  min-height: 100vh !important;
+  width: 100vw !important;
+  max-width: 100vw !important;
+  position: relative !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+.phantom-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1.8rem;
+  background: rgba(10, 11, 10, 0.75);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+}
+.pbar-left, .pbar-right {
+  display: flex;
+  align-items: center;
+  gap: 1.4rem;
+}
+.pbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: var(--text);
+  font-weight: 500;
+  text-decoration: none;
+}
+.pbar-brand:hover { color: var(--accent); }
+.pbar-sound {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 4px;
+  padding: 0.25rem 0.65rem;
+  color: var(--muted);
+  font-size: 9.5px;
+  font-family: var(--font-m);
+  cursor: pointer;
+  transition: all 0.25s;
+}
+.pbar-sound:hover, .pbar-sound.on {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.pbar-center {
+  max-width: 520px;
+  text-align: center;
+  font-size: 9.5px;
+  letter-spacing: 0.16em;
+  line-height: 1.4;
+  color: rgba(234, 234, 226, 0.88);
+  text-transform: uppercase;
+}
+.pbar-clock-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 10px;
+}
+.pbar-dot {
+  color: var(--accent);
+  font-size: 9px;
+}
+.pbar-clock-item b {
+  color: var(--text);
+  font-weight: 500;
+}
+@media (max-width: 900px) {
+  .pbar-center { display: none; }
+}
+
 .work-body:has(> .stage:not([hidden])) {
   flex: 1;
   min-height: 0;
@@ -507,26 +593,19 @@ section > * { flex-shrink: 0; }
 
 .stage {
   position: relative;
-  /* the grid runs the full width of the viewport, out past the section's own
-     padding, and clips hard at the screen edge — no framed panel */
   width: 100vw;
-  margin-left: calc(50% - 50vw);
-  /* takes the height its parent was handed, rather than a percentage of it —
-     a flex item's height is not a definite length for its children */
+  margin-left: 0;
   flex: 1;
   min-height: 0;
   overflow: hidden;
   cursor: grab;
-  touch-action: pan-y; /* vertical swipe still scrolls the page on touch */
+  touch-action: pan-y;
   user-select: none;
   -webkit-user-select: none;
-  /* the grid is pressed into a dish — see WARP in main.js */
   perspective: 1200px;
   perspective-origin: 50% 50%;
 }
 .stage.grabbing { cursor: grabbing; }
-/* the clipped rows dip into the page rather than ending on a hard line —
-   short enough that the peeking row still shows its art, not just its meta */
 .stage::before,
 .stage::after {
   content: "";
@@ -536,10 +615,10 @@ section > * { flex-shrink: 0; }
   z-index: 4;
   pointer-events: none;
 }
-.stage::before { top: 0; height: 48px; background: linear-gradient(var(--bg), transparent 92%); }
+.stage::before { top: 0; height: 56px; background: linear-gradient(var(--bg), transparent 92%); }
 .stage::after {
   bottom: 0;
-  height: 48px;
+  height: 56px;
   background: linear-gradient(transparent, rgba(10, 11, 10, 0.5) 44%, var(--bg) 94%);
 }
 
@@ -547,11 +626,10 @@ section > * { flex-shrink: 0; }
   position: absolute;
   inset: 0;
   transform-style: preserve-3d;
-  /* the warp pushes cards to negative z — behind the plane's own box — so the
-     plane must not hit-test, or it swallows every hover and click */
   pointer-events: none;
 }
 
+/* ---------------- Phantom Grid Cells & Cards ---------------- */
 .gcell {
   position: absolute;
   top: 0;
@@ -559,80 +637,412 @@ section > * { flex-shrink: 0; }
   pointer-events: auto;
   transform-style: preserve-3d;
   backface-visibility: hidden;
+  box-sizing: border-box;
 }
-/* The grid is 54 cells, so promoting them unconditionally pins 54 compositor
-   layers for the whole session. `.live` is set by an observer with a wide
-   margin, so promotion is always in place before the gallery is on screen —
-   it is only released once you are well past it. */
 .stage.live .gcell { will-change: transform; }
 .gcard {
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   width: 100%;
   height: 100%;
-  /* the meta rows run nearly the full cell width; the gap between
-     neighbours is the art's own inset, not this padding */
-  padding: 0.75rem 1rem;
+  padding: 0.85rem 1.1rem;
   text-align: left;
-  cursor: inherit;
+  cursor: pointer;
+  background: #060706;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-sizing: border-box;
+  transition: border-color 0.35s ease, background 0.35s ease, box-shadow 0.35s ease;
+  position: relative;
+  overflow: hidden;
+}
+.gcard:hover, .gcard:focus-visible {
+  border-color: rgba(255, 255, 255, 0.3);
+  background: #0b0d0b;
+  box-shadow: inset 0 0 30px rgba(168, 181, 138, 0.06);
 }
 .g-top {
   display: flex;
   justify-content: space-between;
-  gap: 1rem;
+  align-items: center;
+  gap: 0.8rem;
   font-size: 9px;
   letter-spacing: 0.14em;
+  z-index: 2;
 }
-.g-top span:first-child { color: var(--muted); }
-.g-top span:last-child {
+.g-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--muted);
+}
+.g-brand svg {
+  color: var(--accent);
+  flex-shrink: 0;
+}
+.g-brand .g-cat {
+  font-style: normal;
+  color: var(--muted);
+  font-size: 9px;
+}
+.g-title {
   color: var(--text);
-  transition: color 0.3s;
+  font-weight: 600;
+  font-size: 9.5px;
+  letter-spacing: 0.16em;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  transition: color 0.3s;
 }
-.gcard:hover .g-top span:last-child,
-.gcard:focus-visible .g-top span:last-child { color: var(--accent); }
+.gcard:hover .g-title {
+  color: var(--accent);
+}
 .g-mid {
   flex: 1;
   display: grid;
   place-items: center;
   min-height: 0;
-  padding: clamp(0.7rem, 1.9vh, 1.6rem) 0;
+  padding: 0.5rem 0;
+  z-index: 1;
 }
-/* the art is inset well inside its cell — that inset is the gutter, and it
-   is what leaves the meta rows sitting out at the cell's own edges */
 .g-mid .cover {
-  width: 78%;
+  width: 82%;
   height: auto;
-  max-height: 100%;
-  border: 0;
-  border-radius: 0;
-  box-shadow: 0 20px 44px -20px rgba(0, 0, 0, 0.95);
+  aspect-ratio: 16 / 10;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 16px 36px -12px rgba(0, 0, 0, 0.95);
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s;
 }
-.g-mid .cover .ghost { font-size: clamp(2rem, 3.2vw, 3rem); }
-.g-mid .v-label { width: 34%; font-size: 7px; letter-spacing: 0.02em; white-space: nowrap; }
+.gcard:hover .cover {
+  transform: scale(1.03);
+  border-color: rgba(168, 181, 138, 0.4);
+}
+.g-cover-play {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  background: rgba(8, 9, 8, 0.55);
+  backdrop-filter: blur(4px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.gcard:hover .g-cover-play {
+  opacity: 1;
+}
+.g-play-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--bg);
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  padding-left: 2px;
+  box-shadow: 0 0 15px rgba(168, 181, 138, 0.5);
+  transform: scale(0.8);
+  transition: transform 0.3s ease;
+}
+.gcard:hover .g-play-icon {
+  transform: scale(1);
+}
+.g-play-text {
+  font-size: 8.5px;
+  letter-spacing: 0.18em;
+  color: var(--text);
+  font-weight: 500;
+}
 .g-bot {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 1rem;
+  gap: 0.8rem;
   font-size: 9px;
   letter-spacing: 0.12em;
   color: var(--muted);
+  z-index: 2;
 }
-.g-bot > span:last-child { font-style: italic; letter-spacing: 0.06em; }
-.g-chips { display: flex; gap: 0.3rem; flex-wrap: wrap; }
+.g-chips {
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
 .g-chips i {
   font-style: normal;
   border-radius: 999px;
-  padding: 0.26rem 0.58rem;
+  padding: 0.2rem 0.55rem;
   background: rgba(234, 234, 226, 0.08);
-  color: #9ea298;
-  transition: color 0.3s, background 0.3s;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #a2a69c;
+  font-size: 8px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: color 0.3s, background 0.3s, border-color 0.3s;
 }
-.gcard:hover .g-chips i,
-.gcard:focus-visible .g-chips i { color: var(--accent); background: var(--accent-dim); }
+.gcard:hover .g-chips i {
+  color: var(--accent);
+  background: var(--accent-dim);
+  border-color: rgba(168, 181, 138, 0.3);
+}
+.g-year {
+  font-style: normal;
+  color: var(--muted);
+  font-size: 9px;
+}
+
+/* ---------------- Project Showcase Modal with Blurred Gallery Backdrop ---------------- */
+.pmodal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  padding: 1.5rem;
+}
+.pmodal-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+.pmodal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(5, 6, 5, 0.72);
+  backdrop-filter: blur(24px) saturate(180%) brightness(0.5);
+  -webkit-backdrop-filter: blur(24px) saturate(180%) brightness(0.5);
+}
+.pmodal-card {
+  position: relative;
+  z-index: 2;
+  width: min(92vw, 920px);
+  max-height: 88vh;
+  background: rgba(12, 14, 12, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 35px 100px rgba(0, 0, 0, 0.95), 0 0 50px rgba(168, 181, 138, 0.08);
+  border-radius: 12px;
+  overflow-y: auto;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  transform: scale(0.94) translateY(24px);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.pmodal-overlay.open .pmodal-card {
+  transform: scale(1) translateY(0);
+}
+.pmodal-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.pm-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+}
+.pm-cat {
+  color: var(--accent);
+  font-weight: 500;
+}
+.pm-year {
+  color: var(--muted);
+}
+.pm-tags i {
+  font-style: normal;
+  border-radius: 999px;
+  padding: 0.2rem 0.5rem;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text);
+  font-size: 8.5px;
+  margin-right: 0.3rem;
+}
+.pmodal-close {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 999px;
+  padding: 0.4rem 0.9rem;
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  cursor: pointer;
+  transition: all 0.25s;
+}
+.pmodal-close:hover {
+  background: var(--accent);
+  color: var(--bg);
+  border-color: var(--accent);
+}
+.pm-title {
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin: -0.4rem 0 0.2rem 0;
+  line-height: 1.1;
+}
+.pmodal-media-wrapper {
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: #000;
+  position: relative;
+}
+.pmodal-media {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+.pm-video-mock {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  background: #080908;
+}
+.pm-vm-art {
+  flex: 1;
+  width: 100%;
+  display: grid;
+  place-items: center;
+  position: relative;
+  overflow: hidden;
+  background: radial-gradient(circle at center, rgba(168, 181, 138, 0.12), transparent 70%);
+}
+.pm-vm-art .cover {
+  width: 65%;
+  height: auto;
+  aspect-ratio: 16 / 10;
+}
+.pm-vm-controls {
+  padding: 0.75rem 1.2rem;
+  background: rgba(10, 11, 10, 0.95);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.pm-vm-play {
+  background: var(--accent);
+  color: var(--bg);
+  border: none;
+  border-radius: 4px;
+  padding: 0.35rem 0.85rem;
+  font-family: var(--font-m);
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.pm-vm-play:hover { opacity: 0.85; }
+.pm-vm-trackbar {
+  flex: 1;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.pm-vm-progress {
+  width: 45%;
+  height: 100%;
+  background: var(--accent);
+}
+.pm-vm-time {
+  font-size: 9px;
+  color: var(--muted);
+  letter-spacing: 0.1em;
+}
+.pm-vm-badge {
+  font-size: 8.5px;
+  color: var(--accent);
+  background: rgba(168, 181, 138, 0.12);
+  padding: 0.15rem 0.45rem;
+  border-radius: 3px;
+}
+.pmodal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+.pm-desc {
+  font-size: 1.05rem;
+  line-height: 1.55;
+  color: rgba(234, 234, 226, 0.9);
+}
+.pm-stack {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  font-size: 10px;
+  color: var(--accent);
+  letter-spacing: 0.1em;
+}
+.pmodal-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.5rem;
+  padding-top: 1.2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+.pm-nav {
+  display: flex;
+  gap: 0.6rem;
+}
+.pm-btn-sec {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 999px;
+  padding: 0.5rem 1rem;
+  color: var(--muted);
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  cursor: pointer;
+  transition: all 0.25s;
+}
+.pm-btn-sec:hover {
+  color: var(--text);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+.pm-btn-pri {
+  background: var(--accent);
+  color: var(--bg);
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  padding: 0.55rem 1.4rem;
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: all 0.25s;
+}
+.pm-btn-pri:hover {
+  background: #bdca9f;
+  box-shadow: 0 0 20px rgba(168, 181, 138, 0.4);
+}
 
 .drag-hint {
   position: absolute;
