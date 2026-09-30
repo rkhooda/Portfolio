@@ -557,31 +557,35 @@ section > * { flex-shrink: 0; }
   color: var(--accent);
   border-color: var(--accent);
 }
-.pbar-center {
-  max-width: 520px;
-  text-align: center;
-  font-size: 9.5px;
-  letter-spacing: 0.16em;
-  line-height: 1.4;
-  color: rgba(234, 234, 226, 0.88);
-  text-transform: uppercase;
-}
-.pbar-clock-item {
+.phantom-bg-header {
+  position: absolute;
+  top: 4.2rem;
+  left: 2rem;
+  z-index: 5;
+  pointer-events: none;
+  user-select: none;
   display: flex;
-  align-items: center;
-  gap: 0.4rem;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+.phantom-bg-header .phead-sub {
   font-size: 10px;
-}
-.pbar-dot {
+  letter-spacing: 0.24em;
   color: var(--accent);
-  font-size: 9px;
+  opacity: 0.85;
 }
-.pbar-clock-item b {
-  color: var(--text);
-  font-weight: 500;
-}
-@media (max-width: 900px) {
-  .pbar-center { display: none; }
+.phantom-bg-header .phead-title {
+  font-family: var(--font-d);
+  font-size: clamp(2.8rem, 6.5vw, 6rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 0.95;
+  text-transform: uppercase;
+  color: rgba(234, 234, 226, 0.22);
+  filter: blur(5px);
+  -webkit-filter: blur(5px);
+  margin: 0;
+  padding: 0;
 }
 
 .work-body:has(> .stage:not([hidden])) {
