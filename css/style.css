@@ -567,13 +567,15 @@ section > * { flex-shrink: 0; }
   display: inline-flex;
   flex-direction: column;
   gap: 0.15rem;
-  padding: 0.55rem 1rem;
-  border-radius: 10px;
-  background: rgba(10, 11, 10, 0.4);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  padding: 0.6rem 1.4rem;
+  border-radius: 12px;
+  background: radial-gradient(ellipse at left, rgba(10, 11, 10, 0.5) 0%, rgba(10, 11, 10, 0.15) 70%, transparent 100%);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+  mask-image: linear-gradient(to right, black 75%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, black 75%, transparent 100%);
 }
 .phantom-bg-header .phead-sub {
   font-size: 8.5px;
@@ -626,17 +628,17 @@ section > * { flex-shrink: 0; }
 }
 .stage::before {
   top: 0;
-  height: 80px;
-  background: linear-gradient(to bottom, var(--bg) 0%, rgba(10, 11, 10, 0.5) 60%, transparent 100%);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  height: 90px;
+  background: linear-gradient(to bottom, var(--bg) 0%, rgba(10, 11, 10, 0.6) 50%, transparent 100%);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
 }
 .stage::after {
   bottom: 0;
   height: 90px;
-  background: linear-gradient(to top, var(--bg) 0%, rgba(10, 11, 10, 0.6) 60%, transparent 100%);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  background: linear-gradient(to top, var(--bg) 0%, rgba(10, 11, 10, 0.6) 50%, transparent 100%);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
 }
 
 .plane {
@@ -655,7 +657,6 @@ section > * { flex-shrink: 0; }
   transform-style: preserve-3d;
   backface-visibility: hidden;
   box-sizing: border-box;
-  padding: 6px;
 }
 .stage.live .gcell { will-change: transform; }
 .gcard {
@@ -667,28 +668,17 @@ section > * { flex-shrink: 0; }
   padding: 0.85rem 1.1rem;
   text-align: left;
   cursor: pointer;
-  background: rgba(12, 14, 12, 0.38);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 14px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  background: #060706;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   box-sizing: border-box;
-  filter: blur(var(--dist-blur, 0px));
-  opacity: var(--dist-opacity, 1);
-  transition: border-color 0.35s ease, background 0.35s ease, box-shadow 0.35s ease, filter 0.3s ease, opacity 0.3s ease, transform 0.35s ease;
+  transition: border-color 0.35s ease, background 0.35s ease, box-shadow 0.35s ease;
   position: relative;
   overflow: hidden;
 }
-.gcell:hover .gcard,
-.gcard:hover,
-.gcard:focus-visible {
-  border-color: rgba(168, 181, 138, 0.4);
-  background: rgba(22, 26, 22, 0.68);
-  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.5), inset 0 0 30px rgba(168, 181, 138, 0.1);
-  filter: blur(0px) !important;
-  opacity: 1 !important;
-  transform: translateY(-2px);
+.gcard:hover, .gcard:focus-visible {
+  border-color: rgba(255, 255, 255, 0.3);
+  background: #0b0d0b;
+  box-shadow: inset 0 0 30px rgba(168, 181, 138, 0.06);
 }
 .g-top {
   display: flex;

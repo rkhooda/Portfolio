@@ -227,12 +227,7 @@
     for (const c of cells) {
       const x = (((c.ix * cellW + cam.x) % spanX) + spanX) % spanX - cellW;
       const y = (((c.iy * cellH + cam.y) % spanY) + spanY) % spanY - cellH;
-      if (reduced) {
-        c.el.style.transform = `translate3d(${x}px, ${y}px, 0)`;
-        c.el.style.setProperty("--dist-blur", "0px");
-        c.el.style.setProperty("--dist-opacity", "1");
-        continue;
-      }
+      if (reduced) { c.el.style.transform = `translate3d(${x}px, ${y}px, 0)`; continue; }
       /* -1…1 out to the rim, measured from each card's own centre */
       const mx = x + cellW / 2, my = y + cellH / 2;
       const u = bend((mx - originX) / originX, KX);
@@ -252,12 +247,6 @@
         `${(originY + (my - originY) / kh - cellH / 2).toFixed(1)}px, ${z.toFixed(1)}px)` +
         ` rotateY(${(-u * WARP.tilt).toFixed(2)}deg) rotateX(${(v * WARP.tiltRow).toFixed(2)}deg)` +
         ` scale(${(grow / k).toFixed(4)})`;
-
-      const normDist = Math.min(1, Math.sqrt(r2) / 1.3);
-      const blurPx = (normDist * 3.5).toFixed(1);
-      const opacityVal = (1 - normDist * 0.35).toFixed(2);
-      c.el.style.setProperty("--dist-blur", `${blurPx}px`);
-      c.el.style.setProperty("--dist-opacity", opacityVal);
     }
   }
 
