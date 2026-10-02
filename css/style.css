@@ -559,7 +559,7 @@ section > * { flex-shrink: 0; }
 }
 .phantom-bg-header {
   position: absolute;
-  top: 3rem;
+  top: 5rem;
   left: 1.8rem;
   z-index: 15;
   pointer-events: none;
