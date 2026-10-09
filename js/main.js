@@ -46,13 +46,29 @@
      into it — the FlowPane eyes follow the cursor. */
   const SVGS = {};
   let bellSvgs = [];
+  let covUid = 0;
+  function inlineImg(img, txt) {
+    const idPrefix = "cov" + (++covUid) + "_";
+    const scopedTxt = txt
+      .replace(/id="([a-zA-Z0-9_-]+)"/g, `id="${idPrefix}$1"`)
+      .replace(/url\(#([a-zA-Z0-9_-]+)\)/g, `url(#${idPrefix}$1)`)
+      .replace(/href="#([a-zA-Z0-9_-]+)"/g, `href="#${idPrefix}$1"`);
+    img.insertAdjacentHTML("afterend", scopedTxt);
+    img.nextElementSibling.classList.add("shot");
+    img.remove();
+  }
   function inlineCovers(root) {
     root.querySelectorAll('img.shot[src$=".svg"]').forEach((img) => {
-      const txt = SVGS[img.getAttribute("src")];
-      if (!txt) return;
-      img.insertAdjacentHTML("afterend", txt);
-      img.nextElementSibling.classList.add("shot");
-      img.remove();
+      const src = img.getAttribute("src");
+      const txt = SVGS[src] || SVGS[src.replace(/\?.*$/, "")];
+      if (!txt) {
+        fetch(src).then((r) => r.text()).then((t) => {
+          SVGS[src] = t;
+          if (img.isConnected) inlineImg(img, t);
+        });
+        return;
+      }
+      inlineImg(img, txt);
     });
     bellSvgs = [...document.querySelectorAll("svg.shot .swing")].map((e) => e.ownerSVGElement);
   }
@@ -753,7 +769,9 @@
         mediaContainer.innerHTML = `
           <div class="pm-video-mock">
             <div class="pm-vm-art" style="--tint:${p.tint}">
-              ${coverHTML(p, i)}
+              <div class="cover">
+                ${coverHTML(p, i)}
+              </div>
             </div>
             <div class="pm-vm-controls">
               <button class="pm-vm-play" type="button" onclick="if('${p.url || ''}') window.open('${p.url}', '_blank')">▶ LAUNCH DEMO</button>
@@ -762,6 +780,8 @@
               <span class="pm-vm-badge mono">1080p SHOWCASE</span>
             </div>
           </div>`;
+        inlineCovers(mediaContainer);
+        setupModalArtInteraction(mediaContainer);
       }
     }
 
@@ -775,6 +795,34 @@
     pModal.classList.remove("open");
     pModal.setAttribute("aria-hidden", "true");
     document.body.style.overflow = "";
+  }
+
+  function setupModalArtInteraction(container) {
+    const art = container.querySelector(".pm-vm-art");
+    if (!art) return;
+    const coverEl = art.querySelector(".cover");
+    if (!coverEl) return;
+
+    art.addEventListener("pointermove", (e) => {
+      const r = art.getBoundingClientRect();
+      const x = ((e.clientX - r.left) / r.width - 0.5) * 2;
+      const y = ((e.clientY - r.top) / r.height - 0.5) * 2;
+      coverEl.style.transform = `perspective(1000px) rotateY(${(x * 12).toFixed(2)}deg) rotateX(${(-y * 10).toFixed(2)}deg) scale3d(1.03, 1.03, 1.03)`;
+    });
+
+    art.addEventListener("pointerleave", () => {
+      coverEl.style.transform = "perspective(1000px) rotateY(0deg) rotateX(0deg) scale3d(1, 1, 1)";
+    });
+
+    art.addEventListener("click", () => {
+      coverEl.style.transform = "perspective(1000px) rotateY(0deg) rotateX(0deg) scale3d(0.96, 0.96, 0.96)";
+      setTimeout(() => {
+        coverEl.style.transform = "perspective(1000px) rotateY(0deg) rotateX(0deg) scale3d(1.05, 1.05, 1.05)";
+        setTimeout(() => {
+          coverEl.style.transform = "perspective(1000px) rotateY(0deg) rotateX(0deg) scale3d(1, 1, 1)";
+        }, 160);
+      }, 90);
+    });
   }
 
   if (pmClose) pmClose.addEventListener("click", closeProjectModal);
