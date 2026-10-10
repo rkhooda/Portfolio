@@ -1313,8 +1313,88 @@ function init() {
         props.noteAt(cat.x, cat.y + 0.55, cat.z);
       }
     };
+    const CAT_STATEMENTS = [
+      "Stay away hooman",
+      "i meaaoouwww youuu",
+      "debug your own life first, hooman 😼",
+      "git push --force-me-to-sleep 😴",
+    ];
+    let lastStatementIdx = -1;
+    let currentBubbleEl = null;
+    let bubbleTween = null;
+    let bubbleTimer = null;
+    const catWorldPos = new THREE.Vector3();
+
+    function updateBubblePos() {
+      if (!currentBubbleEl || !catG) return;
+      headG.getWorldPosition(catWorldPos);
+      catWorldPos.y += 0.28;
+      catWorldPos.project(camera);
+      const px = (catWorldPos.x * 0.5 + 0.5) * 100;
+      const py = (-catWorldPos.y * 0.5 + 0.5) * 100;
+      currentBubbleEl.style.left = px.toFixed(2) + "%";
+      currentBubbleEl.style.top = py.toFixed(2) + "%";
+    }
+
+    function showCatBubble() {
+      if (!holder) return;
+
+      let idx;
+      do {
+        idx = Math.floor(Math.random() * CAT_STATEMENTS.length);
+      } while (idx === lastStatementIdx && CAT_STATEMENTS.length > 1);
+      lastStatementIdx = idx;
+      const text = CAT_STATEMENTS[idx];
+
+      if (!currentBubbleEl) {
+        currentBubbleEl = document.createElement("div");
+        currentBubbleEl.className = "cat-bubble";
+        holder.appendChild(currentBubbleEl);
+      }
+
+      currentBubbleEl.textContent = text;
+      updateBubblePos();
+
+      if (bubbleTween) bubbleTween.kill();
+      if (bubbleTimer) clearTimeout(bubbleTimer);
+
+      if (gsap) {
+        bubbleTween = gsap.fromTo(
+          currentBubbleEl,
+          { opacity: 0, scale: 0.7, y: 8 },
+          { opacity: 1, scale: 1, y: 0, duration: 0.3, ease: "back.out(1.7)" }
+        );
+      } else {
+        currentBubbleEl.style.opacity = "1";
+      }
+
+      bubbleTimer = setTimeout(() => {
+        if (currentBubbleEl) {
+          if (gsap) {
+            gsap.to(currentBubbleEl, {
+              opacity: 0,
+              scale: 0.85,
+              y: -8,
+              duration: 0.25,
+              ease: "power2.in",
+              onComplete: () => {
+                if (currentBubbleEl) {
+                  currentBubbleEl.remove();
+                  currentBubbleEl = null;
+                }
+              },
+            });
+          } else {
+            currentBubbleEl.remove();
+            currentBubbleEl = null;
+          }
+        }
+      }, 3200);
+    }
+
     /* click: the cat stops what it's doing and stares right at you */
     props.catLook = () => {
+      showCatBubble();
       if (cat.jump) return;
       if (cat.state === "look") { props.catHop(); return; } // pushed your luck
       cat.state = "look";
@@ -1586,6 +1666,8 @@ function init() {
       blob.material.opacity = Math.max(0.08, 0.3 - lift * 0.35);
       const bs = 1 + lift * 0.4;
       blob.scale.set(bs, bs, 1);
+
+      if (currentBubbleEl) updateBubblePos();
     });
   }
 

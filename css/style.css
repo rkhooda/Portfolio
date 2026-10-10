@@ -490,6 +490,40 @@ section > * { flex-shrink: 0; }
   z-index: 0;
 }
 .hero-scene canvas { display: block; width: 100%; height: 100%; opacity: 0; }
+
+/* cat speech bubble popup */
+.cat-bubble {
+  position: absolute;
+  z-index: 10;
+  transform: translate(-50%, -100%);
+  margin-top: -12px;
+  padding: 8px 14px;
+  background: var(--surface);
+  border: 1px solid var(--accent);
+  color: var(--text);
+  font-family: var(--font-m);
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 14px rgba(168, 181, 138, 0.25);
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+  opacity: 0;
+  transform-origin: bottom center;
+}
+.cat-bubble::after {
+  content: "";
+  position: absolute;
+  bottom: -5px;
+  left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+  width: 8px;
+  height: 8px;
+  background: var(--surface);
+  border-right: 1px solid var(--accent);
+  border-bottom: 1px solid var(--accent);
+}
 .hero-kicker, .hero-name, .hero-tag, .hero-roles { position: relative; z-index: 1; }
 .hero-cue { z-index: 1; }
 
