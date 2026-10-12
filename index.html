@@ -252,40 +252,46 @@
     </div>
   </div>
 
-  <!-- Selected Work Project Showcase Modal (Video/Media overlay with backdrop blur) -->
+  <!-- Selected Work Project Showcase Modal · split: left logo | right info -->
   <div id="projectModal" class="pmodal-overlay" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="pmTitle">
     <div class="pmodal-backdrop" id="pmBackdrop"></div>
     <div class="pmodal-card">
-      <div class="pmodal-top-row">
-        <div class="pm-meta mono">
-          <span id="pmCat" class="pm-cat">RH-01</span>
-          <span id="pmYear" class="pm-year">2025</span>
+      <button id="pmClose" class="pmodal-close mono" type="button" aria-label="Close modal">✕ ESC</button>
+      <div class="pmodal-inner">
+
+        <!-- LEFT · animated logo / cover -->
+        <div class="pm-left">
+          <div id="pmMediaContainer" class="pm-media-area"></div>
+        </div>
+
+        <!-- RIGHT · project details -->
+        <div class="pm-right">
+          <div class="pm-meta mono">
+            <span id="pmCat" class="pm-cat">RH-01</span>
+            <span class="pm-sep">·</span>
+            <span id="pmClient" class="pm-client">PROJECT</span>
+            <span class="pm-sep">·</span>
+            <span id="pmYear" class="pm-year">2025</span>
+          </div>
+
+          <h2 id="pmTitle" class="pm-title">Project Title</h2>
+
           <div id="pmTags" class="pm-tags"></div>
-        </div>
-        <button id="pmClose" class="pmodal-close mono" type="button" aria-label="Close modal">✕ CLOSE [ESC]</button>
-      </div>
 
-      <h2 id="pmTitle" class="pm-title">Project Title</h2>
+          <p id="pmDesc" class="pm-desc">Description goes here.</p>
 
-      <div class="pmodal-media-wrapper">
-        <div id="pmMediaContainer" class="pmodal-media">
-          <!-- Video or dynamic preview -->
-        </div>
-      </div>
+          <div id="pmStack" class="pm-stack mono"></div>
 
-      <div class="pmodal-body">
-        <p id="pmDesc" class="pm-desc">Project description goes here...</p>
-        <div id="pmStack" class="pm-stack mono"></div>
-      </div>
+          <div class="pm-spacer"></div>
 
-      <div class="pmodal-footer">
-        <div class="pm-nav">
-          <button id="pmPrev" class="pm-btn-sec mono" type="button">◄ PREV TRACK</button>
-          <button id="pmNext" class="pm-btn-sec mono" type="button">NEXT TRACK ►</button>
-        </div>
-        <div class="pm-actions">
           <a id="pmUrl" class="pm-btn-pri mono magnetic" href="#" target="_blank" rel="noopener">LAUNCH PROJECT ↗</a>
+
+          <div class="pm-nav">
+            <button id="pmPrev" class="pm-btn-sec mono" type="button">◄ PREV</button>
+            <button id="pmNext" class="pm-btn-sec mono" type="button">NEXT ►</button>
+          </div>
         </div>
+
       </div>
     </div>
   </div>

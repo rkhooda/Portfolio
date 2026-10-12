@@ -734,6 +734,8 @@
     currentModalIndex = i;
     $("#pmCat").textContent = catNo(i);
     $("#pmYear").textContent = p.year;
+    const clientEl = $("#pmClient");
+    if (clientEl) clientEl.textContent = p.client || "PROJECT";
     $("#pmTitle").textContent = p.title;
     $("#pmDesc").textContent = p.desc;
 
@@ -767,21 +769,11 @@
         mediaContainer.innerHTML = `<video class="pm-video" src="${p.video}" autoplay loop muted playsinline controls></video>`;
       } else {
         mediaContainer.innerHTML = `
-          <div class="pm-video-mock">
-            <div class="pm-vm-art" style="--tint:${p.tint}">
-              <div class="cover">
-                ${coverHTML(p, i)}
-              </div>
-            </div>
-            <div class="pm-vm-controls">
-              <button class="pm-vm-play" type="button" onclick="if('${p.url || ''}') window.open('${p.url}', '_blank')">▶ LAUNCH DEMO</button>
-              <div class="pm-vm-trackbar"><div class="pm-vm-progress"></div></div>
-              <span class="pm-vm-time mono">00:00 / ${p.dur || '03:45'}</span>
-              <span class="pm-vm-badge mono">1080p SHOWCASE</span>
-            </div>
+          <div class="cover" style="--tint:${p.tint}">
+            ${coverHTML(p, i)}
           </div>`;
         inlineCovers(mediaContainer);
-        setupModalArtInteraction(mediaContainer);
+        setupModalArtInteraction(pModal);
       }
     }
 
@@ -798,31 +790,31 @@
   }
 
   function setupModalArtInteraction(container) {
-    const art = container.querySelector(".pm-vm-art");
-    if (!art) return;
-    const coverEl = art.querySelector(".cover");
+    const leftPane = container.querySelector(".pm-left");
+    if (!leftPane) return;
+    const coverEl = leftPane.querySelector(".cover");
     if (!coverEl) return;
 
-    art.addEventListener("pointermove", (e) => {
-      const r = art.getBoundingClientRect();
+    leftPane.onpointermove = (e) => {
+      const r = leftPane.getBoundingClientRect();
       const x = ((e.clientX - r.left) / r.width - 0.5) * 2;
       const y = ((e.clientY - r.top) / r.height - 0.5) * 2;
-      coverEl.style.transform = `perspective(1000px) rotateY(${(x * 12).toFixed(2)}deg) rotateX(${(-y * 10).toFixed(2)}deg) scale3d(1.03, 1.03, 1.03)`;
-    });
+      coverEl.style.transform = `perspective(1000px) rotateY(${(x * 14).toFixed(2)}deg) rotateX(${(-y * 11).toFixed(2)}deg) scale3d(1.03, 1.03, 1.03)`;
+    };
 
-    art.addEventListener("pointerleave", () => {
+    leftPane.onpointerleave = () => {
       coverEl.style.transform = "perspective(1000px) rotateY(0deg) rotateX(0deg) scale3d(1, 1, 1)";
-    });
+    };
 
-    art.addEventListener("click", () => {
-      coverEl.style.transform = "perspective(1000px) rotateY(0deg) rotateX(0deg) scale3d(0.96, 0.96, 0.96)";
+    leftPane.onclick = () => {
+      coverEl.style.transform = "perspective(1000px) rotateY(0deg) rotateX(0deg) scale3d(0.95, 0.95, 0.95)";
       setTimeout(() => {
-        coverEl.style.transform = "perspective(1000px) rotateY(0deg) rotateX(0deg) scale3d(1.05, 1.05, 1.05)";
+        coverEl.style.transform = "perspective(1000px) rotateY(0deg) rotateX(0deg) scale3d(1.06, 1.06, 1.06)";
         setTimeout(() => {
           coverEl.style.transform = "perspective(1000px) rotateY(0deg) rotateX(0deg) scale3d(1, 1, 1)";
         }, 160);
       }, 90);
-    });
+    };
   }
 
   if (pmClose) pmClose.addEventListener("click", closeProjectModal);
