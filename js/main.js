@@ -780,6 +780,9 @@
     pModal.classList.add("open");
     pModal.setAttribute("aria-hidden", "false");
     document.body.style.overflow = "hidden";
+    if (document.activeElement && typeof document.activeElement.blur === "function") {
+      document.activeElement.blur();
+    }
   }
 
   function closeProjectModal() {
@@ -787,6 +790,9 @@
     pModal.classList.remove("open");
     pModal.setAttribute("aria-hidden", "true");
     document.body.style.overflow = "";
+    if (document.activeElement && typeof document.activeElement.blur === "function") {
+      document.activeElement.blur();
+    }
   }
 
   function setupModalArtInteraction(container) {
