@@ -732,6 +732,11 @@
   function openProjectModal(p, i) {
     if (!pModal) return;
     currentModalIndex = i;
+    /* Restart the left-pane signal lock when stepping between projects too,
+       so every selected card gets the same arrival moment. */
+    pModal.classList.remove("pm-art-enter");
+    void pModal.offsetWidth;
+    pModal.classList.add("pm-art-enter");
     $("#pmCat").textContent = catNo(i);
     $("#pmYear").textContent = p.year;
     const clientEl = $("#pmClient");

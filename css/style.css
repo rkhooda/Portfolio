@@ -923,6 +923,86 @@ section > * { flex-shrink: 0; }
   cursor: pointer;
 }
 
+/* A quiet, repeatable "signal lock" gives the selected cover a sense of
+   arrival. The frame draws in, then one scan line passes through it; the
+   cover itself remains the hero instead of competing with a busy effect. */
+.pm-left::before,
+.pm-left::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  z-index: 1;
+}
+.pm-left::before {
+  inset: 16% 12%;
+  border: 1px solid rgba(168, 181, 138, 0.22);
+  clip-path: polygon(
+    0 0, 18px 0, 18px 1px, 0 1px, 0 18px, 1px 18px, 1px 0,
+    100% 0, 100% 18px, calc(100% - 1px) 18px, calc(100% - 1px) 1px,
+    calc(100% - 18px) 1px, calc(100% - 18px) 0,
+    100% 100%, calc(100% - 18px) 100%, calc(100% - 18px) calc(100% - 1px),
+    calc(100% - 1px) calc(100% - 1px), calc(100% - 1px) calc(100% - 18px),
+    100% calc(100% - 18px), 0 100%, 0 calc(100% - 18px), 1px calc(100% - 18px),
+    1px calc(100% - 1px), 18px calc(100% - 1px), 18px 100%
+  );
+  opacity: 0;
+  transform: scale(0.94);
+}
+.pm-left::after {
+  left: 12%;
+  right: 12%;
+  top: 16%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  box-shadow: 0 0 14px rgba(168, 181, 138, 0.45);
+  opacity: 0;
+  transform: translateY(0);
+}
+.pmodal-overlay.open.pm-art-enter .pm-left::before {
+  animation: pm-frame-lock 0.7s 0.08s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+.pmodal-overlay.open.pm-art-enter .pm-left::after {
+  animation: pm-scan 0.8s 0.28s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+.pm-signal {
+  position: absolute;
+  top: 1.25rem;
+  left: 1.8rem;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: rgba(168, 181, 138, 0.62);
+  font-size: 8px;
+  letter-spacing: 0.16em;
+  opacity: 0;
+  transform: translateY(4px);
+}
+.pm-signal i {
+  display: block;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 3px rgba(168, 181, 138, 0.1);
+}
+.pmodal-overlay.open.pm-art-enter .pm-signal {
+  animation: pm-signal-in 0.35s 0.42s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
+@keyframes pm-frame-lock {
+  0% { opacity: 0; transform: scale(0.94); }
+  100% { opacity: 1; transform: scale(1); }
+}
+@keyframes pm-scan {
+  0% { opacity: 0; transform: translateY(0); }
+  15% { opacity: 0.85; }
+  100% { opacity: 0; transform: translateY(68%); }
+}
+@keyframes pm-signal-in {
+  to { opacity: 1; transform: translateY(0); }
+}
+
 @media (max-width: 820px) {
   .pm-left {
     border-right: none;
