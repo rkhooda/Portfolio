@@ -778,7 +778,6 @@
             ${coverHTML(p, i)}
           </div>`;
         inlineCovers(mediaContainer);
-        setupModalArtInteraction(pModal);
       }
     }
 
@@ -798,34 +797,6 @@
     if (document.activeElement && typeof document.activeElement.blur === "function") {
       document.activeElement.blur();
     }
-  }
-
-  function setupModalArtInteraction(container) {
-    const leftPane = container.querySelector(".pm-left");
-    if (!leftPane) return;
-    const coverEl = leftPane.querySelector(".cover");
-    if (!coverEl) return;
-
-    leftPane.onpointermove = (e) => {
-      const r = leftPane.getBoundingClientRect();
-      const x = ((e.clientX - r.left) / r.width - 0.5) * 2;
-      const y = ((e.clientY - r.top) / r.height - 0.5) * 2;
-      coverEl.style.transform = `perspective(1000px) rotateY(${(x * 14).toFixed(2)}deg) rotateX(${(-y * 11).toFixed(2)}deg) scale3d(1.03, 1.03, 1.03)`;
-    };
-
-    leftPane.onpointerleave = () => {
-      coverEl.style.transform = "perspective(1000px) rotateY(0deg) rotateX(0deg) scale3d(1, 1, 1)";
-    };
-
-    leftPane.onclick = () => {
-      coverEl.style.transform = "perspective(1000px) rotateY(0deg) rotateX(0deg) scale3d(0.95, 0.95, 0.95)";
-      setTimeout(() => {
-        coverEl.style.transform = "perspective(1000px) rotateY(0deg) rotateX(0deg) scale3d(1.06, 1.06, 1.06)";
-        setTimeout(() => {
-          coverEl.style.transform = "perspective(1000px) rotateY(0deg) rotateX(0deg) scale3d(1, 1, 1)";
-        }, 160);
-      }, 90);
-    };
   }
 
   if (pmClose) pmClose.addEventListener("click", closeProjectModal);
