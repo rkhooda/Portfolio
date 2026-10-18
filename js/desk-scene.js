@@ -1705,9 +1705,14 @@ function init() {
       { obj: props.tableG, id: "vinyl" },
     ].filter((e) => e.obj);
 
+    let cvsRect = null;
+    const updateCvsRect = () => { cvsRect = cvs.getBoundingClientRect(); };
+    window.addEventListener("resize", updateCvsRect, { passive: true });
+    window.addEventListener("scroll", updateCvsRect, { passive: true });
+
     const toNdc = (e) => {
-      const r = cvs.getBoundingClientRect();
-      ndc.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+      if (!cvsRect) updateCvsRect();
+      ndc.set(((e.clientX - cvsRect.left) / cvsRect.width) * 2 - 1, -((e.clientY - cvsRect.top) / cvsRect.height) * 2 + 1);
     };
 
     const pick = () => {

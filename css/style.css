@@ -609,6 +609,7 @@ section > * { flex-shrink: 0; }
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
   mask-image: linear-gradient(to right, transparent 0%, black 18%, black 75%, transparent 100%);
   -webkit-mask-image: linear-gradient(to right, transparent 0%, black 18%, black 75%, transparent 100%);
+  transform: translateZ(0);
 }
 .phantom-bg-header .phead-sub {
   font-size: 9.5px;
@@ -667,6 +668,7 @@ section > * { flex-shrink: 0; }
   -webkit-backdrop-filter: blur(14px);
   mask-image: linear-gradient(to bottom, black 0%, rgba(0, 0, 0, 0.7) 45%, transparent 100%);
   -webkit-mask-image: linear-gradient(to bottom, black 0%, rgba(0, 0, 0, 0.7) 45%, transparent 100%);
+  transform: translateZ(0);
 }
 .stage::after {
   bottom: 0;
@@ -676,6 +678,7 @@ section > * { flex-shrink: 0; }
   -webkit-backdrop-filter: blur(14px);
   mask-image: linear-gradient(to top, black 0%, rgba(0, 0, 0, 0.7) 45%, transparent 100%);
   -webkit-mask-image: linear-gradient(to top, black 0%, rgba(0, 0, 0, 0.7) 45%, transparent 100%);
+  transform: translateZ(0);
 }
 
 .plane {
@@ -695,7 +698,10 @@ section > * { flex-shrink: 0; }
   backface-visibility: hidden;
   box-sizing: border-box;
 }
-.stage.live .gcell { will-change: transform; }
+.stage.live .gcell {
+  will-change: transform;
+  contain: layout style;
+}
 .gcard {
   display: flex;
   flex-direction: column;

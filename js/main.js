@@ -71,6 +71,7 @@
       inlineImg(img, txt);
     });
     bellSvgs = [...document.querySelectorAll("svg.shot .swing")].map((e) => e.ownerSVGElement);
+    cachedEyes = null;
   }
   window.PROJECTS.filter((p) => /\.svg$/.test(p.img || "")).forEach((p) =>
     fetch(p.img).then((r) => r.text()).then((t) => { SVGS[p.img] = t; inlineCovers(document); })
@@ -208,19 +209,27 @@
   /* Googly-eye rule: while the mouse moves, every pupil points at it; a
      couple of seconds of stillness and the idle glances take over again.
      Recomputed per frame while it's on, because the eyes hop around under a
-     cursor that hasn't moved. */
+     cursor that hasn't moved. Cache elements and only measure when layout shifts. */
   let gazeRaf = 0, gazeT = 0, gx = 0, gy = 0;
+  let cachedEyes = null;
+  function getEyes() {
+    if (!cachedEyes) cachedEyes = [...document.querySelectorAll(".eye")];
+    return cachedEyes;
+  }
   function gaze() {
     gazeRaf = 0;
     if (!document.body.classList.contains("gazing")) return;
-    document.querySelectorAll(".eye").forEach((eye) => {
+    const eyes = getEyes();
+    if (!eyes.length) return;
+    for (let i = 0; i < eyes.length; i++) {
+      const eye = eyes[i];
       const r = eye.getBoundingClientRect();
       const dx = gx - (r.left + r.width / 2), dy = gy - (r.top + r.height / 2);
       const d = Math.hypot(dx, dy) || 1;
       const k = Math.min(1, d / 140) / d; /* no full deflection at point-blank */
       eye.style.setProperty("--gx", (dx * k * 36).toFixed(1) + "px");
       eye.style.setProperty("--gy", (dy * k * 30).toFixed(1) + "px");
-    });
+    }
     gazeRaf = requestAnimationFrame(gaze);
   }
   if (!reduced) addEventListener("pointermove", (e) => {
@@ -231,19 +240,23 @@
     clearTimeout(gazeT);
     gazeT = setTimeout(() => {
       document.body.classList.remove("gazing");
-      document.querySelectorAll(".eye").forEach((eye) => {
-        eye.style.removeProperty("--gx");
-        eye.style.removeProperty("--gy");
-      });
+      const eyes = getEyes();
+      for (let i = 0; i < eyes.length; i++) {
+        eyes[i].style.removeProperty("--gx");
+        eyes[i].style.removeProperty("--gy");
+      }
     }, 2200);
     if (!gazeRaf) gazeRaf = requestAnimationFrame(gaze);
   }, { passive: true });
 
   function place() {
-    for (const c of cells) {
+    const isReduced = reduced;
+    const len = cells.length;
+    for (let i = 0; i < len; i++) {
+      const c = cells[i];
       const x = (((c.ix * cellW + cam.x) % spanX) + spanX) % spanX - cellW;
       const y = (((c.iy * cellH + cam.y) % spanY) + spanY) % spanY - cellH;
-      if (reduced) { c.el.style.transform = `translate3d(${x}px, ${y}px, 0)`; continue; }
+      if (isReduced) { c.el.style.transform = `translate3d(${x}px, ${y}px, 0)`; continue; }
       /* -1…1 out to the rim, measured from each card's own centre */
       const mx = x + cellW / 2, my = y + cellH / 2;
       const u = bend((mx - originX) / originX, KX);
@@ -407,11 +420,13 @@
     moved = false;
     /* setPointerCapture retargets the click to the stage itself, so the card
        has to be re-found under the pointer instead of read off e.target */
-    const g = e.target.closest(".gcard") ||
-      document.elementFromPoint(e.clientX, e.clientY)?.closest(".gcard");
-    if (!g) return;
+    const g = e.target.closest(".gcard");
+    const targetCard = g || (Number.isFinite(e.clientX) && Number.isFinite(e.clientY)
+      ? document.elementFromPoint(e.clientX, e.clientY)?.closest(".gcard")
+      : null);
+    if (!targetCard) return;
     if (wasDrag) { e.preventDefault(); return; }
-    const idx = +g.dataset.i;
+    const idx = +targetCard.dataset.i;
     openProjectModal(P[idx], idx);
   }, true);
 
@@ -493,16 +508,20 @@
 
   /* the bar's own contraction retimes every link under it — glue the
      indicator to the layout for the length of that transition */
-  let gluedUntil = 0, gluing = false;
+  let gluedUntil = 0, gluing = false, glueLast = 0;
   function glue(ms) {
     gluedUntil = performance.now() + ms;
     if (gluing) return;
     gluing = true;
-    (function step() {
-      movePill(pillOn, true);
-      if (performance.now() < gluedUntil) requestAnimationFrame(step);
+    glueLast = 0;
+    (function step(now) {
+      if (!glueLast || now - glueLast >= 32) {
+        glueLast = now;
+        movePill(pillOn, true);
+      }
+      if (now < gluedUntil) requestAnimationFrame(step);
       else gluing = false;
-    })();
+    })(performance.now());
   }
 
   navLinks.forEach((a) => {
@@ -530,7 +549,7 @@
     glue(1300); // a little past the 1.15s shell transition
   }
   if (lenis) lenis.on("scroll", ({ scroll }) => syncNav(scroll));
-  addEventListener("scroll", () => syncNav(scrollY), { passive: true });
+  else addEventListener("scroll", () => syncNav(scrollY), { passive: true });
   syncNav(scrollY); // restored scroll positions land in the right state
 
   /* anchor links glide (nav + logo) — flush to the section's top edge. Each
