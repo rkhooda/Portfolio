@@ -40,7 +40,7 @@ window.PROJECTS = [
     year: "2026", dur: "--:--",
     url: null, wip: true,
     img: "assets/img/covers/multiagent-builder.svg",
-    tint: "#A8B58A",
+    tint: "#e0923a",
   },
   {
     title: "Cult-Bot",

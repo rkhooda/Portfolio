@@ -11,10 +11,10 @@
 
   /* ---------- console easter egg ---------- */
   const mono = "font-family:monospace;";
-  console.log("%c◉ NOW PLAYING — rakshit hooda · portfolio (night sage mix)", mono + "color:#A8B58A;font-size:12px;padding:6px 0;");
-  console.log("%c▂▄▆█▆▄▂  oh hey, a fellow inspector. respect.", mono + "color:#7E827A;");
-  console.log("%cthe un-minified truth lives at https://github.com/rkhooda", mono + "color:#EAEAE2;");
-  console.log('%c"it works on my machine" — me, lying', mono + "color:#7E827A;font-style:italic;");
+  console.log("%c◉ NOW PLAYING — rakshit hooda · portfolio (meter amber mix)", mono + "color:#E0923A;font-size:12px;padding:6px 0;");
+  console.log("%c▂▄▆█▆▄▂  oh hey, a fellow inspector. respect.", mono + "color:#8D8882;");
+  console.log("%cthe un-minified truth lives at https://github.com/rkhooda", mono + "color:#DCDEE0;");
+  console.log('%c"it works on my machine" — me, lying', mono + "color:#8D8882;font-style:italic;");
 
   /* ---------- shared render helpers ---------- */
   const catNo = (i) => "RH-" + String(i + 1).padStart(2, "0");

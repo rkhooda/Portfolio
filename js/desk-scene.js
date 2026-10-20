@@ -12,9 +12,9 @@
 let THREE = null; // filled in by boot(), before init() ever runs
 
 const CONFIG = {
-  bg: 0x0a0b0a,
-  sage: 0xa8b58a,
-  cream: 0xeaeae2,
+  bg: 0x0c0d0f,
+  sage: 0xe0923a,
+  cream: 0xdcdee0,
   warm: 0xffc98a, // the one warm note: the desk lamp
   vinyl: true,
   dust: true,
@@ -310,7 +310,7 @@ function init() {
     return g;
   }
 
-  const INK = { bg: "#0e120e", sage: "#a8b58a", cream: "#d9d9cc", muted: "#585e54", dim: "#2c322b", tan: "#c2b28a" };
+  const INK = { bg: "#0c0d0f", sage: "#e0923a", cream: "#dcdee0", muted: "#8d8882", dim: "#22262a", tan: "#c2b28a" };
   const MONO = "'JetBrains Mono', ui-monospace, Menlo, monospace";
 
   /* -- left: a podcast playing in the corner, strictly no tutorials -- */
@@ -345,7 +345,7 @@ function init() {
     g.beginPath();
     g.arc(0, -24, 16, Math.PI * 1.05, Math.PI * 1.95);
     g.stroke();
-    g.fillStyle = "#a8b58a";
+    g.fillStyle = "#e0923a";
     g.beginPath();
     g.roundRect(-19.5, -28, 7, 12, 3);
     g.fill();
@@ -383,7 +383,7 @@ function init() {
     g.fillStyle = bgGrad;
     g.fillRect(0, 0, s.w, s.h);
     /* back wall: led line + soft lamp pools */
-    g.fillStyle = "rgba(168,181,138,0.5)";
+    g.fillStyle = "rgba(224,146,58,0.5)";
     g.fillRect(30, 58, s.w - 60, 2);
     for (const lx of [80, 368]) {
       const pool = g.createRadialGradient(lx, 40, 4, lx, 40, 60);
@@ -393,7 +393,7 @@ function init() {
       g.fillRect(lx - 60, 0, 120, 110);
     }
     g.font = `600 10px ${MONO}`;
-    g.fillStyle = "rgba(168,181,138,0.75)";
+    g.fillStyle = "rgba(224,146,58,0.75)";
     g.fillText("ON AIR", 200, 46);
 
     /* table */
@@ -422,7 +422,7 @@ function init() {
     for (let i = 0; i < pod.wave.length; i++) {
       if (Math.random() < 0.55) pod.wave[i] = rand(0.1, 1) * (0.4 + 0.6 * Math.sin(i * 0.7 + pod.t * 4) ** 2);
       const h = 3 + pod.wave[i] * 9;
-      g.fillStyle = "rgba(168,181,138,0.6)";
+      g.fillStyle = "rgba(224,146,58,0.6)";
       g.fillRect(178 + i * 4.2, wy - h / 2, 2.6, h);
     }
 
@@ -815,9 +815,9 @@ function init() {
       g.font = "600 58px 'JetBrains Mono', ui-monospace, monospace";
       g.textAlign = "center";
       g.textBaseline = "middle";
-      g.shadowColor = "rgba(168,181,138,0.95)";
+      g.shadowColor = "rgba(224,146,58,0.95)";
       g.shadowBlur = 16;
-      g.fillStyle = "#cfdab2";
+      g.fillStyle = "#f5cb8c";
       g.fillText(glyph, 48, 52);
       const tex = new THREE.CanvasTexture(c);
       tex.colorSpace = THREE.SRGBColorSpace;
@@ -1006,7 +1006,7 @@ function init() {
     root.add(plantG);
     cyl(0.078, 0.06, 0.13, 10, mat(0x47332a, { rough: 0.95 }), 0, 0.065, 0, { parent: plantG });
     cyl(0.07, 0.07, 0.012, 10, mat(0x18130e), 0, 0.128, 0, { parent: plantG, cast: false });
-    const greens = [mat(0x6d7d57), mat(0x86976a), mat(0xa8b58a)];
+    const greens = [mat(0x6d7d57), mat(0x86976a), mat(0x9ca378)];
     for (let i = 0; i < 7; i++) {
       const a = (i / 7) * Math.PI * 2 + 0.4;
       const lean = i < 5 ? 0.62 : 0.16; // outer rosette + two upright

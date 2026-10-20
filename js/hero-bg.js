@@ -30,7 +30,7 @@
   if (!ctx) return;
 
   const CONFIG = {
-    sage: "168,181,138",
+    sage: "224,146,58",
     warm: "255,201,138",
     levels: 16,       // iso-lines in the map
     grid: 12,         // px between samples — smaller is smoother and slower

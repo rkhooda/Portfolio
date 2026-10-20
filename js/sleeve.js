@@ -19,7 +19,7 @@
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const ctx = canvas.getContext("2d");
   const label = document.getElementById("waveLabel");
-  const ACCENT = "#a8b58a";
+  const ACCENT = "#e0923a";
 
   let w = 0, h = 0, raf = 0, near = false, t = 0, amp = 0, said = "";
 
@@ -53,7 +53,7 @@
     ctx.clearRect(0, 0, w, h);
 
     const mid = h / 2;
-    ctx.strokeStyle = "rgba(234,234,226,0.07)";
+    ctx.strokeStyle = "rgba(220,222,224,0.07)";
     ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.moveTo(0, mid);
@@ -72,7 +72,7 @@
     }
     ctx.strokeStyle = ACCENT;
     ctx.lineWidth = 1.4;
-    ctx.shadowColor = "rgba(168,181,138,0.5)";
+    ctx.shadowColor = "rgba(224,146,58,0.5)";
     ctx.shadowBlur = 10 * (0.3 + amp * 0.7);
     ctx.stroke();
     ctx.shadowBlur = 0;

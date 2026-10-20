@@ -38,7 +38,7 @@
      out from. The svg is sized in its own units and scaled by CSS, which
      is what keeps it from ever overflowing a column. */
   const CELL = 12, GAP = 2, PITCH = CELL + GAP;
-  const FILL = ["rgba(234,234,226,0.06)", 0.28, 0.48, 0.72, 1];
+  const FILL = ["rgba(220,222,224,0.06)", 0.28, 0.48, 0.72, 1];
 
   function drawCalendar({ from, days }) {
     const fig = $("#cal");
@@ -53,7 +53,7 @@
       const x = ((n / 7) | 0) * PITCH;
       const y = (n % 7) * PITCH;
       const lvl = c === 0 ? 0 : Math.min(4, Math.ceil((c / max) * 4));
-      const fill = lvl === 0 ? FILL[0] : `rgba(168,181,138,${FILL[lvl]})`;
+      const fill = lvl === 0 ? FILL[0] : `rgba(224,146,58,${FILL[lvl]})`;
       return `<rect x="${x}" y="${y}" width="${CELL}" height="${CELL}" rx="2" fill="${fill}"/>`;
     });
 
