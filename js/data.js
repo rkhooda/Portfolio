@@ -25,8 +25,9 @@ window.PROJECTS = [
   {
     title: "CredVault",
     client: "WEB3 VAULT",
-    desc: "Secure, decentralized issuance & verification of credentials on the blockchain.",
+    desc: "A decentralized identity protocol that issues, anchors, and cryptographically verifies credentials on-chain. Built with tamper-proof smart contracts, it lets students, professionals, and organizations prove their credentials instantly without centralized intermediaries.",
     tags: ["WEB3", "PLATFORM"],
+    stack: ["Solidity", "Ethereum", "Ethers.js", "IPFS", "Next.js"],
     year: "2025", dur: "04:12",
     url: "https://cred-vaulte.vercel.app",
     img: "assets/img/covers/credvault.svg",
@@ -35,8 +36,9 @@ window.PROJECTS = [
   {
     title: "Multiagent Builder",
     client: "AI LABS",
-    desc: "Multi-agent AI system for end-to-end product development.",
+    desc: "An autonomous orchestration platform that coordinates specialized AI agents across planning, architecture, coding, and code-review to ship complete software features end-to-end with persistent context and deterministic tool execution.",
     tags: ["AI", "SYSTEM"],
+    stack: ["TypeScript", "Multi-Agent Systems", "LLM Orchestration", "Node.js", "Vector DB"],
     year: "2026", dur: "--:--",
     url: null, wip: true,
     img: "assets/img/covers/multiagent-builder.svg",
