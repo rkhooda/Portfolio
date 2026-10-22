@@ -47,8 +47,9 @@ window.PROJECTS = [
   {
     title: "Cult-Bot",
     client: "DISCORD UTILS",
-    desc: "Discord dev-productivity bot — todos, streaks, XP, GitHub/LeetCode/Codeforces stats. All buttons, no syntax.",
+    desc: "A developer productivity bot for engineering squads that transforms daily standups, streaks, task tracking, and competitive coding stats (GitHub, LeetCode, Codeforces) into interactive button-driven Discord dashboards.",
     tags: ["AUTOMATION", "TOOLS"],
+    stack: ["Node.js", "Discord.js", "REST APIs", "PostgreSQL", "Docker"],
     year: "2025", dur: "05:01",
     url: "https://cult-bot.vercel.app",
     img: "assets/img/covers/cult-bot.svg",
@@ -57,8 +58,9 @@ window.PROJECTS = [
   {
     title: "Clixo",
     client: "ETH PROTOCOL",
-    desc: "Decentralised data-labelling platform on Ethereum.",
+    desc: "A decentralized micro-tasking protocol on Ethereum that matches AI developers needing high-quality labelled training datasets with global contributors, ensuring instant escrow payouts and cryptographically validated consensus.",
     tags: ["WEB3", "WEB"],
+    stack: ["Solidity", "Web3.js", "IPFS", "Smart Contracts", "React"],
     year: "2026", dur: "03:47",
     url: "https://clixoo.vercel.app",
     img: "assets/img/covers/clixo.svg",
