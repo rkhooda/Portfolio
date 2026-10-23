@@ -69,8 +69,9 @@ window.PROJECTS = [
   {
     title: "Bellsy",
     client: "DEV TOOLS",
-    desc: "npm package + VS Code extension that pings you when coding agents and CLI tasks finish, fail, or need approval.",
+    desc: "A developer notification toolkit (CLI tool + VS Code extension + cross-platform sound chime) that pings your speakers and phone whenever long-running builds, test suites, or background coding agents finish or block on user input.",
     tags: ["TOOLS"],
+    stack: ["TypeScript", "VS Code API", "Node.js", "Web Audio", "CLI"],
     year: "2025", dur: "02:48",
     url: "https://bellsy.vercel.app",
     img: "assets/img/covers/bellsy.svg",
@@ -79,8 +80,9 @@ window.PROJECTS = [
   {
     title: "FlowPane",
     client: "DESKTOP APPS",
-    desc: "Lightweight, always-on-top desktop to-do app with a translucent UI.",
+    desc: "A distraction-free, floating desktop scratchpad and task dock designed with a translucent blur aesthetic that stays pinned to your screen, letting you capture quick thoughts, sprint goals, and checklists without breaking your coding flow.",
     tags: ["APPS", "TOOLS"],
+    stack: ["Electron", "JavaScript", "HTML5", "CSS Glassmorphism", "Local Storage"],
     year: "2025", dur: "03:24",
     url: "https://flowpane.vercel.app",
     img: "assets/img/covers/flowpane.svg",
