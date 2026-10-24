@@ -91,8 +91,9 @@ window.PROJECTS = [
   {
     title: "ProcrastiNO",
     client: "PRODUCTIVITY",
-    desc: "Aesthetic productivity tracker for pairs — todos, workouts, video journals.",
+    desc: "A collaborative daily accountability platform built for creative duos and study buddies. Features shared pomodoros, sync habits, workout logs, and daily 30-second video check-ins to keep friends focused on shipping.",
     tags: ["APPS"],
+    stack: ["React Native", "Firebase", "WebRTC", "TypeScript", "TailwindCSS"],
     year: "2026", dur: "03:12",
     url: "https://github.com/rkhooda/ProcrastiNO",
     img: "assets/img/covers/procrastino.svg",
@@ -101,8 +102,9 @@ window.PROJECTS = [
   {
     title: "StatisticalStudies",
     client: "EDU PLATFORM",
-    desc: "Educational platform for statistics & math — lectures, UGC-NET prep, premium content.",
+    desc: "A comprehensive mathematics and statistics learning portal engineered for UGC-NET aspirants, complete with interactive formula visualizers, curated problem sets, high-yield cheat sheets, and categorized video lecture series.",
     tags: ["WEB", "APPS"],
+    stack: ["Next.js", "KaTeX", "PostgreSQL", "TailwindCSS", "Prisma"],
     year: "2025", dur: "04:37",
     url: "https://statistical-studies.vercel.app",
     img: "assets/img/covers/statisticalstudies.svg",
