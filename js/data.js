@@ -113,8 +113,9 @@ window.PROJECTS = [
   {
     title: "Developer Brain",
     client: "ENGINEERING OS",
-    desc: "My long-term engineering operating system — an AI-augmented knowledge base.",
+    desc: "A personalized second brain and continuous knowledge engine built on Obsidian and autonomous LLM agents that indexes codebases, documents architecture decisions, preserves debugging heuristics, and automatically drafts project roadmaps.",
     tags: ["TOOLS", "LAB"],
+    stack: ["Markdown", "Obsidian", "Python", "Local LLMs", "Automation"],
     year: "2026", dur: "∞",
     url: null, wip: true,
     img: "assets/img/covers/developer-brain.svg",
